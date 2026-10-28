@@ -1,0 +1,184 @@
+/* =========================================================
+   HIGHWAY — النظام اللوني الموحّد للتطبيقات الأربعة
+   مستوحى من تقرير الكباتن: صفحة بيضاء، بطاقات كريمية، رأس فيروزي،
+   لمسات صفراء للتمييز، ونص داكن مريح للعين. بلا تدرجات ولا ظلال ثقيلة.
+   ========================================================= */
+:root{
+  --teal:#25CED1; --teal-600:#25CED1; --yellow:#E8EF44; --yellow-700:#E8EF44; --cream:#F3F0E7; --white:#FFFFFF;
+  --ink:#0E3A3B; --teal-800:#0E3A3B; --teal-900:#0E3A3B; --ink-soft:rgba(14,58,59,.62);
+  --cream-line:#E7E2D3;                       /* فاصل خفيف بدرجة من الكريمي نفسه */
+  --glass-bg:var(--cream); --glass-bg-strong:var(--cream); --glass-border:transparent; --card:var(--cream);
+  --shadow-neu:none; --shadow-float:none; --shadow-btn:none;
+  --food-bg:var(--teal);
+}
+
+/* ===== الصفحة ===== */
+body{background:var(--white);color:var(--ink)}
+.ambient{display:none}
+.app-shell .glass,.modal .glass{backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;border-color:transparent}
+
+/* ===== الرأس: كتلة فيروزية مثل ترويسة التقرير ===== */
+.app-header{background:var(--teal) !important;border:0 !important;box-shadow:none !important}
+.brand-mini-title{color:var(--white)}.brand-mini-title em{color:var(--yellow)}
+.brand-mini-sub{color:rgba(14,58,59,.78)}
+.w-addr{color:rgba(14,58,59,.82)}.w-addr svg{color:var(--ink)}
+.header-back,.hdr-cart,.header-avatar{background:rgba(255,255,255,.3) !important;color:var(--ink) !important;border:0 !important;box-shadow:none !important}
+.hdr-cart em{background:var(--yellow);color:var(--ink)}
+.header-avatar img{border-color:var(--white)}
+
+/* ===== العناوين ===== */
+.page-heading h1{color:var(--ink)}
+.page-heading h1::after{background:var(--yellow) !important}
+.page-heading p{color:var(--ink-soft)}
+.sec-h h2,.mn-h,.sr-h,.acc-h,.sec-t,.sec-label{color:var(--ink)}
+.mn-h{border-inline-start:5px solid var(--yellow);padding-inline-start:10px}
+
+/* ===== البطاقات: كريمي فوق الأبيض، بلا ظلال ===== */
+.action-card,.rest-card,.price-row,.stat,.oc,.cart-card,.mi,.co,.vc,.v-head,.fi,.sr,.offer,.online-card,.auto-card,.cap-card,
+.eg,.pf-list,.w-sbox,.acc-row,.form-card,.result-box,.calc-input,.empty-orders,.app-card,.st-card,.sc{
+  background:var(--cream) !important;border-color:transparent !important;box-shadow:none !important}
+.action-card::after,.rest-card::after,.price-row::after{background:var(--teal) !important}
+.pf-card{background:var(--cream) !important;box-shadow:none !important;border:0 !important}
+.pf-cover{background:var(--teal) !important}
+.pf-row{border-color:var(--white) !important}
+
+/* عناصر داخل البطاقة الكريمية: أبيض للتباين */
+.v-info>div,.vc-time,.sc-time,.vc-meta .hl,.sc-meta span,.st-chips span,.of-meta span,.cap-nums>div,.cap-st,.mi-price,.oc-tag,.oc-store,
+.cart-card .qty,.pf-ico,.act-info div,.sh-rows>div,.creds>div,.co-logo,.lg-it img{background:var(--white) !important}
+.mi-price{align-self:flex-start;display:inline-block;padding:3px 10px;border-radius:9px}
+.mrow .em{background:var(--teal) !important;color:var(--white) !important}
+.cl{border-color:var(--white) !important}
+.sum>div{border-color:var(--white) !important}
+.sum .tot{border-top:2px dashed var(--cream-line) !important}
+
+/* البطاقات الرئيسية الفيروزية */
+.action-card.hero,.hero2,.online-card.on,.auto-card.on,.eg.hi,.stat.hot,.bn.t,.tr-hero{background:var(--teal) !important;color:var(--ink) !important}
+.hero2 h1,.hero2 small,.hero-txt h2,.hero-txt p,.online-card.on b,.auto-card.on b,.eg.hi b,.eg.hi small,.stat.hot b,.stat.hot small{color:var(--ink) !important}
+.action-card.hero::before{opacity:.55}
+.hero-tag{background:var(--white) !important;color:var(--ink)}
+.hero-cta{background:var(--yellow) !important;color:var(--ink) !important;box-shadow:none !important}
+.hero-bolt{background:var(--yellow) !important;color:var(--ink) !important;box-shadow:none !important}
+.w-search{background:var(--white) !important;box-shadow:none !important}
+.bn.y{background:var(--yellow) !important}.bn.d{background:var(--ink) !important;color:var(--cream) !important}.bn{box-shadow:none !important}
+.eg.warn{background:var(--yellow) !important}
+.online-card small,.auto-card small{color:var(--ink-soft) !important}
+.ac-ic{background:var(--white) !important;color:var(--ink) !important}.auto-card.on .ac-ic{background:var(--ink) !important;color:var(--yellow) !important}
+
+/* أيقونات بطاقات الإجراءات: دوائر مسطّحة بالهوية */
+.action-card .glyph,.action-card.prep .glyph,.rest-card .ico,.rest-card.custom .ico,.pf-verified{background:var(--teal) !important;box-shadow:none !important;color:var(--white) !important}
+.action-card .glyph svg,.rest-card .ico svg{color:var(--white) !important}
+.action-card.confirm .glyph{background:var(--yellow) !important}.action-card.confirm .glyph svg{color:var(--ink) !important}
+.action-card .glyph.insta,.action-card .glyph.fb,.action-card .glyph.wa{background:var(--ink) !important;box-shadow:none !important}
+.action-card .glyph.insta svg,.action-card .glyph.fb svg,.action-card .glyph.wa svg{color:var(--yellow) !important}
+.action-card .glyph::before{display:none}
+
+/* رسومات الطعام والأغلفة: أبيض رفيع على فيروزي مسطّح */
+.mi-art,.fi .mi-art,.sr .ic,.em-art,.is-art,.vc-img,.v-hero,.cat2 i,.cats2 i{background:var(--teal) !important;color:var(--white) !important;box-shadow:none !important}
+.cat2.on i{background:var(--ink) !important;color:var(--yellow) !important}
+.cat2 span{color:var(--ink)}
+
+/* ===== الأزرار ===== */
+.submit-btn{background:var(--yellow) !important;color:var(--ink) !important;box-shadow:none !important}
+.ghost-btn{background:var(--cream) !important;color:var(--ink) !important;border:0 !important;box-shadow:none !important}
+.cart-card .ghost-btn,.offer .ghost-btn,.oc .ghost-btn,.app-act .ghost-btn,.mrow .ghost-btn{background:var(--white) !important}
+.act-btn.go,.btn-s{background:var(--teal) !important;color:var(--ink) !important;box-shadow:none !important}
+.btn-s.alt{background:var(--white) !important;color:var(--ink) !important}
+.mi-add{background:var(--yellow) !important;color:var(--ink) !important;box-shadow:none !important}
+.mi-add.has{background:var(--ink) !important;color:var(--yellow) !important}
+.qty button{background:var(--teal) !important;color:var(--ink) !important}
+.co-re{background:var(--yellow) !important;color:var(--ink) !important}
+.more-link,.sec-more{color:var(--ink) !important;text-decoration:underline;text-decoration-color:var(--teal);text-decoration-thickness:2px;text-underline-offset:4px}
+.pf-logout{background:var(--cream) !important;color:var(--ink) !important;border:0 !important}
+.loc-btn{background:var(--cream) !important;border:1.5px dashed var(--teal) !important;color:var(--ink) !important}
+
+/* مفاتيح التشغيل */
+.sw{background:var(--cream-line) !important}
+.sw::after{background:var(--white) !important;box-shadow:none !important}
+.sw.on{background:var(--ink) !important}.sw.on::after{background:var(--yellow) !important}
+
+/* ===== الحقول ===== */
+.field input,.field textarea,.field select,textarea.plain,.search-wrap input,.w-sbox,.mrow select,input[type=time],.calc-input input{
+  background:var(--white) !important;border:1.5px solid var(--cream-line) !important;color:var(--ink) !important;box-shadow:none !important}
+.modal .field input,.modal .field textarea,.modal .field select{background:var(--cream) !important;border-color:var(--cream) !important}
+.field input:focus,.field textarea:focus,.search-wrap input:focus,.modal .field input:focus,.modal .field textarea:focus{border-color:var(--teal) !important}
+.w-sbox{border:0 !important;background:var(--cream) !important}
+.search-wrap input{background:var(--cream) !important;border-color:var(--cream) !important}
+
+/* ===== الشرائح والتبويبات: كريمي، والمختار فيروزي ===== */
+.seg{background:var(--cream) !important}
+.seg button{color:var(--ink-soft)}.seg button.on{background:var(--teal) !important;color:var(--ink) !important;box-shadow:none !important}
+.seg button i{background:var(--white) !important;color:var(--ink)}
+.chip,.ctab,.srt{background:var(--cream) !important;color:var(--ink) !important;border:0 !important;box-shadow:none !important}
+.chip.on,.ctab.on,.srt.on{background:var(--teal) !important;color:var(--ink) !important}
+.cat-tabs{background:rgba(255,255,255,.96) !important}
+
+/* ===== الشريط السفلي ===== */
+.tabbar{background:var(--white) !important;border:0 !important;border-top:1.5px solid var(--cream-line) !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+.tab{color:var(--ink-soft)}.tab.on{color:var(--ink)}
+.tab.on .ti{background:var(--teal) !important}
+.tb{background:var(--yellow) !important;color:var(--ink) !important}
+
+/* ===== حالات الطلب ===== */
+.oc::before{width:5px}
+.oc.s-new::before{background:var(--yellow)}.oc.s-accepted::before,.oc.s-picked::before{background:var(--teal)}
+.oc.s-delivered::before{background:var(--ink)}.oc.s-cancelled::before{background:var(--cream-line)}
+.oc-chip{background:var(--white);color:var(--ink)}
+.s-new .oc-chip{background:var(--yellow) !important;color:var(--ink) !important}
+.s-accepted .oc-chip,.s-picked .oc-chip{background:var(--teal) !important;color:var(--ink) !important}
+.s-delivered .oc-chip{background:var(--ink) !important;color:var(--cream) !important}
+.s-cancelled .oc-chip{background:var(--white) !important;color:var(--ink-soft) !important}
+.oc-price{background:var(--yellow) !important;color:var(--ink) !important}
+.oc-prog i{background:var(--white) !important}.oc-prog i.done{background:var(--ink) !important}.oc-prog i.act{background:rgba(37,206,209,.35) !important}
+.oc-prog i.act::after{background:var(--teal) !important}
+.oc-cap{background:var(--white) !important}
+.oc-cap .av,.cap-row .av{background:var(--ink) !important;color:var(--yellow) !important}
+.oc-call,.cap-row a{background:var(--teal) !important;color:var(--ink) !important}
+.tl li::before{background:var(--cream-line) !important}
+.tl li i{background:var(--white) !important;border-color:var(--cream-line) !important}
+.tl li.done i{background:var(--teal) !important;border-color:var(--teal) !important}
+.tl li.act i{background:var(--yellow) !important;border-color:var(--ink) !important}
+.stat b,.stat small{color:var(--ink)}
+.of-earn,.pay-big .big{background:var(--yellow) !important;color:var(--ink) !important}
+.of-bar{background:var(--white) !important}.of-bar i{background:var(--teal) !important}
+.act-card{background:var(--ink) !important;color:var(--cream) !important}
+.act-card .submit-btn{background:var(--yellow) !important;color:var(--ink) !important}
+.act-btns a,.act-btns button{background:transparent !important;border:1.5px solid rgba(243,240,231,.35) !important;color:var(--cream) !important}
+.act-info div{color:var(--ink)}
+.cap-dot{background:var(--cream-line) !important}.cap-dot.on{background:var(--teal) !important;box-shadow:none !important}
+.net-dot{background:var(--cream-line) !important}.net-dot.on{background:var(--yellow) !important;box-shadow:none !important}
+.pill.ok,.sc-badge{background:var(--teal) !important;color:var(--ink) !important}
+.pill.mid{background:var(--yellow) !important}.sc-badge.off,.pill.bad{background:var(--white) !important;color:var(--ink-soft) !important}
+
+/* ===== شريط الحالة العائم والتنبيه ===== */
+.live-bar{background:var(--ink) !important;color:var(--cream) !important;box-shadow:0 14px 30px -18px rgba(14,58,59,.7) !important;border:0 !important}
+.lv-dot{background:var(--yellow) !important}
+.cart-bar{background:var(--ink) !important;color:var(--cream) !important;box-shadow:0 14px 30px -18px rgba(14,58,59,.7) !important}
+.cart-bar .cb-n{background:var(--yellow) !important;color:var(--ink) !important}.cart-bar .cb-t{color:var(--yellow) !important}
+.toast{background:var(--ink) !important;color:var(--cream) !important;box-shadow:none !important}
+
+/* ===== النوافذ ===== */
+.modal{background:rgba(14,58,59,.45) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+.modal-card{background:var(--white) !important;box-shadow:none !important;border:0 !important}
+.modal-summary{background:var(--teal) !important}
+.rt-price{background:var(--yellow) !important;color:var(--ink) !important}
+.user-menu{background:var(--white) !important;box-shadow:0 18px 40px -20px rgba(14,58,59,.45) !important}
+.um-item{color:var(--ink)}
+
+/* ===== التتبع والخرائط ===== */
+.tk-sheet{background:var(--white) !important}
+.tk-ic{background:var(--teal) !important;color:var(--white) !important}
+.tk-ic.done{background:var(--yellow) !important;color:var(--ink) !important}
+.tk-steps i{background:var(--cream) !important}.tk-steps i.done{background:var(--ink) !important}.tk-steps i.act{background:var(--teal) !important}
+.tk-steps i.act::after{display:none}
+.tk-ht p{color:var(--ink) !important}
+.leaflet-container,.tk-map,.act-map,.dl-map{background:var(--cream) !important}
+.mk-store img{border-color:var(--white) !important}.mk-cap div{background:var(--ink) !important;border-color:var(--yellow) !important}
+.loc-panel{border-top:1.5px solid var(--cream-line)}
+
+/* ===== الملاحظات والشارات ===== */
+.demo-banner,.v-note.demo{background:var(--yellow) !important;border:0 !important;color:var(--ink) !important}
+.v-note.closed,.st-closed{background:var(--ink) !important;color:var(--cream) !important}
+.route-pill.sarou,.route-pill.umm,.pickup-pill{background:var(--teal) !important;color:var(--ink) !important;box-shadow:none !important}
+.route-pill.umm{background:var(--yellow) !important}
+.price-row .price,.price-tag{background:var(--yellow) !important;color:var(--ink) !important}
+.site-footer h4,.site-footer p{color:var(--ink)}

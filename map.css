@@ -12,7 +12,7 @@
 .mk-cap .pulse,.mk-me .pulse{position:absolute;inset:0;border-radius:50%;background:rgba(37,206,209,.35);animation:mkPulse 1.8s ease-out infinite}
 .mk-me{position:relative;width:28px;height:28px}.mk-me i{position:absolute;inset:7px;border-radius:50%;background:#25CED1;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 @keyframes mkPulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.7);opacity:0}}
-.mk-cap.moving div{transition:transform .5s}
+
 /* منتقي الموقع بملء الشاشة */
 .loc-full{position:fixed;inset:0;z-index:95;background:#F3F0E7;display:none;flex-direction:column}
 .loc-full.show{display:flex;animation:sheetUp .3s cubic-bezier(.22,1,.36,1)}

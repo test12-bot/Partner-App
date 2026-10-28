@@ -688,8 +688,8 @@ button.brand-mini:active{transform:scale(.95);}
 /* ===== الصفحات الداخلية: هوية HIGHWAY (ألوان الهوية فقط، بدون تداخل) ===== */
 .modal-card{position:relative; overflow:hidden;}
 .modal-title::after{content:""; display:block; width:42px; height:5px; margin-top:7px; border-radius:5px; background:var(--teal);}
-.modal-summary, .result-box, .pickup-pill{position:relative; overflow:hidden; isolation:isolate; background:var(--teal);}
-.modal-summary::after, .result-box::after, .pickup-pill::after{
+.modal-summary, .result-box{position:relative; overflow:hidden; isolation:isolate; background:var(--teal);}
+.modal-summary::after, .result-box::after{
     content:""; position:absolute; right:-14px; bottom:-10px; width:150px; height:62px; z-index:-1; pointer-events:none;
     background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20300%20200%27%3E%3Cpath%20d%3D%27M0%20150C60%2080%20180%2030%20300%2020%27%20fill%3D%27none%27%20stroke%3D%27%23F3F0E7%27%20stroke-width%3D%276%27%20stroke-linecap%3D%27round%27%20stroke-opacity%3D%27.5%27%2F%3E%3Cpath%20d%3D%27M30%20185C100%20125%20200%2080%20300%2070%27%20fill%3D%27none%27%20stroke%3D%27%23F3F0E7%27%20stroke-width%3D%276%27%20stroke-linecap%3D%27round%27%20stroke-opacity%3D%27.28%27%2F%3E%3C%2Fsvg%3E") no-repeat center/contain;
 }
@@ -883,10 +883,7 @@ body:not(.authed) .tabbar, body:not(.authed) .live-bar{display:none;}
 .oc-prog i.act::after{content:""; position:absolute; inset:0; width:55%; background:var(--teal); border-radius:5px; animation:lvFill 1.8s ease-in-out infinite;}
 .oc-prog.cancelled i{background:rgba(14,58,59,.1);}
 .oc-actions{display:flex; gap:8px; margin-top:12px;}
-.oc-actions .btn-s{flex:1; padding:11px 10px; border-radius:999px; font-size:12.5px; font-weight:800; background:var(--yellow); color:var(--teal-900); text-align:center;}
-.oc-actions .btn-s.alt{flex:0 0 auto; background:rgba(14,58,59,.08);}
-.oc-actions .btn-s.dng{flex:0 0 auto; background:rgba(229,72,77,.1); color:var(--danger);}
-.oc-actions .btn-s:active{transform:scale(.96);}
+
 .empty-orders{text-align:center; padding:36px 16px; border-radius:var(--r-lg); background:rgba(255,255,255,.6); border:1.5px dashed rgba(27,181,184,.5); color:var(--ink-soft); font-size:13px; font-weight:700;}
 .empty-orders svg{display:block; margin:0 auto 10px; width:38px; height:38px; color:var(--teal-600);}
 
@@ -942,7 +939,7 @@ body:not(.authed) .tabbar, body:not(.authed) .live-bar{display:none;}
 .sw{position:relative;width:54px;height:30px;border-radius:999px;border:0;background:#cbd5d5;cursor:pointer;flex:none}.sw::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 .sw.on{background:var(--teal)}.sw.on::after{transform:translateX(-24px)}.sw.sm{width:44px;height:26px}.sw.sm::after{width:20px;height:20px}.sw.sm.on::after{transform:translateX(-18px)}
 .more-link{background:none;border:0;color:var(--teal-800);font:inherit;font-weight:800;font-size:13px;padding:8px 0;cursor:pointer}.more-link.inl{padding:0}
-.ghost-btn.wide{width:100%}.two{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.ghost-btn.wide{width:100%}
 .tabbar .tab{min-width:0;font-size:11px}
 .mrow .em{width:40px;height:40px;border-radius:12px;background:#FFFFFF;display:grid;place-items:center;flex:none}.mrow .em svg{width:26px;height:26px}
 .mrow .em{background:linear-gradient(160deg,#5fd3d6 0%,#25CED1 55%,#1fa9ac 100%) !important;color:#fff !important}.mrow .em svg{stroke-width:1.6}
