@@ -21,6 +21,10 @@ window.HW_CONFIG = {
   tileUrl: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",   // بدّله بمزوّد خرائط مدفوع عند الإطلاق
   routeUrl: "https://router.project-osrm.org/route/v1/driving/",
 
+  /* صور أغلفة المتاجر (تضيفها HIGHWAY): ضع الصورة داخل مجلد covers واكتب اسمها هنا، مثل
+     covers: { hamada: "covers/hamada.jpg" }   — المتجر بلا صورة تظهر له رسمة قسمه */
+  covers: {},
+
   captains: [],           // أسماء كباتن جاهزة للاقتراح (اختياري)
 
   /* المتاجر الشريكة (نفس حسابات موقع المتاجر). start = نقطة الانطلاق لقائمة أسعار التوصيل */

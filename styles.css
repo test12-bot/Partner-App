@@ -295,7 +295,6 @@ body{touch-action:manipulation;}
 @media (hover:hover){ .price-row:hover{transform:translateX(-4px); background:#fff;} }
 .price-row .nm{flex:1; min-width:0;}
 .price-row .item-name{font-weight:700; font-size:14px; color:var(--teal-900);}
-.uni-note{display:block; margin-top:4px; font-size:11px; font-weight:700; color:#D9760B;}
 .item-price{
     flex:0 0 auto;
     font-family:var(--font-display); font-weight:700; font-size:16px; color:var(--teal-800);
@@ -943,3 +942,5 @@ body:not(.authed) .tabbar, body:not(.authed) .live-bar{display:none;}
 .tabbar .tab{min-width:0;font-size:11px}
 .mrow .em{width:40px;height:40px;border-radius:12px;background:#FFFFFF;display:grid;place-items:center;flex:none}.mrow .em svg{width:26px;height:26px}
 .mrow .em{background:linear-gradient(160deg,#5fd3d6 0%,#25CED1 55%,#1fa9ac 100%) !important;color:#fff !important}.mrow .em svg{stroke-width:1.6}
+.mrow .em.of-ic{font-weight:800;font-size:18px;color:var(--teal-900) !important;background:var(--yellow) !important}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}

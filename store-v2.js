@@ -6,6 +6,7 @@ let _menus = {}, _states = {}, editCat = null, editItem = null;
 const EH = HWOrders.esc;
 
 menusCol.subscribe(l => { _menus = {}; l.forEach(m => { _menus[m.id] = m; }); if (currentScreen_() === 'screen-menu') renderMenuAdmin(); });
+HWPromo.offers.subscribe(() => { if (currentScreen_() === 'screen-menu') renderMenuAdmin(); });
 stateCol.subscribe(l => { _states = {}; l.forEach(m => { _states[m.id] = m; }); if (currentScreen_() === 'screen-menu') renderMenuAdmin(); });
 
 /* ---------- أزرار الطلب ---------- */
@@ -33,13 +34,14 @@ function myMenu() { return _menus[currentUser.id] || { id: currentUser.id, cats:
 function saveMenu(m) { m.demo = false; menusCol.patch(currentUser.id, m, true); }
 function renderMenuAdmin() {
     const box = document.getElementById('menuAdmin'); if (!box) return;
-    if (!currentUser || !currentUser.start) { box.innerHTML = '<div class="empty-orders">المنيو خاص بحسابات المتاجر</div>'; return; }
+    if (!currentUser || !currentUser.start) { box.innerHTML = '<div class="empty-orders">إدارة القائمة متاحة لحسابات المتاجر</div>'; return; }
     const st = _states[currentUser.id] || {}, open = st.open !== false, m = myMenu();
     box.innerHTML =
         '<div class="cart-card"><div class="mrow"><div><b>' + (open ? 'المتجر مفتوح' : 'المتجر مغلق') + '</b><small class="mut">' + (open ? 'يستقبل طلبات العملاء' : 'لن يظهر للعملاء كمفتوح') + '</small></div><button type="button" class="sw' + (open ? ' on' : '') + '" onclick="toggleOpen()" aria-label="فتح أو إغلاق"></button></div>' +
         '<div class="mrow" style="margin-top:10px"><div><b>وقت التحضير المعتاد</b><small class="mut">يظهر للعميل قبل الطلب</small></div><select id="prepSel" onchange="setPrep(this.value)">' + [10, 15, 20, 30, 45].map(n => '<option value="' + n + '"' + ((st.prepMin || 20) === n ? ' selected' : '') + '>' + n + ' د</option>').join('') + '</select></div></div>' +
         '<div class="cart-card"><div class="mrow"><div><b>موقع المتجر على الخريطة</b><small class="mut">' + (st.lat != null ? 'تم تحديده ✓ (يُحسب عليه سعر التوصيل)' : 'غير محدد: يُحسب التوصيل من مركز المدينة') + '</small></div><button type="button" class="ghost-btn" onclick="openStoreLoc()">' + (st.lat != null ? 'تعديل' : 'تحديد') + '</button></div></div>' +
-        (m.demo ? '<div class="demo-banner">هذا منيو تجريبي بأسعار وهمية، عدّله أو احذفه</div>' : '') +
+        offersCard() +
+        (m.demo ? '<div class="demo-banner">هذه قائمة تجريبية بأسعار وهمية، عدّلها أو احذفها</div>' : '') +
         m.cats.map((c, ci) => '<div class="cart-card"><div class="mrow"><b>' + EH(c.name) + '</b><span><button type="button" class="more-link inl" onclick="openCatSheet(' + ci + ')">تعديل</button></span></div>' +
             c.items.map((it, ii) => '<div class="mrow it' + (it.on === false ? ' off' : '') + '"><span class="em">' + HWFood.forItem(it.name, it.desc, c.name, '') + '</span><div class="mt"><b>' + EH(it.name) + '</b><small class="mut">' + HWOrders.money(it.price) + ' د.أ' + (it.on === false ? ' · غير متوفر' : '') + '</small></div><button type="button" class="sw sm' + (it.on !== false ? ' on' : '') + '" onclick="toggleItem(' + ci + ',' + ii + ')" aria-label="التوفر"></button><button type="button" class="more-link inl" onclick="openItemEdit(' + ci + ',' + ii + ')">تعديل</button></div>').join('') +
             '<button type="button" class="more-link" onclick="openItemEdit(' + ci + ',-1)">+ إضافة صنف</button></div>').join('') +
@@ -102,3 +104,35 @@ function slAddr() {
 function storeGps(silent) { if (!navigator.geolocation) return; navigator.geolocation.getCurrentPosition(p => slMap.setView([p.coords.latitude, p.coords.longitude], 18), () => { if (!silent) HWOrders.toast('تعذر تحديد موقعك'); }, { enableHighAccuracy: true, timeout: 9000 }); }
 function saveStoreLoc() { if (!slPick) return; stateCol.patch(currentUser.id, { lat: +slPick.lat.toFixed(6), lng: +slPick.lng.toFixed(6) }, true); closeStoreLoc(); buzz(15); HWOrders.toast('تم حفظ موقع المتجر'); }
 
+
+/* ---------- العروض ---------- */
+let editOffer = null;
+function offersCard() {
+    const l = HWPromo.offers.list().filter(o => o.storeId === currentUser.id);
+    return '<div class="cart-card"><div class="mrow"><div><b>العروض</b><small class="mut">تظهر للعملاء في بطاقات العروض أعلى التطبيق</small></div><button type="button" class="ghost-btn" onclick="openOfferEdit(null)">+ عرض</button></div>' +
+        l.map(o => { const on = HWPromo.live(o); return '<div class="mrow it' + (on ? '' : ' off') + '"><span class="em of-ic">%</span><div class="mt"><b>' + EH(o.title) + (o.demo ? ' <span class="mut" style="display:inline">(تجريبي)</span>' : '') + '</b><small class="mut">' + (o.percent ? 'خصم ' + o.percent + '٪' + (o.minOrder ? ' فوق ' + HWOrders.money(o.minOrder) + ' د.أ' : '') : 'إعلان بدون خصم') + (o.endsAt ? ' · حتى ' + new Date(o.endsAt).toLocaleDateString('ar-JO') : '') + '</small></div>' +
+            '<button type="button" class="sw sm' + (o.active !== false ? ' on' : '') + '" onclick="toggleOffer(\'' + o.id + '\')" aria-label="تفعيل العرض"></button><button type="button" class="more-link inl" onclick="openOfferEdit(\'' + o.id + '\')">تعديل</button></div>'; }).join('') + '</div>';
+}
+function toggleOffer(id) { const o = HWPromo.offers.get(id); if (o) HWPromo.offers.patch(id, { active: o.active === false }); buzz(); }
+function openOfferEdit(id) {
+    editOffer = id; const o = id ? HWPromo.offers.get(id) : { title: '', sub: '', percent: 10, minOrder: 0, endsAt: 0 };
+    const end = o.endsAt ? new Date(o.endsAt).toISOString().slice(0, 10) : '';
+    document.getElementById('menuSheetBody').innerHTML = '<div class="sh-head"><div><small>العروض</small><h3>' + (id ? 'تعديل العرض' : 'عرض جديد') + '</h3></div></div>' +
+        '<div class="field"><label for="ofTitle">عنوان العرض</label><input type="text" id="ofTitle" value="' + EH(o.title) + '" placeholder="مثال: خصم 20% على كل الوجبات"></div>' +
+        '<div class="field"><label for="ofSub">تفاصيل قصيرة <span class="opt">(اختياري)</span></label><input type="text" id="ofSub" value="' + EH(o.sub || '') + '" placeholder="مثال: لفترة محدودة"></div>' +
+        '<div class="two"><div class="field"><label for="ofPct">نسبة الخصم ٪</label><input type="number" id="ofPct" min="0" max="50" value="' + (o.percent || 0) + '"></div>' +
+        '<div class="field"><label for="ofMin">الحد الأدنى للطلب</label><input type="number" id="ofMin" min="0" step="0.5" value="' + (o.minOrder || 0) + '"></div></div>' +
+        '<div class="field"><label for="ofEnd">ينتهي في <span class="opt">(اختياري)</span></label><input type="date" id="ofEnd" value="' + end + '"></div>' +
+        '<p class="mut" style="margin:0 0 12px">الخصم يُطبَّق تلقائيًا على قيمة المنتجات في سلة العميل، وتستلم من الكابتن المبلغ بعد الخصم. ضع 0 لإعلان بدون خصم.</p>' +
+        '<div class="sh-actions">' + (id ? '<button type="button" class="ghost-btn dng" onclick="deleteOffer()">حذف</button>' : '') + '<button type="button" class="submit-btn" style="flex:1" onclick="saveOffer()"><span class="btn-label">حفظ العرض</span></button></div>';
+    document.getElementById('menuSheet').classList.add('show');
+}
+function saveOffer() {
+    const title = document.getElementById('ofTitle').value.trim(), pct = Math.max(0, Math.min(50, parseFloat(document.getElementById('ofPct').value) || 0));
+    if (!title) { HWOrders.toast('اكتب عنوان العرض'); return; }
+    const endV = document.getElementById('ofEnd').value;
+    const rec = { storeId: currentUser.id, title, sub: document.getElementById('ofSub').value.trim(), percent: pct, minOrder: Math.max(0, parseFloat(document.getElementById('ofMin').value) || 0), endsAt: endV ? new Date(endV + 'T23:59:59').getTime() : 0, demo: false };
+    if (editOffer) HWPromo.offers.patch(editOffer, rec); else HWPromo.offers.create(Object.assign({ active: true }, rec));
+    closeMenuSheet(); buzz(15); HWOrders.toast('تم حفظ العرض');
+}
+function deleteOffer() { if (confirm('حذف هذا العرض؟')) { HWPromo.offers.remove(editOffer); closeMenuSheet(); } }

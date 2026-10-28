@@ -159,7 +159,7 @@ function sha256(str) {
   }
 
   /* ---------- الحسابات المالية ---------- */
-  function feeFrom(priceStr) {                          // أجرة التوصيل من نص مثل "2.00 - 2.50"
+  function feeFrom(priceStr) {                          // رسوم التوصيل من نص مثل "2.00 - 2.50"
     var m = String(priceStr == null ? '' : priceStr).match(/\d+(\.\d+)?/g) || [];
     if (!m.length) return 0;
     var a = m.map(parseFloat);
@@ -244,8 +244,8 @@ function sha256(str) {
   }
   function card(o, actionsHtml, showStore) {
     var meta = '<span class="oc-price">' + (o.price ? esc(o.price) + ' <small>دينار</small>' : '—') + '</span>';
-    if (o.orderValue) meta += '<span class="oc-val">' + (isMarket(o) ? 'المنتجات ' : 'قيمة الطلب ') + esc(o.orderValue) + ' د.أ</span>';
-    if (isMarket(o)) meta += '<span class="oc-tag">طلب عميل</span>';
+    if (o.orderValue) meta += '<span class="oc-val">' + 'قيمة الطلب ' + esc(o.orderValue) + ' د.أ</span>';
+    if (isMarket(o)) meta += '<span class="oc-tag">طلب تطبيق</span>';
     return '<article class="oc s-' + o.status + '" data-id="' + esc(o.id) + '" tabindex="0" role="button">' +
       '<div class="oc-top"><span class="oc-code">' + esc(o.code) + '</span>' + (showStore ? '<span class="oc-store">' + esc(o.storeName || '') + '</span>' : '') +
       '<span class="oc-time">' + ago(o.createdAt) + '</span><span class="oc-chip">' + label(o) + '</span></div>' +

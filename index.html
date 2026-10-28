@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="leaflet.css?v=40">
-<link rel="stylesheet" href="styles.css?v=40">
-<link rel="stylesheet" href="map.css?v=40">
-<link rel="stylesheet" href="theme.css?v=45">
+<link rel="stylesheet" href="leaflet.css?v=60">
+<link rel="stylesheet" href="styles.css?v=60">
+<link rel="stylesheet" href="map.css?v=60">
+<link rel="stylesheet" href="theme.css?v=60">
 </head>
 <body>
 
@@ -241,8 +241,8 @@
         <div id="pricesContainer"></div>
 
         <div class="list-note">
-          <p>يتم تحديد أجور التوصيل بناءً على مناطق التوصيل المحددة.</p>
-          <p>تُحتسب أجور التوصيل للمناطق غير المدرجة حسب الكيلومتر (0.35 دينار للكيلومتر).</p>
+          <p>يتم تحديد رسوم التوصيل بناءً على مناطق التوصيل المحددة.</p>
+          <p>تُحتسب رسوم التوصيل للمناطق غير المدرجة حسب الكيلومتر (0.35 دينار للكيلومتر).</p>
           <div class="note-actions">
             <button type="button" class="note-link" onclick="goTo('screen-calc')">احسب بالكيلو ←</button>
           </div>
@@ -309,7 +309,7 @@
     <!-- المنيو -->
     <section class="screen" id="screen-menu">
       <div class="container">
-        <div class="page-heading"><h1>المنيو</h1><p>أدر قائمة منتجاتك كما يراها العملاء</p></div>
+        <div class="page-heading"><h1>قائمة الطعام</h1><p>أدر قائمة منتجاتك كما يراها العملاء</p></div>
         <div id="menuAdmin"></div>
       </div>
     </section>
@@ -414,7 +414,7 @@
   <nav class="tabbar" aria-label="التنقل الرئيسي">
     <button class="tab on" type="button" data-tab="home" onclick="tabGo('screen-home')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 3l9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></span><span>الرئيسية</span></button>
     <button class="tab" type="button" data-tab="prices" onclick="tabGo('screen-prices')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 10h6M9 14h6M9 17.5h3.5"/></svg></span><span>الأسعار</span></button>
-    <button class="tab" type="button" data-tab="menu" id="tabMenu" onclick="tabGo('screen-menu')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v8a2 2 0 0 0 2 2v8M9 3v8M7 3v8M18 3c-2 2-3 5-3 8h3v10"/></svg></span><span>المنيو</span></button>
+    <button class="tab" type="button" data-tab="menu" id="tabMenu" onclick="tabGo('screen-menu')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v8a2 2 0 0 0 2 2v8M9 3v8M7 3v8M18 3c-2 2-3 5-3 8h3v10"/></svg></span><span>القائمة</span></button>
     <button class="tab" type="button" data-tab="orders" onclick="tabGo('screen-orders')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l2 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7l2-4Z"/><path d="M4 7h16"/><path d="M9 11h6"/></svg><em class="tb" id="tabBadge"></em></span><span>طلباتي</span></button>
     <button class="tab" type="button" data-tab="profile" onclick="tabGo('screen-profile')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>حسابي</span></button>
   </nav>
@@ -476,13 +476,14 @@
   </div>
 </div>
 
-<script src="leaflet.js?v=40"></script>
-<script src="hw-config.js?v=40"></script>
-<script src="hw-map.js?v=40"></script>
-<script src="hw-food.js?v=40"></script>
-<script src="hw-orders.js?v=40"></script>
-<script src="script.js?v=40"></script>
-<script src="store-v2.js?v=40"></script>
-<script src="hw-ui.js?v=44"></script>
+<script src="leaflet.js?v=60"></script>
+<script src="hw-config.js?v=60"></script>
+<script src="hw-map.js?v=60"></script>
+<script src="hw-food.js?v=60"></script>
+<script src="hw-orders.js?v=60"></script>
+<script src="hw-promo.js?v=60"></script>
+<script src="script.js?v=60"></script>
+<script src="store-v2.js?v=60"></script>
+<script src="hw-ui.js?v=60"></script>
 </body>
 </html>

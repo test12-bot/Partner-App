@@ -22,7 +22,9 @@ body{background:var(--white);color:var(--ink)}
 .brand-mini-title{color:var(--white)}.brand-mini-title em{color:var(--yellow)}
 .brand-mini-sub{color:rgba(14,58,59,.78)}
 .w-addr{color:rgba(14,58,59,.82)}.w-addr svg{color:var(--ink)}
-.header-back,.hdr-cart,.header-avatar{background:rgba(255,255,255,.3) !important;color:var(--ink) !important;border:0 !important;box-shadow:none !important}
+.header-back,.hdr-cart{background:rgba(255,255,255,.3) !important;color:var(--ink) !important;border:0 !important;box-shadow:none !important}
+.header-avatar{border:3px solid var(--cream) !important;background:var(--cream) !important;box-shadow:none;transition:border-color .2s,box-shadow .2s,transform .2s}
+.header-avatar[aria-expanded="true"]{border-color:var(--yellow) !important;box-shadow:none !important}
 .hdr-cart em{background:var(--yellow);color:var(--ink)}
 .header-avatar img{border-color:var(--white)}
 
@@ -73,7 +75,9 @@ body{background:var(--white);color:var(--ink)}
 .action-card .glyph::before{display:none}
 
 /* رسومات الطعام والأغلفة: أبيض رفيع على فيروزي مسطّح */
-.mi-art,.fi .mi-art,.sr .ic,.em-art,.is-art,.vc-img,.v-hero,.cat2 i,.cats2 i{background:var(--teal) !important;color:var(--white) !important;box-shadow:none !important}
+.mi-art,.fi .mi-art,.sr .ic,.em-art,.is-art,.vc-img,.v-hero,.cat2 i,.cats2 i{background:var(--teal) !important;color:var(--cream) !important;box-shadow:none !important}
+.vc-ill,.vc-img .vc-ill,.v-hero .vc-ill,.mi-art,.is-art,.bn .bn-ill{color:var(--cream) !important}
+.vc-img .pt,.v-hero .pt,.is-art .pt{color:rgba(243,240,231,.24) !important}
 .cat2.on i{background:var(--ink) !important;color:var(--yellow) !important}
 .cat2 span{color:var(--ink)}
 
@@ -116,7 +120,7 @@ body{background:var(--white);color:var(--ink)}
 /* شريط سفلي بأسلوب إنستغرام: كبسولة زجاجية عائمة بلا حواف، تصغر أثناء التمرير وتعود عند التوقف */
 .tabbar{left:0 !important;right:0 !important;bottom:calc(12px + env(safe-area-inset-bottom)) !important;width:calc(100% - 52px) !important;max-width:430px !important;margin-inline:auto !important;
   padding:5px !important;gap:0 !important;border-radius:999px !important;border:0 !important;outline:0 !important;
-  background:rgba(243,240,231,.72) !important;box-shadow:0 12px 32px -14px rgba(14,58,59,.38) !important;
+  background:rgba(243,240,231,.74) !important;box-shadow:0 8px 28px -6px rgba(14,58,59,.14),0 1px 4px rgba(14,58,59,.05) !important;
   backdrop-filter:blur(24px) saturate(180%) !important;-webkit-backdrop-filter:blur(24px) saturate(180%) !important;
   transform-origin:50% 100%;transition:transform .32s cubic-bezier(.22,1,.36,1),width .32s cubic-bezier(.22,1,.36,1) !important}
 body.bar-mini .tabbar{transform:scale(.86) translateY(2px)}
@@ -195,3 +199,6 @@ body.bar-mini .tabbar{transform:scale(.86) translateY(2px)}
 .route-pill.umm{background:var(--yellow) !important}
 .price-row .price,.price-tag{background:var(--yellow) !important;color:var(--ink) !important}
 .site-footer h4,.site-footer p{color:var(--ink)}
+
+/* ===== إطارات الصور بالليموني ===== */
+.lg-it img,.vc-logo,.v-logo,.co-logo,.sc-logo,.st-logo,.bn-store img,.mk-store img,.pf-avatar,.sr img{border:3px solid var(--yellow) !important;background:var(--white) !important}

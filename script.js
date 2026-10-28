@@ -1,5 +1,7 @@
 /* =========================================================
-   HIGHWAY Delivery — قائمة الأسعار واستدعاء كابتن
+   HIGHWAY Partner App — تطبيق المتاجر الشريكة
+   الأساس: الدخول، الشاشة الافتتاحية، قوائم الأسعار، استدعاء كابتن، حاسبة الكيلو، وطلبات المتجر.
+   الإضافات (طلبات التطبيق، القائمة، العروض، موقع المتجر) في store-v2.js
    ========================================================= */
 
 try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch (e) {}
@@ -92,18 +94,11 @@ let calcState = { dist: '', total: '0.00' };
 let screenStack = ['screen-home'];
 
 /* ---------- أيقونات الشاشة الافتتاحية (طعام) ---------- */
-const FOOD_ICONS = [
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11c0-3.5 3.6-6 8-6s8 2.5 8 6H4Z"/><path d="M3 14.5h18"/><path d="M5 17.5h14v.5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-.5Z"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3C8 3 4.5 4.5 2.5 7L12 21 21.5 7C19.5 4.5 16 3 12 3Z"/><circle cx="10" cy="9" r="1.2"/><circle cx="14" cy="11" r="1.2"/><circle cx="12" cy="15" r="1"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5V8Z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3v2M11 3v2M14 3v2"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a2 2 0 0 0 2 2v9"/><path d="M10 3v7a2 2 0 0 1-2 2"/><path d="M17 3c-2 1.5-3 4-3 7h3v11"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11a5 5 0 0 1 10 0"/><path d="M6.5 11h11L12 21 6.5 11Z"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>'
-];
+
 
 function buildSplashIcons() {
     const wrap = document.getElementById('splashIcons');
-    const SPL = window.HWFood ? HWFood.splashSet() : FOOD_ICONS;
+    const SPL = HWFood.splashSet();   // رسومات الطعام المشتركة (hw-food.js)
     for (let i = 0; i < 18; i++) {
         const el = document.createElement('div');
         el.className = 'float-icon';
@@ -519,17 +514,12 @@ function renderList(list) {
     }
 
     list.forEach(item => {
-        const note = item.n.includes('جامعة')
-            ? '<span class="uni-note">يضاف 0.50 دينار لدخول الجامعة</span>'
-            : '';
-
         const el = document.createElement('button');
         el.type = 'button';
         el.className = 'price-row';
         el.innerHTML = `
             <span class="nm">
                 <span class="item-name">${item.n}</span>
-                ${note}
             </span>
             <span class="item-price">${item.p}</span>
         `;
@@ -655,7 +645,7 @@ function submitOrder() {
         ref.style.display = 'none';
     }
     resetAndGo('screen-home');
-    HWOrders.toast('تم تسجيل طلبك وإرساله للمنسقين');
+    HWOrders.toast('تم تسجيل طلبك وإرساله لفريق العمليات');
     buzz(18);
 }
 
@@ -828,8 +818,9 @@ function renderSheet(id) {
     if (!o) { closeOrderSheet(); return; }
     const rows = [['وقت الطلب', HWOrders.fmtTime(o.createdAt)]];
     if (o.orderValue) rows.push(['قيمة الطلب', o.orderValue + ' د.أ']);
-    if (o.price) rows.push(['أجرة التوصيل', o.price + ' دينار']);
+    if (o.price) rows.push(['رسوم التوصيل', o.price + ' دينار']);
     if (o.notes) rows.push(['ملاحظات', o.notes]);
+    if (o.discount) rows.push(['خصم العرض', '−' + HWOrders.money(o.discount) + ' د.أ' + (o.offerTitle ? ' (' + o.offerTitle + ')' : '')]);
     const ph = o.captain && o.captain.phone ? String(o.captain.phone).replace(/[^\d+]/g, '') : '';
     body.innerHTML =
         '<div class="sh-head"><div><small>تفاصيل الطلب</small><h3>' + HWOrders.esc(o.code) + '</h3></div><span class="oc-chip" style="' + '' + '">' + HWOrders.SHORT[o.status] + '</span></div>' +
