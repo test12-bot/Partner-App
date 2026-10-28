@@ -1,1 +1,1 @@
-هذا المجلد كاملًا يخص مستودع: Partner-App. ارفع كل محتوياته إلى جذر المستودع (استبدل الموجود). ملفات لم تعد مستخدمة يمكنك حذفها من المستودع: wolt.css، hw-prices.js، logo-full.png، splash-logo.png، hw-accounts.js، disp-acc.js، flat.css.
+هذا المجلد كاملًا يخص مستودع: Partner-App. ارفع كل محتوياته إلى جذر المستودع.

@@ -113,9 +113,19 @@ body{background:var(--white);color:var(--ink)}
 .cat-tabs{background:rgba(255,255,255,.96) !important}
 
 /* ===== الشريط السفلي ===== */
-.tabbar{background:var(--white) !important;border:0 !important;border-top:1.5px solid var(--cream-line) !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
-.tab{color:var(--ink-soft)}.tab.on{color:var(--ink)}
-.tab.on .ti{background:var(--teal) !important}
+.tabbar{left:14px !important;right:14px !important;bottom:calc(10px + env(safe-area-inset-bottom)) !important;max-width:520px;margin-inline:auto;
+  padding:6px !important;gap:4px !important;border-radius:999px !important;
+  background:rgba(243,240,231,.62) !important;border:1px solid rgba(255,255,255,.75) !important;
+  box-shadow:0 16px 34px -18px rgba(14,58,59,.5),inset 0 1px 0 rgba(255,255,255,.7) !important;
+  backdrop-filter:blur(22px) saturate(180%) !important;-webkit-backdrop-filter:blur(22px) saturate(180%) !important}
+.tab{flex:1 1 0 !important;flex-direction:row !important;justify-content:center;gap:7px !important;height:52px;padding:0 !important;border-radius:999px;color:var(--ink-soft);
+  transition:flex-grow .3s var(--ease-out),background .25s var(--ease-out),color .2s}
+.tab.on{flex-grow:1.7 !important;background:var(--teal);color:var(--ink)}
+.tab .ti{width:auto !important;height:auto !important;background:none !important;transform:none !important}
+.tab svg{width:23px;height:23px}
+.tab>span:last-child{font-size:12.5px;font-weight:800;white-space:nowrap}
+.tab:not(.on)>span:last-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tab .tb{top:-7px;inset-inline-end:-9px;box-shadow:0 0 0 2px var(--cream) !important}
 .tb{background:var(--yellow) !important;color:var(--ink) !important}
 
 /* ===== حالات الطلب ===== */
