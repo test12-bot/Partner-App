@@ -113,19 +113,22 @@ body{background:var(--white);color:var(--ink)}
 .cat-tabs{background:rgba(255,255,255,.96) !important}
 
 /* ===== الشريط السفلي ===== */
-.tabbar{left:14px !important;right:14px !important;bottom:calc(10px + env(safe-area-inset-bottom)) !important;max-width:520px;margin-inline:auto;
-  padding:6px !important;gap:4px !important;border-radius:999px !important;
-  background:rgba(243,240,231,.62) !important;border:1px solid rgba(255,255,255,.75) !important;
-  box-shadow:0 16px 34px -18px rgba(14,58,59,.5),inset 0 1px 0 rgba(255,255,255,.7) !important;
-  backdrop-filter:blur(22px) saturate(180%) !important;-webkit-backdrop-filter:blur(22px) saturate(180%) !important}
-.tab{flex:1 1 0 !important;flex-direction:row !important;justify-content:center;gap:7px !important;height:52px;padding:0 !important;border-radius:999px;color:var(--ink-soft);
-  transition:flex-grow .3s var(--ease-out),background .25s var(--ease-out),color .2s}
-.tab.on{flex-grow:1.7 !important;background:var(--teal);color:var(--ink)}
+/* شريط سفلي بأسلوب إنستغرام: كبسولة زجاجية عائمة بلا حواف، تصغر أثناء التمرير وتعود عند التوقف */
+.tabbar{left:0 !important;right:0 !important;bottom:calc(12px + env(safe-area-inset-bottom)) !important;width:calc(100% - 52px) !important;max-width:430px !important;margin-inline:auto !important;
+  padding:5px !important;gap:0 !important;border-radius:999px !important;border:0 !important;outline:0 !important;
+  background:rgba(243,240,231,.72) !important;box-shadow:0 12px 32px -14px rgba(14,58,59,.38) !important;
+  backdrop-filter:blur(24px) saturate(180%) !important;-webkit-backdrop-filter:blur(24px) saturate(180%) !important;
+  transform-origin:50% 100%;transition:transform .32s cubic-bezier(.22,1,.36,1),width .32s cubic-bezier(.22,1,.36,1) !important}
+body.bar-mini .tabbar{transform:scale(.86) translateY(2px)}
+.tab{flex:1 1 0 !important;flex-direction:row !important;gap:7px !important;height:50px;padding:0 !important;justify-content:center;align-items:center;border-radius:999px;color:var(--ink) !important;
+  transition:flex-grow .32s cubic-bezier(.22,1,.36,1),background .25s var(--ease-out),transform .12s}
+.tab.on{flex-grow:2.1 !important;background:rgba(37,206,209,.36)}
 .tab .ti{width:auto !important;height:auto !important;background:none !important;transform:none !important}
-.tab svg{width:23px;height:23px}
-.tab>span:last-child{font-size:12.5px;font-weight:800;white-space:nowrap}
-.tab:not(.on)>span:last-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.tab .tb{top:-7px;inset-inline-end:-9px;box-shadow:0 0 0 2px var(--cream) !important}
+.tab svg{width:25px;height:25px;stroke-width:2}
+.tab>span:last-child{font-size:13px;font-weight:800;white-space:nowrap;animation:tabLbl .3s ease}
+.tab:not(.on)>span:last-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@keyframes tabLbl{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:none}}
+.tab .tb{top:-6px;inset-inline-end:-10px;box-shadow:none !important}
 .tb{background:var(--yellow) !important;color:var(--ink) !important}
 
 /* ===== حالات الطلب ===== */
