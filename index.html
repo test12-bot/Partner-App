@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="description" content="HIGHWAY Partner App — قائمة أسعار التوصيل واستدعاء كابتن وطلبات العملاء">
+<title>HIGHWAY Partner App</title>
+<meta name="theme-color" content="#25CED1">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HW Partner">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="leaflet.css?v=1">
+<link rel="stylesheet" href="styles.css?v=33">
+<link rel="stylesheet" href="map.css?v=1">
+</head>
+<body>
+
+<div class="ambient"></div>
+
+<!-- الشاشة الافتتاحية + تسجيل الدخول (الإطار الزجاجي نفسه يكبر) -->
+<div id="splash">
+  <div class="splash-icons" id="splashIcons"></div>
+  <div class="splash-content">
+    <div class="splash-logo-wrap" id="splashCard">
+      <div class="logo-stage">
+        <video class="splash-video" id="splashVideo" autoplay muted playsinline preload="auto" aria-hidden="true">
+          <source src="splash-intro.mp4?v=23" type="video/mp4">
+          <source src="splash-intro.webm?v=23" type="video/webm">
+        </video>
+        <canvas class="splash-canvas" id="splashCanvas" width="1080" height="530" role="img" aria-label="HIGHWAY Delivery"></canvas>
+        <img class="splash-fallback" src="splash-logo-final.png?v=23" alt="" width="1080" height="530" aria-hidden="true">
+        <button class="login-back" id="loginBack" type="button" onclick="closeLogin()" aria-label="رجوع للشاشة الرئيسية" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <div class="login-panel" id="loginPanel" aria-hidden="true">
+        <div class="login-clip">
+          <form class="login-form" id="loginForm" novalidate autocomplete="on">
+            <h1>تسجيل الدخول</h1>
+            <p class="login-sub">أدخل بيانات حسابك للمتابعة</p>
+
+            <div class="field" id="loginUserField">
+              <label for="loginUser">اسم المستخدم</label>
+              <input type="text" id="loginUser" name="username" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" dir="ltr" placeholder="Username" tabindex="-1">
+            </div>
+            <div class="field" id="loginPassField">
+              <label for="loginPass">كلمة المرور</label>
+              <div class="pass-wrap">
+                <input type="password" id="loginPass" name="password" autocomplete="current-password" dir="ltr" placeholder="Password" tabindex="-1">
+                <button type="button" class="pass-toggle" id="passToggle" onclick="togglePass()" aria-label="إظهار كلمة المرور" tabindex="-1">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <label class="remember"><input type="checkbox" id="loginRemember" tabindex="-1"><span class="box"></span><span>تذكرني على هذا الجهاز</span></label>
+            <div class="login-error" id="loginError" role="alert"></div>
+
+            <button type="submit" class="submit-btn" id="loginBtn" tabindex="-1">
+              <span class="spinner"></span>
+              <span class="btn-label">دخول</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="splash-extras" id="splashExtras">
+      <div class="splash-extras-in"><div class="splash-extras-pad">
+        <div class="splash-tagline">أسرع طريق لطلباتك</div>
+        <div class="splash-status">
+          <span>جاري تجهيز قائمة الأسعار</span>
+          <span class="dot-flow"><span></span><span></span><span></span></span>
+        </div>
+        <button class="splash-enter" id="enterBtn" type="button">الدخول ←</button>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="app-shell" id="appShell">
+
+  <header class="app-header">
+    <button class="header-back" id="headerBack" type="button" aria-label="رجوع" onclick="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <button class="brand-mini" id="brandReload" type="button" aria-label="إعادة تحميل الموقع" onclick="reloadSite()">
+      <img class="brand-mini-logo" src="logo-icon.png" alt="" width="647" height="560">
+      <div class="brand-mini-text">
+        <span class="brand-mini-title">HIGHWAY <em>Partner</em></span>
+        <span class="brand-mini-sub">Partner App</span>
+      </div>
+    </button>
+    <div class="user-wrap" id="userWrap" style="display:none;">
+      <button class="header-avatar" id="avatarBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="userMenu" aria-label="حسابي" onclick="toggleUserMenu()">
+        <img id="avatarImg" alt="" width="40" height="40">
+      </button>
+      <div class="user-menu" id="userMenu" role="menu" aria-hidden="true">
+        <div class="um-head">
+          <img id="umImg" alt="" width="44" height="44">
+          <div class="um-id"><b id="umName"></b><small id="umRole"></small></div>
+        </div>
+        <button class="um-item" type="button" role="menuitem" onclick="openProfile()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span>الملف الشخصي</span>
+        </button>
+        <button class="um-item danger" type="button" role="menuitem" onclick="logout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          <span>تسجيل الخروج</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- الرئيسية -->
+    <section class="screen active" id="screen-home">
+      <div class="container" style="display:flex; flex-direction:column; flex:1;">
+        <div class="page-heading">
+          <h1 id="homeTitle">أهلًا بك</h1>
+          <p>اختر الخدمة التي تحتاجها الآن</p>
+        </div>
+        <div class="card-stack app-home">
+          <button class="action-card hero" type="button" onclick="openOrderModal('direct')">
+            <span class="hero-txt">
+              <small class="hero-tag"><i></i>خدمة فورية</small>
+              <h2>استدعاء كابتن</h2>
+              <p>كابتن يصلك بسرعة لاستلام طلب متجرك</p>
+              <span class="hero-cta">اطلب الآن <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span>
+            </span>
+            <span class="hero-bolt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg></span>
+          </button>
+
+          <div class="stat-row" id="homeStats"></div>
+          <div id="homeActive"></div>
+
+          <div class="sec-label">خدماتنا</div>
+          <div class="mini-grid">
+            <button class="action-card prep glass mini" type="button" onclick="tabGo('screen-prices')">
+              <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5h6v-1a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v1Z"/><path d="M9 10h6M9 14h6M9 17.5h3.5"/></svg></span>
+              <span class="txt"><h3>قوائم الأسعار</h3><p>السلط وعمان</p></span>
+            </button>
+            <button class="action-card prep glass mini" type="button" onclick="goTo('screen-calc')">
+              <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><rect x="8" y="6" width="8" height="4" rx="1"/><path d="M8.5 14h.01M12 14h.01M15.5 14h.01M8.5 17.5h.01M12 17.5h.01M15.5 17.5h.01"/></svg></span>
+              <span class="txt"><h3>احسب بالكيلو</h3><p>0.35 د.أ / كم</p></span>
+            </button>
+            <button class="action-card prep glass mini wide" type="button" onclick="goTo('screen-contact')">
+              <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/><path d="M19 20c0 1.4-1.8 2-4 2h-2"/></svg></span>
+              <span class="txt"><h3>تواصل معنا</h3><p>فريقنا جاهز لخدمتك والرد على استفساراتك</p></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- خيارات الأسعار -->
+    <section class="screen" id="screen-prices">
+      <div class="container">
+        <div class="page-heading">
+          <h1>قوائم الأسعار</h1>
+          <p>اختر المنطقة أو احسب بالكيلو</p>
+        </div>
+        <div class="card-stack" style="justify-content:flex-start;">
+          <button class="action-card prep glass" type="button" onclick="setRegion('salt')">
+            <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
+            <span class="txt"><h3>التوصيل لمناطق السلط</h3><p id="saltDesc">قائمة أسعار مستقلة لكل من السرو وأم النعاج</p></span>
+            <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span>
+          </button>
+          <button class="action-card prep glass" type="button" onclick="setRegion('amman')">
+            <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l6-3v15"/><path d="M9 21V4l8 3v14"/><path d="M17 21V11l4 2v8"/><path d="M12 10h2M12 14h2M6 12h1M6 16h1"/></svg></span>
+            <span class="txt"><h3>التوصيل لمناطق عمان</h3><p>أسعار التوصيل لأحياء عمان</p></span>
+            <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span>
+          </button>
+          <button class="action-card confirm glass" type="button" onclick="goTo('screen-calc')">
+            <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><rect x="8" y="6" width="8" height="4" rx="1"/><path d="M8.5 14h.01M12 14h.01M15.5 14h.01M8.5 17.5h.01M12 17.5h.01M15.5 17.5h.01"/></svg></span>
+            <span class="txt"><h3>احسب بالكيلو</h3><p>0.35 دينار للكيلومتر، وأقل سعر توصيل 1.50</p></span>
+            <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- نقطة الانطلاق -->
+    <section class="screen" id="screen-start">
+      <div class="container">
+        <div class="page-heading">
+          <h1>من أين سينطلق الطلب؟</h1>
+          <p>اختر نقطة الانطلاق</p>
+        </div>
+        <div class="rest-grid">
+          <button class="rest-card glass" type="button" onclick="selectStartPoint('umm_naaj')">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
+            <span>أم النعاج</span>
+          </button>
+          <button class="rest-card glass" type="button" onclick="selectStartPoint('sarou')">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
+            <span>السرو</span>
+          </button>
+          <button class="rest-card custom glass" type="button" onclick="showConstruction()">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <span>دبابنة (قريباً)</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- قائمة المناطق -->
+    <section class="screen" id="screen-list">
+      <div class="container">
+        <div class="page-heading">
+          <h1 id="listTitle">قائمة الأسعار</h1>
+          <div class="list-meta">
+            <div id="listSub" class="route-line"></div>
+            <a id="pdfLink" class="print-chip" href="#" target="_blank" rel="noopener" aria-label="طباعة قائمة الأسعار">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2.5"/><path d="M7 14h10v7H7z"/></svg>
+              <span>طباعة</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="search-wrap">
+          <svg class="search-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="text" id="searchInput" placeholder="ابحث عن اسم المنطقة..." autocomplete="off" oninput="filterList()">
+        </div>
+
+        <div class="tap-hint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5a2 2 0 0 1 4 0v6"/><path d="M13 11V9a2 2 0 0 1 4 0v5a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-3l-2-4a2 2 0 0 1 3-2l1 1.5V11"/></svg>
+          اضغط على المنطقة لتحديد التفاصيل
+        </div>
+
+        <div id="pricesContainer"></div>
+
+        <div class="list-note">
+          <p>يتم تحديد أجور التوصيل بناءً على مناطق التوصيل المحددة.</p>
+          <p>تُحتسب أجور التوصيل للمناطق غير المدرجة حسب الكيلومتر (0.35 دينار للكيلومتر).</p>
+          <div class="note-actions">
+            <button type="button" class="note-link" onclick="goTo('screen-calc')">احسب بالكيلو ←</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- الحاسبة -->
+    <section class="screen" id="screen-calc">
+      <div class="container">
+        <div class="page-heading">
+          <h1>حاسبة المسافة</h1>
+          <p>سعر الكيلومتر 0.35 دينار، وأقل سعر توصيل 1.50 دينار</p>
+        </div>
+
+        <div class="form-card glass" style="text-align:center;">
+          <div class="field" id="distanceField">
+            <label>المسافة بالكيلومتر</label>
+            <input type="number" id="distanceInput" class="calc-input" inputmode="decimal" min="0" step="any" placeholder="0" oninput="calculateTotal()">
+            <div class="err-msg">الرجاء إدخال المسافة أولاً</div>
+          </div>
+
+          <div class="result-box">
+            <span class="result-label">السعر التقديري</span>
+            <div id="calcResult" class="result-display">0.00 <small>JOD</small></div>
+            <div id="minFareNote" class="min-note">تم تطبيق أقل سعر توصيل (1.50 دينار)</div>
+          </div>
+
+          <button type="button" class="submit-btn" onclick="openOrderModal('calc')">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>
+            <span class="btn-label">تأكيد واستدعاء كابتن</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- تواصل معنا -->
+    <section class="screen" id="screen-contact">
+      <div class="container">
+        <div class="page-heading">
+          <h1>تواصل معنا</h1>
+          <p>فريقنا جاهز لخدمتك والرد على استفساراتك</p>
+        </div>
+        <div class="card-stack" style="justify-content:flex-start;">
+          <a class="action-card glass link-card" href="https://www.instagram.com/highway_delivery_jor/" target="_blank" rel="noopener">
+            <span class="glyph insta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".8" fill="currentColor" stroke="none"/></svg></span>
+            <span class="txt"><h3>Instagram</h3><p>تابع جديدنا وعروضنا</p></span>
+            <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span>
+          </a>
+          <a class="action-card glass link-card" href="https://www.facebook.com/share/19LXVQg7hd/?mibextid=wwXIfr" target="_blank" rel="noopener">
+            <span class="glyph fb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8a1 1 0 0 1 1-1Z"/></svg></span>
+            <span class="txt"><h3>Facebook</h3><p>مجتمعنا على فيسبوك</p></span>
+            <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span>
+          </a>
+          <a class="action-card glass link-card" href="https://wa.me/962791819432" target="_blank" rel="noopener">
+            <span class="glyph wa"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M16.02 2.67C8.65 2.67 2.67 8.65 2.67 16.02c0 2.5.68 4.94 1.98 7.08L2.7 29.33l6.4-1.9a13.3 13.3 0 0 0 6.92 1.9h.01c7.37 0 13.35-5.98 13.35-13.35 0-3.56-1.39-6.92-3.9-9.44a13.28 13.28 0 0 0-9.46-3.87Zm7.8 19.06c-.33.93-1.9 1.77-2.63 1.86-.67.09-1.5.13-2.42-.15a19.4 19.4 0 0 1-2.24-.83c-3.95-1.71-6.53-5.68-6.73-5.95-.2-.26-1.6-2.13-1.6-4.06 0-1.93.99-2.87 1.35-3.27.35-.4.77-.5 1.02-.5.26 0 .52 0 .74.01.24.01.56-.09.87.67.33.8 1.13 2.75 1.23 2.95.1.2.16.44.03.7-.13.27-.2.44-.4.67-.2.24-.42.53-.6.71-.2.2-.41.42-.18.82.24.4 1.05 1.74 2.26 2.83 1.55 1.4 2.86 1.83 3.26 2.04.4.2.63.17.87-.1.24-.27 1-1.18 1.27-1.58.27-.4.53-.33.9-.2.36.13 2.32 1.1 2.72 1.3.4.2.66.3.76.47.1.17.1.98-.23 1.91Z"/></svg></span>
+            <span class="txt"><h3>WhatsApp</h3><p>محادثة مباشرة مع الدعم</p></span>
+            <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- المنيو -->
+    <section class="screen" id="screen-menu">
+      <div class="container">
+        <div class="page-heading"><h1>المنيو</h1><p>أدر قائمة منتجاتك كما يراها العملاء</p></div>
+        <div id="menuAdmin"></div>
+      </div>
+    </section>
+
+    <!-- طلباتي -->
+    <section class="screen" id="screen-orders">
+      <div class="container">
+        <div class="page-heading">
+          <h1>طلباتي</h1>
+          <p>تابع حالة طلباتك وتفاصيل الكابتن</p>
+        </div>
+        <div class="stat-grid" id="ordStats"></div>
+        <div class="seg" id="ordSeg" role="tablist">
+          <button type="button" data-f="active" class="on">الحالية</button>
+          <button type="button" data-f="done">المكتملة</button>
+          <button type="button" data-f="all">الكل</button>
+        </div>
+        <div id="ordList"></div>
+      </div>
+    </section>
+
+    <!-- الملف الشخصي -->
+    <section class="screen" id="screen-profile">
+      <div class="container">
+        <article class="pf-card">
+          <div class="pf-cover"></div>
+          <div class="pf-body">
+            <div class="pf-avatar-wrap">
+              <img class="pf-avatar" id="pfImg" alt="" width="108" height="108">
+              <span class="pf-verified" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            </div>
+            <h1 class="pf-name" id="pfName"></h1>
+            <p class="pf-handle" id="pfHandle" dir="ltr"></p>
+            <span class="pf-chip" id="pfChip"></span>
+          </div>
+        </article>
+
+        <div class="pf-list">
+          <div class="pf-row">
+            <span class="pf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+            <span class="pf-k">اسم المستخدم</span>
+            <span class="pf-v" id="pfUser" dir="ltr"></span>
+          </div>
+          <div class="pf-row">
+            <span class="pf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v5c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="pf-k">نوع الحساب</span>
+            <span class="pf-v" id="pfType"></span>
+          </div>
+          <div class="pf-row">
+            <span class="pf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
+            <span class="pf-k">نقطة الانطلاق</span>
+            <span class="pf-v" id="pfStart"></span>
+          </div>
+          <a class="pf-row pf-link" id="pfPdf" href="#" target="_blank" rel="noopener">
+            <span class="pf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+            <span class="pf-k">قائمة أسعار متجري (PDF)</span>
+            <svg class="pf-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </a>
+        </div>
+
+        <button class="pf-logout" type="button" onclick="logout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          تسجيل الخروج
+        </button>
+      </div>
+    </section>
+
+    <!-- نجاح -->
+    <section class="screen" id="screen-success">
+      <div class="container" style="display:flex; flex-direction:column; flex:1;">
+        <div class="success-wrap">
+          <div class="check-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0E3A3B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <h2>تم تجهيز الطلب</h2>
+          <p id="successSub">تم فتح واتساب لمشاركة تفاصيل الطلب مع الكابتن.</p>
+          <span class="success-ref" id="successRef" style="display:none;"></span>
+          <button class="new-order-btn" type="button" onclick="resetAndGo('screen-home')">
+            العودة للرئيسية
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <h4>لا تحتار</h4>
+    <p>الـ HIGHWAY Delivery أسرع قرار</p>
+    <div class="copyright">&copy; 2025 HIGHWAY Delivery. All Rights Reserved.</div>
+  </footer>
+
+  <div class="live-bar" id="liveBar" role="status" aria-live="polite" onclick="liveOpen(event)">
+    <div class="lv-top">
+      <span class="lv-dot"></span>
+      <div class="lv-txt"><b id="lvTitle">طلبك قيد التنفيذ</b><small id="lvSub"></small></div>
+      <button class="lv-x" type="button" onclick="hideLive(event)" aria-label="إخفاء"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="lv-track" id="lvTrack"><span><i></i>تم الإرسال</span><span><i></i>كابتن</span><span><i></i>في الطريق</span><span><i></i>تم التسليم</span></div>
+  </div>
+
+  <nav class="tabbar" aria-label="التنقل الرئيسي">
+    <button class="tab on" type="button" data-tab="home" onclick="tabGo('screen-home')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 3l9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></span><span>الرئيسية</span></button>
+    <button class="tab" type="button" data-tab="prices" onclick="tabGo('screen-prices')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 10h6M9 14h6M9 17.5h3.5"/></svg></span><span>الأسعار</span></button>
+    <button class="tab" type="button" data-tab="menu" id="tabMenu" onclick="tabGo('screen-menu')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v8a2 2 0 0 0 2 2v8M9 3v8M7 3v8M18 3c-2 2-3 5-3 8h3v10"/></svg></span><span>المنيو</span></button>
+    <button class="tab" type="button" data-tab="orders" onclick="tabGo('screen-orders')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l2 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7l2-4Z"/><path d="M4 7h16"/><path d="M9 11h6"/></svg><em class="tb" id="tabBadge"></em></span><span>طلباتي</span></button>
+    <button class="tab" type="button" data-tab="profile" onclick="tabGo('screen-profile')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>حسابي</span></button>
+  </nav>
+</div>
+
+<!-- نافذة تفاصيل الطلب -->
+<div id="orderModal" class="modal" onclick="if(event.target===this) closeOrderModal()">
+  <div class="modal-card glass">
+    <h3 class="modal-title">تفاصيل إضافية للطلب</h3>
+    <div class="modal-summary" id="modalSummary" style="display:none;"></div>
+
+    <div class="field">
+      <label>قيمة الطلب <span class="opt">(اختياري)</span></label>
+      <div class="value-wrap">
+        <input type="text" id="modalOrderValue" placeholder="مثال: 15">
+        <span class="cur">د.أ</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>ملاحظات أخرى <span class="opt">(اختياري)</span></label>
+      <textarea id="modalOrderNotes" rows="3" placeholder="مثال: بجانب الصيدلية، الطابق الثاني..."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="ghost-btn" onclick="closeOrderModal()">إلغاء</button>
+      <button type="button" class="submit-btn" onclick="submitOrder()">
+        <svg class="btn-icon" viewBox="0 0 32 32" fill="currentColor"><path d="M16.02 2.67C8.65 2.67 2.67 8.65 2.67 16.02c0 2.5.68 4.94 1.98 7.08L2.7 29.33l6.4-1.9a13.3 13.3 0 0 0 6.92 1.9h.01c7.37 0 13.35-5.98 13.35-13.35 0-3.56-1.39-6.92-3.9-9.44a13.28 13.28 0 0 0-9.46-3.87Zm7.8 19.06c-.33.93-1.9 1.77-2.63 1.86-.67.09-1.5.13-2.42-.15a19.4 19.4 0 0 1-2.24-.83c-3.95-1.71-6.53-5.68-6.73-5.95-.2-.26-1.6-2.13-1.6-4.06 0-1.93.99-2.87 1.35-3.27.35-.4.77-.5 1.02-.5.26 0 .52 0 .74.01.24.01.56-.09.87.67.33.8 1.13 2.75 1.23 2.95.1.2.16.44.03.7-.13.27-.2.44-.4.67-.2.24-.42.53-.6.71-.2.2-.41.42-.18.82.24.4 1.05 1.74 2.26 2.83 1.55 1.4 2.86 1.83 3.26 2.04.4.2.63.17.87-.1.24-.27 1-1.18 1.27-1.58.27-.4.53-.33.9-.2.36.13 2.32 1.1 2.72 1.3.4.2.66.3.76.47.1.17.1.98-.23 1.91Z"/></svg>
+        <span class="btn-label">إرسال الطلب</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ورقة تفاصيل الطلب الحالي -->
+<div id="menuSheet" class="modal" onclick="if(event.target===this) closeMenuSheet()"><div class="modal-card glass" id="menuSheetBody"></div></div>
+
+<div class="loc-full" id="slFull">
+  <div class="loc-map"><div class="lmap" id="slMap"></div><div class="loc-shadow"></div>
+    <div class="loc-pin" id="slPin"><svg viewBox="0 0 48 58"><path d="M24 56C24 56 4 36 4 22a20 20 0 0 1 40 0c0 14-20 34-20 34Z" fill="#0E4B4D"/><circle cx="24" cy="22" r="9" fill="#E8EF44"/></svg></div>
+    <div class="loc-top"><button class="loc-x" type="button" onclick="closeStoreLoc()" aria-label="إغلاق"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="loc-hint">ضع الدبوس على باب متجرك</div></div>
+    <button class="loc-gps" type="button" onclick="storeGps()" aria-label="موقعي الحالي"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3.5"/><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+  </div>
+  <div class="loc-panel"><div class="loc-lbl"><small>موقع المتجر</small><b id="slAddr">...</b></div><button type="button" class="submit-btn" onclick="saveStoreLoc()"><span class="btn-label">حفظ موقع المتجر</span></button></div>
+</div>
+
+<div id="orderSheet" class="modal" onclick="if(event.target===this) closeOrderSheet()">
+  <div class="modal-card glass" id="orderSheetBody"></div>
+</div>
+
+<!-- نافذة قيد التجهيز -->
+<div id="constructionModal" class="modal" onclick="closeConstruction()">
+  <div class="modal-card glass" style="text-align:center;">
+    <div class="construct-ico">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    </div>
+    <h3 class="modal-title" style="margin-bottom:6px;">منطقة قيد التجهيز</h3>
+    <p style="margin:0; font-size:13px; font-weight:500; color:var(--ink-soft);">نعمل جاهدين لتغطية هذه المنطقة قريباً.</p>
+  </div>
+</div>
+
+<script src="leaflet.js?v=1"></script>
+<script src="hw-config.js?v=2"></script>
+<script src="hw-map.js?v=1"></script>
+<script src="hw-food.js?v=1"></script>
+<script src="hw-orders.js?v=3"></script>
+<script src="script.js?v=35"></script>
+<script src="store-v2.js?v=4"></script>
+</body>
+</html>
