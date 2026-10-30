@@ -106,8 +106,75 @@
   function dayKey(ts) { var d = new Date(ts || Date.now()); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function todayTargets() { var k = dayKey(); return targets.list().filter(function (t) { return t.active !== false && (!t.day || t.day === k); }); }
 
-  /* صورة الغلاف: ما ترفعه الإدارة (storestate.cover) ثم ما يضيفه HIGHWAY في الكود (HW_CONFIG.covers) */
-  function cover(sid, st) { return (st && st.cover) || (CFG.covers && CFG.covers[sid]) || ''; }
+  /* =========================================================
+     المتاجر: تديرها الإدارة بالكامل (إضافة، حساب الدخول، الشعار، الغلاف، ملف PDF، الموقع، المنيو)
+     stores/<id> : { id, name, cat, start, user, hash, active, sort, mediaV, pdfV, pdfName }  ← خفيف، يُزامَن دائمًا
+     media/<id>  : { logo, cover }  ← صور كبيرة، تُجلب مرة واحدة عند تغيّر mediaV وتُحفظ في الجهاز
+     pdfs/<id>   : { data, name }   ← قائمة أسعار التوصيل للمتجر، تُجلب فقط عند فتحها
+     pricelists/<start> : { salt: [{n,p}], amman: [{n,p}] }  ← أسعار التوصيل التي تعدّلها الإدارة
+     قبل أن تضيف الإدارة أي متجر تُستخدم القائمة القديمة في hw-config.js
+     ========================================================= */
+  var storesCol = DB.col('stores'), priceCol = DB.col('pricelists'), raw = storesCol._raw(), media = {}, mediaSubs = [], fetching = {};
+  function storeList(all) {
+    var l = storesCol.list();
+    if (!l.length) l = (CFG.stores || []).map(function (s, i) { return Object.assign({ sort: i, legacy: true }, s); });
+    return l.filter(function (s) { return all || s.active !== false; }).sort(function (a, b) { return (a.sort || 0) - (b.sort || 0) || String(a.name).localeCompare(b.name, 'ar'); });
+  }
+  function storeById(id) { return storeList(true).filter(function (s) { return s.id === id; })[0] || null; }
+  function readMedia(id) { if (media[id]) return media[id]; try { media[id] = JSON.parse(localStorage.getItem('hw-media-' + id)) || null; } catch (e) { media[id] = null; } return media[id]; }
+  /* يجلب صور المتاجر التي تغيّرت فقط */
+  function syncMedia() {
+    storeList(true).forEach(function (s) {
+      if (!s.mediaV) return; var m = readMedia(s.id);
+      if ((m && m.v === s.mediaV) || fetching[s.id] === s.mediaV) return;
+      fetching[s.id] = s.mediaV;
+      getDoc('media', s.id).then(function (d) {
+        media[s.id] = { v: s.mediaV, logo: (d && d.logo) || '', cover: (d && d.cover) || '' };
+        try { localStorage.setItem('hw-media-' + s.id, JSON.stringify(media[s.id])); } catch (e) {}
+        mediaSubs.forEach(function (f) { try { f(s.id); } catch (e) {} });
+      });
+    });
+  }
+  function getDoc(col, id) {
+    if (raw.remote) return fetch(raw.base + '/' + col + '/' + id + '.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return null; });
+    try { return Promise.resolve(JSON.parse(localStorage.getItem('hw-' + col + '-' + id) || 'null')); } catch (e) { return Promise.resolve(null); }
+  }
+  function putDoc(col, id, obj) {
+    if (raw.remote) return raw.send(obj == null ? 'DELETE' : 'PUT', '/' + col + '/' + id + '.json', obj == null ? undefined : obj);
+    try { if (obj == null) localStorage.removeItem('hw-' + col + '-' + id); else localStorage.setItem('hw-' + col + '-' + id, JSON.stringify(obj)); } catch (e) { return Promise.reject(e); }
+    return Promise.resolve();
+  }
+  /* الإدارة: حفظ الصور (يرفع mediaV فتُحدَّث عند الجميع) */
+  function saveMedia(id, patch) {
+    var cur = readMedia(id) || {}, doc = { logo: patch.logo !== undefined ? patch.logo : (cur.logo || ''), cover: patch.cover !== undefined ? patch.cover : (cur.cover || '') }, v = Date.now();
+    return putDoc('media', id, doc).then(function () {
+      media[id] = Object.assign({ v: v }, doc); try { localStorage.setItem('hw-media-' + id, JSON.stringify(media[id])); } catch (e) {}
+      storesCol.patch(id, { mediaV: v }); mediaSubs.forEach(function (f) { f(id); });
+    });
+  }
+  function logo(id) {
+    var m = readMedia(id); if (m && m.logo) return m.logo;
+    var s = storeById(id); return s && (s.legacy || s.avatar) ? 'avatars/' + id + '.jpg' : 'logo-icon.png';
+  }
+  /* صورة الغلاف: ما ترفعه الإدارة، ثم ما يضيفه HIGHWAY في الكود (HW_CONFIG.covers) */
+  function cover(sid) { var m = readMedia(sid); return (m && m.cover) || (CFG.covers && CFG.covers[sid]) || ''; }
+  function onMedia(f) { mediaSubs.push(f); }
+  /* ملف PDF: يُجلب عند الضغط فقط ويُفتح في نافذة جديدة */
+  function savePdf(id, data, name) { return putDoc('pdfs', id, data ? { data: data, name: name || '' } : null).then(function () { storesCol.patch(id, { pdfV: data ? Date.now() : 0, pdfName: data ? name || '' : '' }); }); }
+  function openPdf(id, fallback) {
+    var s = storeById(id), w = g.open('', '_blank');
+    if (!s || !s.pdfV) { if (w) w.location = fallback || (s && s.pdf) || ''; return; }
+    getDoc('pdfs', id).then(function (d) {
+      if (!d || !d.data) { if (w) w.close(); return; }
+      var b = atob(d.data.split(',')[1]), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+      var url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' }));
+      if (w) w.location = url; else g.location = url;
+    });
+  }
+  function hasPdf(id) { var s = storeById(id); return !!(s && (s.pdfV || s.pdf)); }
+  /* أسعار التوصيل: نسخة الإدارة إن وُجدت، وإلا الأسعار الأصلية في الكود */
+  function priceList(start, region, fallback) { var d = priceCol.get(start); return d && d[region] ? d[region] : (fallback || []); }
+  storesCol.subscribe(syncMedia);
 
   /* ---------- الطباعة: تذكرة الطلب (80 مم) والتقارير (A4) بهوية HIGHWAY ---------- */
   var PRINT_CSS = '*{box-sizing:border-box}body{margin:0;font-family:"Tajawal","Segoe UI",Tahoma,sans-serif;color:#0E3A3B;direction:rtl}' +
@@ -146,6 +213,8 @@
     itemOn: itemOn, itemListed: itemListed, optsPrice: optsPrice, optsError: optsError, nextMorning: nextMorning,
     storeRating: storeRating, captainRating: captainRating, stars: stars,
     announcements: announcements, todayTargets: todayTargets, dayKey: dayKey, cover: cover, r2: r2,
-    printHtml: printHtml, reportHead: reportHead, periodStart: periodStart, optsText: optsText
+    printHtml: printHtml, reportHead: reportHead, periodStart: periodStart, optsText: optsText,
+    storesCol: storesCol, priceCol: priceCol, storeList: storeList, storeById: storeById, logo: logo, onMedia: onMedia, saveMedia: saveMedia,
+    savePdf: savePdf, openPdf: openPdf, hasPdf: hasPdf, priceList: priceList
   };
 })(window);

@@ -52,8 +52,9 @@
     var on = false; ft = setInterval(function () { on = !on; document.title = on ? '🔔 طلب جديد' : baseTitle; }, 1200);
   }
   /* إشعار للنظام عندما تكون الصفحة مخفية (لا يعمل في Safari iOS داخل التبويب) */
+  function tr(x) { return g.HWI18n ? g.HWI18n.t(x) : x; }   // بالإنجليزية عند اختيارها
   function notify(title, body) {
-    try { if (document.hidden && g.Notification && Notification.permission === 'granted') new Notification(title, { body: body, icon: 'icon-192.png', tag: 'hw' }); } catch (e) {}
+    try { if (document.hidden && g.Notification && Notification.permission === 'granted') new Notification(tr(title), { body: tr(body), icon: 'icon-192.png', tag: 'hw' }); } catch (e) {}
   }
   /* إبقاء الشاشة مضاءة */
   function keepAwake(on) {

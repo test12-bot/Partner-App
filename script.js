@@ -9,80 +9,7 @@ window.addEventListener("pageshow", () => window.scrollTo(0, 0));
 
 /* ---------- بيانات الأسعار (من قوائم الأسعار الرسمية PDF) ---------- */
 /* p = السعر، وإذا كان نطاقاً يُكتب (الأدنى - الأعلى) ويظهر في الصفحة بنفس شكله في القائمة */
-const PRICES = {
-  sarou: {
-    salt: [
-    {n:"ابو الردا", p:"3.00"}, {n:"ابو القيقب", p:"3.00"}, {n:"إسكان آسيا", p:"2.00"},
-    {n:"إسكان الجمارك", p:"1.50"}, {n:"إسكان طيبة", p:"1.50"}, {n:"إسكان الفردوس", p:"3.00"},
-    {n:"إسكان المهندسين", p:"2.00"}, {n:"أم جوزة", p:"4.00"}, {n:"أم زيتونة", p:"4.00"},
-    {n:"أم عطية", p:"3.00"}, {n:"أم العمد", p:"4.00"}, {n:"أم نعاج", p:"1.50 - 2.00"},
-    {n:"البحيرة", p:"2.00"}, {n:"بركة العامرية", p:"2.00"}, {n:"بطنا", p:"3.50 - 4.00"},
-    {n:"البقعان", p:"2.00"}, {n:"البقعة", p:"4.00"}, {n:"البقيع", p:"3.00"},
-    {n:"ترخيص السلط", p:"1.50"}, {n:"جامعة البلقاء التطبيقية", p:"3.00"}, {n:"جامعة عمان الأهلية", p:"1.50"},
-    {n:"جسر المناصير", p:"2.50"}, {n:"جلعاد", p:"5.00"}, {n:"حدائق ابو حسان", p:"3.00"},
-    {n:"الحمر", p:"2.00 - 2.50"}, {n:"حي السميرات", p:"2.00"}, {n:"حي العبداللات", p:"2.00"},
-    {n:"حي الفروسية", p:"2.50"}, {n:"الخندق", p:"3.00"}, {n:"دبابنة", p:"1.50"},
-    {n:"دعم الغزالات", p:"3.00 - 3.50"}, {n:"دوار الصوارفة", p:"2.00"}, {n:"الرميمين", p:"5.00"},
-    {n:"الزعتري", p:"2.50"}, {n:"زي", p:"3.50"}, {n:"السرو الجنوبي", p:"1.50"},
-    {n:"السلالم", p:"2.00 - 2.50"}, {n:"سلعوف", p:"3.50"}, {n:"شارع الخضر", p:"2.50"},
-    {n:"شارع الستين", p:"2.50 - 3.00"}, {n:"صافوط", p:"3.50"}, {n:"الصبيحي", p:"5.00"},
-    {n:"الصوانية", p:"2.50"}, {n:"صويلح", p:"3.50"}, {n:"ضاحية الزهور", p:"1.50"},
-    {n:"طباعة العواملة", p:"3.00"}, {n:"الطرازين", p:"4.00"}, {n:"علان", p:"4.00"},
-    {n:"عيرا", p:"5.00"}, {n:"العيزرية", p:"3.00"}, {n:"عين الباشا", p:"3.00 - 3.50"},
-    {n:"الفحيص", p:"3.00"}, {n:"القسام", p:"4.00"}, {n:"الكسارات", p:"2.50"},
-    {n:"كفرهودا", p:"4.00 - 5.00"}, {n:"الكمالية", p:"2.00 - 2.50"}, {n:"ماحص", p:"3.50"},
-    {n:"مدرسة السلط الثانوية", p:"2.50"}, {n:"المدينة الرياضية", p:"3.00"}, {n:"المضري", p:"2.50"},
-    {n:"معسكرات الحسين", p:"2.50"}, {n:"المغاريب", p:"3.00"}, {n:"المنشية", p:"3.00"},
-    {n:"الميامين", p:"3.00"}, {n:"الميدان", p:"2.50"}, {n:"الميسة", p:"2.00"},
-    {n:"نقب الدبور السفلي", p:"2.50"}, {n:"نقب الدبور العلوي", p:"2.00"}, {n:"وادي الأكراد", p:"3.00"},
-    {n:"وادي السلط", p:"4.00"}, {n:"وادي الشجرة", p:"2.00"}, {n:"وادي شعيب", p:"4.00 - 5.00"},
-    {n:"وسط المدينة (البلد)", p:"2.50"}, {n:"الوسية", p:"3.50"}, {n:"يرقا", p:"5.00"},
-    {n:"اليزيدية", p:"1.50"}
-    ],
-    amman: [
-    {n:"ابو نصير", p:"5.00"}, {n:"تلاع العلي", p:"5.00 - 6.00"}, {n:"الجاردنز", p:"6.00"},
-    {n:"الجبيهه", p:"5.00"}, {n:"خلدا", p:"4.00 - 5.00"}, {n:"دابوق", p:"4.00"},
-    {n:"الدوار الثامن", p:"6.00"}, {n:"دوار الداخلية", p:"7.00"}, {n:"الدوار السابع", p:"6.00"},
-    {n:"الدوار السادس", p:"7.00"}, {n:"شارع الأردن", p:"5.00 - 6.00"}, {n:"شارع الجامعة", p:"5.00"}
-    ]
-  },
-  umm_naaj: {
-    salt: [
-    {n:"ابو الردا", p:"3.50"}, {n:"ابو القيقب", p:"3.50"}, {n:"إسكان آسيا", p:"2.00"},
-    {n:"إسكان الجمارك", p:"1.50"}, {n:"إسكان طيبة", p:"1.50"}, {n:"إسكان الفردوس", p:"3.50"},
-    {n:"إسكان المهندسين", p:"2.50"}, {n:"أم جوزة", p:"4.00"}, {n:"أم زيتونة", p:"4.00"},
-    {n:"أم عطية", p:"3.00"}, {n:"أم العمد", p:"4.00"}, {n:"أم نعاج", p:"1.50 - 2.00"},
-    {n:"البحيرة", p:"2.50"}, {n:"بركة العامرية", p:"2.50"}, {n:"بطنا", p:"4.00"},
-    {n:"البقعان", p:"2.50"}, {n:"البقعة", p:"4.00"}, {n:"البقيع", p:"3.50"},
-    {n:"ترخيص السلط", p:"1.50"}, {n:"جامعة البلقاء التطبيقية", p:"3.50"}, {n:"جامعة عمان الأهلية", p:"1.50"},
-    {n:"جسر المناصير", p:"3.00"}, {n:"جلعاد", p:"6.00"}, {n:"حدائق ابو حسان", p:"3.50"},
-    {n:"الحمر", p:"2.00 - 2.50"}, {n:"حي السميرات", p:"2.00"}, {n:"حي العبداللات", p:"2.00"},
-    {n:"حي الفروسية", p:"3.00"}, {n:"الخندق", p:"3.50"}, {n:"دبابنة", p:"2.00"},
-    {n:"دعم الغزالات", p:"3.50 - 4.00"}, {n:"دوار الصوارفة", p:"2.50"}, {n:"الرميمين", p:"5.00"},
-    {n:"الزعتري", p:"3.00"}, {n:"زي", p:"4.00"}, {n:"السرو الجنوبي", p:"1.50"},
-    {n:"السلالم", p:"2.50 - 3.00"}, {n:"سلعوف", p:"3.50"}, {n:"شارع الخضر", p:"3.00"},
-    {n:"شارع الستين", p:"3.00 - 3.50"}, {n:"صافوط", p:"3.50"}, {n:"الصبيحي", p:"6.00"},
-    {n:"الصوانية", p:"3.00"}, {n:"صويلح", p:"3.50"}, {n:"ضاحية الزهور", p:"2.00"},
-    {n:"طباعة العواملة", p:"3.50"}, {n:"الطرازين", p:"4.00"}, {n:"علان", p:"4.00"},
-    {n:"عيرا", p:"5.00"}, {n:"العيزرية", p:"3.50"}, {n:"عين الباشا", p:"3.00 - 3.50"},
-    {n:"الفحيص", p:"3.00"}, {n:"القسام", p:"4.00"}, {n:"الكسارات", p:"2.50"},
-    {n:"كفرهودا", p:"4.00 - 5.00"}, {n:"الكمالية", p:"2.00 - 2.50"}, {n:"ماحص", p:"3.50"},
-    {n:"مدرسة السلط الثانوية", p:"3.00"}, {n:"المدينة الرياضية", p:"3.50"}, {n:"المضري", p:"3.00"},
-    {n:"معسكرات الحسين", p:"2.50"}, {n:"المغاريب", p:"3.50"}, {n:"المنشية", p:"3.50"},
-    {n:"الميامين", p:"3.50"}, {n:"الميدان", p:"3.00"}, {n:"الميسة", p:"2.50"},
-    {n:"نقب الدبور السفلي", p:"3.00"}, {n:"نقب الدبور العلوي", p:"2.50"}, {n:"وادي الأكراد", p:"3.50"},
-    {n:"وادي السلط", p:"4.00"}, {n:"وادي الشجرة", p:"2.50"}, {n:"وادي شعيب", p:"4.00 - 5.00"},
-    {n:"وسط المدينة (البلد)", p:"3.00"}, {n:"الوسية", p:"4.00"}, {n:"يرقا", p:"5.00"},
-    {n:"اليزيدية", p:"2.00"}
-    ],
-    amman: [
-    {n:"ابو نصير", p:"5.00"}, {n:"تلاع العلي", p:"5.00 - 6.00"}, {n:"الجاردنز", p:"6.00"},
-    {n:"الجبيهه", p:"5.00"}, {n:"خلدا", p:"4.00 - 5.00"}, {n:"دابوق", p:"4.00"},
-    {n:"الدوار الثامن", p:"6.00"}, {n:"دوار الداخلية", p:"7.00"}, {n:"الدوار السابع", p:"6.00"},
-    {n:"الدوار السادس", p:"7.00"}, {n:"شارع الأردن", p:"5.00 - 6.00"}, {n:"شارع الجامعة", p:"5.00"}
-    ]
-  }
-};
+const PRICES = window.HW_PRICES;   // أسعار التوصيل الأصلية (hw-prices.js)، والإدارة تعدّلها من لوحتها
 
 /* ---------- الحالة ---------- */
 let currentRegion = '';
@@ -256,27 +183,32 @@ function sha256(str) {
     return h.map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
 }
 
+/* حسابات المتاجر تديرها الإدارة (مجموعة stores في قاعدة البيانات).
+   USERS أعلاه احتياط فقط قبل أن تنقل الإدارة المتاجر لقاعدة البيانات، ولحساب admin */
+function storeUser(s) { return { id: s.id, names: [normUser(s.user)].concat(s.alias || []), hash: s.hash, label: s.name, start: s.start || 'sarou', pdf: s.pdf || '', active: s.active !== false }; }
+function allUsers() {
+    const list = HWBiz.storesCol.list(), db = list.filter(s => s.user && s.hash).map(storeUser);
+    return list.length ? db.concat(USERS.filter(u => !u.start)) : USERS;   // بعد النقل: المتاجر من قاعدة البيانات فقط
+}
 function findUserByName(name) {
     const n = normUser(name);
-    return n ? USERS.find(u => u.names.includes(n)) || null : null;
+    return n ? allUsers().find(u => u.names.includes(n)) || null : null;
 }
-
 function readSession() {
-    let id = null;
-    try { id = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY); } catch (e) {}
-    const u = USERS.find(x => x.id === id) || null;
-    return u && acctOf(u).active === false ? null : u;
+    let id = null, cached = null;
+    try { id = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY); cached = JSON.parse(localStorage.getItem(SESSION_KEY + '-obj') || 'null'); } catch (e) {}
+    const u = allUsers().find(x => x.id === id) || (cached && cached.id === id ? cached : null);   // قبل تحميل قاعدة البيانات: آخر نسخة محفوظة
+    return u && u.active !== false ? u : null;
 }
-/* الإدارة تستطيع تغيير كلمة مرور المتجر أو إيقاف حسابه (مجموعة accounts) */
-function acctOf(u) { return (window.HWDB && HWDB.col('accounts').get(u.id)) || {}; }
 function saveSession(user, remember) {
     try {
         localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY);
         (remember ? localStorage : sessionStorage).setItem(SESSION_KEY, user.id);
+        localStorage.setItem(SESSION_KEY + '-obj', JSON.stringify(user));
     } catch (e) {}
 }
 function clearSession() {
-    try { localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+    try { localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(SESSION_KEY + '-obj'); } catch (e) {}
 }
 
 /* تطبيق المستخدم على الواجهة: الترحيب + شكل قوائم الأسعار */
@@ -300,7 +232,7 @@ function userRole(u) { return u.start ? 'متجر شريك' : 'مسؤول الن
 
 function setAvatar(img, u) {
     img.onerror = () => { img.onerror = null; img.src = 'logo-icon.png'; };
-    img.src = `avatars/${u.id}.jpg`;
+    img.src = u.start ? HWBiz.logo(u.id) : `avatars/${u.id}.jpg`;   // شعار المتجر ترفعه الإدارة
 }
 
 function fillUserUI(u) {
@@ -315,9 +247,10 @@ function fillUserUI(u) {
     document.getElementById('pfUser').textContent = u.names[0];
     document.getElementById('pfType').textContent = userRole(u);
     document.getElementById('pfStart').textContent = u.start ? START_LABELS[u.start] : 'السرو وأم النعاج';
-    const pdf = document.getElementById('pfPdf');
-    pdf.style.display = u.pdf ? '' : 'none';
-    if (u.pdf) pdf.href = u.pdf;
+    const pdf = document.getElementById('pfPdf'), has = u.start ? HWBiz.hasPdf(u.id) : false;
+    pdf.style.display = has ? '' : 'none';
+    pdf.href = u.pdf || '#';
+    pdf.onclick = has ? (e) => { e.preventDefault(); HWBiz.openPdf(u.id); } : null;
 }
 
 function closeUserMenu() {
@@ -375,10 +308,11 @@ async function submitLogin(ev) {
 
     btn.classList.add('loading');
     await new Promise(r => setTimeout(r, 350));
-    const user = findUserByName(nameEl.value), acct = user ? acctOf(user) : {};
-    const ok = user && sha256(`HIGHWAY|${user.id}|${passEl.value}`) === (acct.hash || user.hash);
+    await HWBiz.storesCol.ready();
+    const user = findUserByName(nameEl.value);
+    const ok = user && sha256(`HIGHWAY|${user.id}|${passEl.value}`) === user.hash;
     btn.classList.remove('loading');
-    if (ok && acct.active === false) { err.textContent = 'الحساب موقوف، تواصل مع HIGHWAY'; passEl.value = ''; return; }
+    if (ok && user.active === false) { err.textContent = 'الحساب موقوف، تواصل مع HIGHWAY'; passEl.value = ''; return; }
 
     if (!ok) {
         document.getElementById('loginUserField').classList.add('invalid');
@@ -484,7 +418,7 @@ const REGION_TITLES ={ salt: 'التوصيل لمناطق السلط', amman: '�
 
 function generateList() {
     // كل نقطة انطلاق لها قائمتها الخاصة (السرو / أم النعاج)
-    const source = (PRICES[currentStartPoint] || {})[currentRegion] || [];
+    const source = HWBiz.priceList(currentStartPoint, currentRegion, (PRICES[currentStartPoint] || {})[currentRegion] || []);
     currentList = [...source].sort(compareNames);
 
     currentStartName = (currentUser && currentUser.label) || START_LABELS[currentStartPoint];
@@ -496,8 +430,9 @@ function generateList() {
     document.getElementById('searchInput').value = '';
 
     // زر الطباعة / التحميل: قائمة الأسعار الرسمية (PDF) الخاصة بنقطة الانطلاق المختارة
-    const pdfUrl = (currentUser && currentUser.pdf) || PDF_FILES[currentStartPoint];
-    document.getElementById('pdfLink').href = pdfUrl;
+    const pl = document.getElementById('pdfLink');
+    pl.href = (currentUser && currentUser.pdf) || PDF_FILES[currentStartPoint];
+    pl.onclick = currentUser && currentUser.start && HWBiz.hasPdf(currentUser.id) ? (e) => { e.preventDefault(); HWBiz.openPdf(currentUser.id); } : null;
 
     skeletonList();
     clearTimeout(window.__sk);

@@ -17,11 +17,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="leaflet.css?v=64">
-<link rel="stylesheet" href="styles.css?v=64">
-<link rel="stylesheet" href="map.css?v=64">
-<link rel="stylesheet" href="theme.css?v=64">
-<link rel="stylesheet" href="dark.css?v=64">
+<link rel="stylesheet" href="leaflet.css?v=66">
+<link rel="stylesheet" href="styles.css?v=66">
+<link rel="stylesheet" href="map.css?v=66">
+<link rel="stylesheet" href="theme.css?v=66">
+<link rel="stylesheet" href="dark.css?v=66">
 </head>
 <body>
 
@@ -468,15 +468,6 @@
 <!-- ورقة تفاصيل الطلب الحالي -->
 <div id="menuSheet" class="modal" onclick="if(event.target===this) closeMenuSheet()"><div class="modal-card glass" id="menuSheetBody"></div></div>
 
-<div class="loc-full" id="slFull">
-  <div class="loc-map"><div class="lmap" id="slMap"></div><div class="loc-shadow"></div>
-    <div class="loc-pin" id="slPin"><svg viewBox="0 0 48 58"><path d="M24 56C24 56 4 36 4 22a20 20 0 0 1 40 0c0 14-20 34-20 34Z" fill="#0E4B4D"/><circle cx="24" cy="22" r="9" fill="#E8EF44"/></svg></div>
-    <div class="loc-top"><button class="loc-x" type="button" onclick="closeStoreLoc()" aria-label="إغلاق"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="loc-hint">ضع الدبوس على باب متجرك</div></div>
-    <button class="loc-gps" type="button" onclick="storeGps()" aria-label="موقعي الحالي"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3.5"/><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
-  </div>
-  <div class="loc-panel"><div class="loc-lbl"><small>موقع المتجر</small><b id="slAddr">...</b></div><button type="button" class="submit-btn" onclick="saveStoreLoc()"><span class="btn-label">حفظ موقع المتجر</span></button></div>
-</div>
-
 <div id="orderSheet" class="modal" onclick="if(event.target===this) closeOrderSheet()">
   <div class="modal-card glass" id="orderSheetBody"></div>
 </div>
@@ -492,16 +483,18 @@
   </div>
 </div>
 
-<script src="leaflet.js?v=64"></script>
-<script src="hw-i18n.js?v=64"></script>
-<script src="hw-config.js?v=64"></script>
-<script src="hw-map.js?v=64"></script>
-<script src="hw-food.js?v=64"></script>
-<script src="hw-orders.js?v=64"></script>
-<script src="hw-notify.js?v=64"></script>
-<script src="hw-biz.js?v=64"></script>
-<script src="script.js?v=64"></script>
-<script src="store-v2.js?v=64"></script>
-<script src="hw-ui.js?v=64"></script>
+<script src="leaflet.js?v=66"></script>
+<script src="hw-i18n.js?v=66"></script>
+<script src="hw-config.js?v=66"></script>
+<script src="hw-map.js?v=66"></script>
+<script src="hw-food.js?v=66"></script>
+<script src="hw-orders.js?v=66"></script>
+<script src="hw-notify.js?v=66"></script>
+<script src="hw-push.js?v=66"></script>
+<script src="hw-biz.js?v=66"></script>
+<script src="hw-prices.js?v=66"></script>
+<script src="script.js?v=66"></script>
+<script src="store-v2.js?v=66"></script>
+<script src="hw-ui.js?v=66"></script>
 </body>
 </html>

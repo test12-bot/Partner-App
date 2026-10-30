@@ -31,7 +31,7 @@
     return pts[pts.length - 1];
   }
   var HOME = '<svg viewBox="0 0 48 58" width="40" height="48"><path d="M24 56C24 56 4 36 4 22a20 20 0 0 1 40 0c0 14-20 34-20 34Z" fill="#0E4B4D"/><path d="M15 24.5 24 16l9 8.5V33a1.5 1.5 0 0 1-1.5 1.5h-4.5V28h-6v6.5h-4.5A1.5 1.5 0 0 1 15 33v-8.5Z" fill="#E8EF44"/></svg>';
-  function storePin(id) { return '<div class="mk-store"><img src="' + 'avatars/' + id + '.jpg' + '" onerror="this.src=\'logo-icon.png\'" alt=""><i></i></div>'; }
+  function storePin(id) { return '<div class="mk-store"><img src="' + (g.HWBiz ? g.HWBiz.logo(id) : 'avatars/' + id + '.jpg') + '" onerror="this.src=\'logo-icon.png\'" alt=""><i></i></div>'; }
   function capPin() { return '<div class="mk-cap"><span class="pulse"></span><div><img src="logo-icon.png" alt=""></div></div>'; }
   function mePin() { return '<div class="mk-me"><span class="pulse"></span><i></i></div>'; }
   function icon(html, w, h, ax, ay) { return L.divIcon({ html: html, className: 'mk', iconSize: [w, h], iconAnchor: [ax, ay] }); }

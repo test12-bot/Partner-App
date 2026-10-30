@@ -220,3 +220,8 @@ body.bar-mini .tabbar{transform:scale(.86) translateY(2px)}
 /* ===== الإنجليزية: قلب الأسهم مع اتجاه LTR ===== */
 html[dir="ltr"] .pf-chev,html[dir="ltr"] .hero-cta svg,html[dir="ltr"] .header-back svg,html[dir="ltr"] .ofr-cta svg,html[dir="ltr"] .sec-more svg{transform:scaleX(-1)}
 html[dir="ltr"] body{font-family:"Tajawal","Segoe UI",system-ui,sans-serif}
+/* ===== الإشعارات (hw-push.js) ===== */
+.hw-nag{display:flex;align-items:center;gap:12px;background:var(--yellow);color:#0E3A3B;border-radius:18px;padding:12px 14px;margin:0 0 12px}
+.hw-nag div{flex:1}.hw-nag b{display:block;font-size:14px}.hw-nag small{font-size:12px;font-weight:700;opacity:.75}
+.hw-nag button{flex:none;border:0;border-radius:12px;padding:9px 16px;background:#0E3A3B;color:#E8EF44;font:inherit;font-weight:800;cursor:pointer}
+.hw-steps{margin:6px 0 10px;padding-inline-start:20px;line-height:2;font-size:14px;color:var(--ink)}

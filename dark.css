@@ -212,3 +212,5 @@
 :root[data-theme="dark"] .hw-sound-pill{--ink:#0E3A3B;--teal-800:#0E3A3B;--teal-900:#0E3A3B;--ink-soft:rgba(14,58,59,.72);--white:#fff;--surface:#fff;--cream:#F3F0E7;--cream-line:#E7E2D3;color:#0E3A3B}
 :root[data-theme="dark"] .hw-sa-warn{background:#0F4446;--cream:#F3F0E7;--white:#fff;--surface:rgba(255,255,255,.14)}
 :root[data-theme="dark"] .hw-seg button.on{--ink:#0E3A3B;--teal-800:#0E3A3B;--teal-900:#0E3A3B;--ink-soft:rgba(14,58,59,.72);--white:#fff;--surface:#fff;--cream:#F3F0E7;--cream-line:#E7E2D3;color:#0E3A3B}
+:root[data-theme="dark"] .hw-nag{--ink:#0E3A3B;--teal-800:#0E3A3B;--teal-900:#0E3A3B;--ink-soft:rgba(14,58,59,.72);--white:#fff;--surface:#fff;--cream:#F3F0E7;--cream-line:#E7E2D3;color:#0E3A3B}
+:root[data-theme="dark"] .hw-nag button{background:#0F4446;--cream:#F3F0E7;--white:#fff;--surface:rgba(255,255,255,.14)}

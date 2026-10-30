@@ -1010,3 +1010,5 @@ body:not(.authed) .tabbar, body:not(.authed) .live-bar{display:none;}
 .cmt{background:#fff;border-radius:14px;padding:10px 12px;margin-top:8px}
 .cmt span{color:#F5B400;letter-spacing:1px}.cmt p{margin:4px 0;font-size:13px}.cmt small{font-size:11px;color:var(--ink-soft)}
 .field select{width:100%}
+.note-card{background:var(--yellow);color:#0E3A3B;border-radius:18px;padding:12px 14px;margin:0 0 12px}
+.note-card b{display:block;font-size:14px}.note-card small{font-size:12.5px;font-weight:700;opacity:.8}

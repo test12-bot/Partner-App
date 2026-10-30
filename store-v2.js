@@ -2,26 +2,31 @@
    Partner App — store-v2.js
    ميزات المتجر الشريك فوق الملف الأساسي (script.js):
    1) طلبات العملاء: قبول/رفض/جاهز + طباعة التذكرة
-   2) حالة المتجر: فتح/إغلاق، إيقاف مؤقت، أوقات الدوام الأسبوعية، وقت التحضير، الموقع
-   3) القائمة: الأقسام والأصناف، "نفد اليوم"، وقت تحضير الصنف، الخيارات والإضافات
-   4) العروض (يتحمّلها المتجر)
+   2) حالة المتجر: فتح/إغلاق، إيقاف مؤقت، أوقات الدوام الأسبوعية، وقت التحضير
+   3) القائمة: التوفر اليومي فقط (إطفاء الصنف، "نفد اليوم").
+      الأسماء والأسعار والخيارات والعروض والموقع والصور تديرها الإدارة من لوحتها
    5) التقارير: اليوم / ٧ أيام / الشهر + طباعة
    6) استدعاء كابتن: بوجهة أو بدون وجهة
    يعتمد على: hw-orders.js, hw-biz.js, hw-food.js, hw-map.js
    ========================================================= */
 const menusCol = HWDB.col('menus'), stateCol = HWDB.col('storestate');
 const EH = HWOrders.esc, MNY = HWOrders.money, $s = (id) => document.getElementById(id);
-let _menus = {}, _states = {}, editCat = null, editItem = null, editOpts = [], editOffer = null, repPeriod = 'day';
+let _menus = {}, _states = {}, repPeriod = 'day';
 
 function isStore() { return !!(currentUser && currentUser.start); }
 function myState() { return (currentUser && _states[currentUser.id]) || {}; }
 function refreshStoreUI() { const s = currentScreen_(); if (s === 'screen-menu') renderMenuAdmin(); if (s === 'screen-reports') renderReports(); renderStoreHome(); }
 menusCol.subscribe(l => { _menus = {}; l.forEach(m => { _menus[m.id] = m; }); refreshStoreUI(); });
 stateCol.subscribe(l => { _states = {}; l.forEach(m => { _states[m.id] = m; }); refreshStoreUI(); });
-HWBiz.offers.subscribe(refreshStoreUI);
 HWBiz.announcementsCol.subscribe(renderStoreHome);
 /* حساب المتجر: إن أوقفته الإدارة يخرج المستخدم فورًا */
-HWDB.col('accounts').subscribe(() => { if (isStore() && acctOf(currentUser).active === false) { HWOrders.toast('تم إيقاف حساب المتجر من الإدارة'); setTimeout(logout, 1500); } });
+HWBiz.storesCol.subscribe((l) => {
+    if (!isStore() || !l.length) return;
+    const s = l.filter(x => x.id === currentUser.id)[0];
+    if (!s || s.active === false) { HWOrders.toast('تم إيقاف حساب المتجر من الإدارة'); setTimeout(logout, 1500); return; }
+    if (s.name !== currentUser.label || s.pdfV !== currentUser.pdfV) { Object.assign(currentUser, { label: s.name, pdfV: s.pdfV }); fillUserUI(currentUser); }
+});
+HWBiz.onMedia((id) => { if (isStore() && id === currentUser.id) fillUserUI(currentUser); });
 function openMenuSheet(html) { $s('menuSheetBody').innerHTML = html; $s('menuSheet').classList.add('show'); }
 function closeMenuSheet() { $s('menuSheet').classList.remove('show'); }
 function sheetHead(small, title) { return '<div class="sh-head"><div><small>' + small + '</small><h3>' + title + '</h3></div></div>'; }
@@ -113,22 +118,14 @@ function renderMenuAdmin() {
     box.innerHTML = statusCard() +
         '<div class="cart-card">' +
         '<div class="mrow"><div><b>وقت التحضير المعتاد</b><small class="mut">يظهر للعميل قبل الطلب</small></div><select id="prepSel" onchange="setPrep(this.value)">' + [10, 15, 20, 30, 45].map(n => '<option value="' + n + '"' + ((st.prepMin || 20) === n ? ' selected' : '') + '>' + n + ' د</option>').join('') + '</select></div>' +
-        '<div class="mrow"><div><b>أوقات الدوام</b><small class="mut">' + EH(hoursSummary(st.hours)) + '</small></div><button type="button" class="ghost-btn" onclick="openHours()">تعديل</button></div>' +
-        '<div class="mrow"><div><b>موقع المتجر على الخريطة</b><small class="mut">' + (st.lat != null ? 'تم تحديده ✓ (يُحسب عليه سعر التوصيل)' : 'غير محدد: يُحسب التوصيل من مركز المدينة') + '</small></div><button type="button" class="ghost-btn" onclick="openStoreLoc()">' + (st.lat != null ? 'تعديل' : 'تحديد') + '</button></div></div>' +
-        offersCard() +
-        (m.demo ? '<div class="demo-banner">هذه قائمة تجريبية بأسعار وهمية، عدّلها أو احذفها</div>' : '') +
-        m.cats.map((c, ci) => '<div class="cart-card"><div class="mrow"><b>' + EH(c.name) + '</b><button type="button" class="more-link inl" onclick="openCatSheet(' + ci + ')">تعديل</button></div>' +
+        '<div class="mrow"><div><b>أوقات الدوام</b><small class="mut">' + EH(hoursSummary(st.hours)) + '</small></div><button type="button" class="ghost-btn" onclick="openHours()">تعديل</button></div></div>' +
+        '<div class="note-card"><b>التوفر اليومي</b><small>أطفئ الصنف إذا نفد أو توقف. لإضافة أصناف أو تغيير الأسعار والعروض تواصل مع HIGHWAY.</small></div>' +
+        (m.cats.length ? m.cats.map((c, ci) => '<div class="cart-card"><div class="mrow"><b>' + EH(c.name) + '</b></div>' +
             c.items.map((it, ii) => {
                 const out = it.outUntil && it.outUntil > now, on = HWBiz.itemOn(it, now);
-                const tags = [MNY(it.price) + ' د.أ'];
-                if ((it.options || []).length) tags.push(it.options.length + ' خيارات');
-                if (it.prepMin) tags.push(it.prepMin + ' د تحضير');
-                if (out) tags.push('نفد حتى الغد'); else if (it.on === false) tags.push('موقوف');
-                return '<div class="mrow it' + (on ? '' : ' off') + '"><span class="em">' + HWFood.forItem(it.name, it.desc, c.name, '') + '</span><div class="mt"><b>' + EH(it.name) + '</b><small class="mut">' + tags.join(' · ') + '</small></div>' +
-                    '<button type="button" class="sw sm' + (on ? ' on' : '') + '" onclick="toggleItem(' + ci + ',' + ii + ')" aria-label="التوفر"></button><button type="button" class="more-link inl" onclick="openItemEdit(' + ci + ',' + ii + ')">تعديل</button></div>';
-            }).join('') +
-            '<button type="button" class="more-link" onclick="openItemEdit(' + ci + ',-1)">+ إضافة صنف</button></div>').join('') +
-        '<button type="button" class="ghost-btn wide" onclick="openCatSheet(-1)">+ إضافة قسم جديد</button>';
+                return '<div class="mrow it' + (on ? '' : ' off') + '"><span class="em">' + HWFood.forItem(it.name, it.desc, c.name, '') + '</span><div class="mt"><b>' + EH(it.name) + '</b><small class="mut">' + MNY(it.price) + ' د.أ' + (out ? ' · نفد حتى الغد' : it.on === false ? ' · موقوف' : '') + '</small></div>' +
+                    '<button type="button" class="sw sm' + (on ? ' on' : '') + '" onclick="toggleItem(' + ci + ',' + ii + ')" aria-label="التوفر"></button></div>';
+            }).join('') + '</div>').join('') : '<div class="empty-orders">لم تُضف الإدارة منيو متجرك بعد</div>');
 }
 function toggleItem(ci, ii) {
     const m = myMenu(), it = m.cats[ci].items[ii];
@@ -142,115 +139,6 @@ function setItemOff(ci, ii, today) {
     if (today) { it.outUntil = HWBiz.nextMorning(6); it.on = true; } else { it.on = false; it.outUntil = 0; }
     saveMenu(m); closeMenuSheet(); buzz(12);
 }
-function openCatSheet(ci) {
-    editCat = ci; const c = ci >= 0 ? myMenu().cats[ci] : { name: '' };
-    openMenuSheet(sheetHead('القائمة', ci >= 0 ? 'تعديل القسم' : 'قسم جديد') + '<div class="field"><label for="catName">اسم القسم</label><input type="text" id="catName" value="' + EH(c.name) + '" placeholder="مثال: مشروبات"></div>' +
-        '<div class="sh-actions">' + (ci >= 0 ? '<button type="button" class="ghost-btn dng" onclick="delCat()">حذف</button>' : '') + '<button type="button" class="submit-btn" style="flex:1" onclick="saveCat()"><span class="btn-label">حفظ</span></button></div>');
-}
-function saveCat() {
-    const n = $s('catName').value.trim(); if (!n) return;
-    const m = myMenu(); if (editCat >= 0) m.cats[editCat].name = n; else m.cats.push({ id: 'c' + Date.now().toString(36), name: n, items: [] });
-    saveMenu(m); closeMenuSheet();
-}
-function delCat() { if (!confirm('حذف القسم وكل أصنافه؟')) return; const m = myMenu(); m.cats.splice(editCat, 1); saveMenu(m); closeMenuSheet(); }
-
-function openItemEdit(ci, ii) {
-    editItem = [ci, ii]; const m = myMenu(), it = ii >= 0 ? m.cats[ci].items[ii] : { name: '', desc: '', price: '' };
-    editOpts = JSON.parse(JSON.stringify(it.options || []));
-    openMenuSheet(sheetHead(EH(m.cats[ci].name), ii >= 0 ? 'تعديل الصنف' : 'صنف جديد') +
-        '<div class="field"><label for="itName">الاسم</label><input type="text" id="itName" value="' + EH(it.name) + '"></div>' +
-        '<div class="field"><label for="itDesc">الوصف <span class="opt">(اختياري)</span></label><input type="text" id="itDesc" value="' + EH(it.desc || '') + '"></div>' +
-        '<div class="two"><div class="field"><label for="itPrice">السعر (د.أ)</label><input type="number" id="itPrice" step="0.05" min="0" inputmode="decimal" value="' + EH(it.price) + '"></div>' +
-        '<div class="field"><label for="itPrep">وقت التحضير</label><select id="itPrep"><option value="0">المعتاد للمتجر</option>' + [10, 15, 20, 25, 30, 40, 45, 60].map(n => '<option value="' + n + '"' + (it.prepMin === n ? ' selected' : '') + '>' + n + ' دقيقة</option>').join('') + '</select></div></div>' +
-        '<div class="opt-ed"><div class="mrow"><div><b>الخيارات والإضافات</b><small class="mut">مثل الحجم، الإضافات، اجعلها وجبة</small></div><button type="button" class="ghost-btn" onclick="addGroup()">+ مجموعة</button></div><div id="optsEd"></div></div>' +
-        '<p class="mut">الرسمة تُختار تلقائيًا من اسم الصنف</p>' +
-        '<div class="sh-actions">' + (ii >= 0 ? '<button type="button" class="ghost-btn dng" onclick="delItem()">حذف</button>' : '') + '<button type="button" class="submit-btn" style="flex:1" onclick="saveItem()"><span class="btn-label">حفظ</span></button></div>');
-    renderOptsEd();
-}
-/* محرر الخيارات: يعمل على نسخة (editOpts) ولا يُحفظ إلا عند "حفظ" */
-function renderOptsEd() {
-    $s('optsEd').innerHTML = editOpts.map((g, gi) =>
-        '<div class="og-ed" data-g="' + gi + '"><div class="og-row"><input data-f="name" value="' + EH(g.name) + '" placeholder="اسم المجموعة (مثال: الحجم)">' +
-        '<button type="button" class="og-x" onclick="delGroup(' + gi + ')" aria-label="حذف المجموعة">×</button></div>' +
-        '<div class="og-row sm"><label><input type="checkbox" data-f="req"' + (g.min >= 1 ? ' checked' : '') + '> اختيار مطلوب</label><label>الحد الأقصى <input type="number" data-f="max" min="1" max="10" value="' + (g.max || 1) + '"></label></div>' +
-        g.choices.map((c, ci) => '<div class="og-row ch" data-c="' + ci + '"><input data-f="cname" value="' + EH(c.name) + '" placeholder="الخيار"><input data-f="cprice" type="number" step="0.05" min="0" value="' + (c.price || 0) + '" aria-label="السعر الإضافي"><button type="button" class="og-x" onclick="delChoice(' + gi + ',' + ci + ')" aria-label="حذف الخيار">×</button></div>').join('') +
-        '<button type="button" class="more-link" onclick="addChoice(' + gi + ')">+ خيار</button></div>').join('') || '<p class="mut" style="margin:6px 0 0">لا توجد خيارات لهذا الصنف</p>';
-}
-function readOptsEd() {                               // ينقل ما كُتب في الحقول إلى editOpts
-    document.querySelectorAll('.og-ed').forEach(el => {
-        const g = editOpts[+el.dataset.g]; if (!g) return;
-        g.name = el.querySelector('[data-f="name"]').value.trim();
-        g.min = el.querySelector('[data-f="req"]').checked ? 1 : 0;
-        g.max = Math.max(1, Math.min(10, parseInt(el.querySelector('[data-f="max"]').value, 10) || 1));
-        el.querySelectorAll('.ch').forEach(r => { const c = g.choices[+r.dataset.c]; c.name = r.querySelector('[data-f="cname"]').value.trim(); c.price = Math.max(0, Math.round((parseFloat(r.querySelector('[data-f="cprice"]').value) || 0) * 100) / 100); });
-    });
-}
-function addGroup() { readOptsEd(); editOpts.push({ id: 'g' + Date.now().toString(36), name: '', min: 0, max: 1, choices: [{ id: 'o' + Date.now().toString(36), name: '', price: 0 }] }); renderOptsEd(); }
-function delGroup(gi) { readOptsEd(); editOpts.splice(gi, 1); renderOptsEd(); }
-function addChoice(gi) { readOptsEd(); editOpts[gi].choices.push({ id: 'o' + Date.now().toString(36) + editOpts[gi].choices.length, name: '', price: 0 }); renderOptsEd(); }
-function delChoice(gi, ci) { readOptsEd(); editOpts[gi].choices.splice(ci, 1); renderOptsEd(); }
-function saveItem() {
-    const n = $s('itName').value.trim(), p = parseFloat($s('itPrice').value);
-    if (!n || !(p >= 0)) { HWOrders.toast('أدخل الاسم والسعر'); return; }
-    readOptsEd();
-    const opts = editOpts.map(g => Object.assign(g, { choices: g.choices.filter(c => c.name) })).filter(g => g.name && g.choices.length);
-    if (opts.some(g => g.min > g.choices.length)) { HWOrders.toast('عدد الخيارات أقل من المطلوب'); return; }
-    const m = myMenu(), [ci, ii] = editItem, old = ii >= 0 ? m.cats[ci].items[ii] : {};
-    const rec = { id: old.id || 'i' + Date.now().toString(36), name: n, desc: $s('itDesc').value.trim(), price: Math.round(p * 100) / 100, on: old.on !== false, outUntil: old.outUntil || 0, prepMin: +$s('itPrep').value || 0 };
-    if (opts.length) rec.options = opts;
-    if (ii >= 0) m.cats[ci].items[ii] = rec; else m.cats[ci].items.push(rec);
-    saveMenu(m); closeMenuSheet(); HWOrders.toast('تم حفظ الصنف');
-}
-function delItem() { if (!confirm('حذف هذا الصنف؟')) return; const m = myMenu(); m.cats[editItem[0]].items.splice(editItem[1], 1); saveMenu(m); closeMenuSheet(); }
-
-/* ---------- موقع المتجر ---------- */
-let slMap = null, slPick = null, slTimer = null;
-function openStoreLoc() {
-    const st = myState(), c = st.lat != null ? [st.lat, st.lng] : HWMap.center();
-    $s('slFull').classList.add('show');
-    if (!slMap) { slMap = HWMap.create($s('slMap'), { center: c, zoom: 17 }); slMap.on('movestart', () => $s('slPin').classList.add('drag')); slMap.on('moveend', () => { $s('slPin').classList.remove('drag'); slAddr(); }); }
-    setTimeout(() => { slMap.invalidateSize(); slMap.setView(c, 17, { animate: false }); slAddr(); if (st.lat == null) storeGps(true); }, 80);
-}
-function closeStoreLoc() { $s('slFull').classList.remove('show'); }
-function slAddr() {
-    const c = slMap.getCenter(); slPick = { lat: c.lat, lng: c.lng }; const el = $s('slAddr'); el.textContent = 'جاري تحديد العنوان…';
-    clearTimeout(slTimer); const mine = slPick; slTimer = setTimeout(async () => { const t = await HWMap.reverse([c.lat, c.lng]); if (mine === slPick) el.textContent = t || 'الموقع المحدد على الخريطة'; }, 500);
-}
-function storeGps(silent) { if (!navigator.geolocation) return; navigator.geolocation.getCurrentPosition(p => slMap.setView([p.coords.latitude, p.coords.longitude], 18), () => { if (!silent) HWOrders.toast('تعذر تحديد موقعك'); }, { enableHighAccuracy: true, timeout: 9000 }); }
-function saveStoreLoc() { if (!slPick) return; stateCol.patch(currentUser.id, { lat: +slPick.lat.toFixed(6), lng: +slPick.lng.toFixed(6) }, true); closeStoreLoc(); buzz(15); HWOrders.toast('تم حفظ موقع المتجر'); }
-
-/* =========================================================
-   4) العروض
-   ========================================================= */
-function offersCard() {
-    const l = HWBiz.offers.list().filter(o => o.storeId === currentUser.id);
-    return '<div class="cart-card"><div class="mrow"><div><b>العروض</b><small class="mut">تظهر للعملاء في بطاقة "عروض اليوم"</small></div><button type="button" class="ghost-btn" onclick="openOfferEdit(null)">+ عرض</button></div>' +
-        l.map(o => { const on = HWBiz.live(o); return '<div class="mrow it' + (on ? '' : ' off') + '"><span class="em of-ic">%</span><div class="mt"><b>' + EH(o.title) + (o.demo ? ' <span class="mut" style="display:inline">(تجريبي)</span>' : '') + '</b><small class="mut">' + (o.percent ? 'خصم ' + o.percent + '٪' + (o.minOrder ? ' فوق ' + MNY(o.minOrder) + ' د.أ' : '') : 'إعلان بدون خصم') + (o.endsAt ? ' · حتى ' + new Date(o.endsAt).toLocaleDateString('ar-JO') : '') + '</small></div>' +
-            '<button type="button" class="sw sm' + (o.active !== false ? ' on' : '') + '" onclick="toggleOffer(\'' + o.id + '\')" aria-label="تفعيل العرض"></button><button type="button" class="more-link inl" onclick="openOfferEdit(\'' + o.id + '\')">تعديل</button></div>'; }).join('') + '</div>';
-}
-function toggleOffer(id) { const o = HWBiz.offers.get(id); if (o) HWBiz.offers.patch(id, { active: o.active === false }); buzz(); }
-function openOfferEdit(id) {
-    editOffer = id; const o = id ? HWBiz.offers.get(id) : { title: '', sub: '', percent: 10, minOrder: 0, endsAt: 0 };
-    const end = o.endsAt ? new Date(o.endsAt).toISOString().slice(0, 10) : '';
-    openMenuSheet(sheetHead('العروض', id ? 'تعديل العرض' : 'عرض جديد') +
-        '<div class="field"><label for="ofTitle">عنوان العرض</label><input type="text" id="ofTitle" value="' + EH(o.title) + '" placeholder="مثال: خصم 20% على كل الوجبات"></div>' +
-        '<div class="field"><label for="ofSub">تفاصيل قصيرة <span class="opt">(اختياري)</span></label><input type="text" id="ofSub" value="' + EH(o.sub || '') + '" placeholder="مثال: لفترة محدودة"></div>' +
-        '<div class="two"><div class="field"><label for="ofPct">نسبة الخصم ٪</label><input type="number" id="ofPct" min="0" max="50" value="' + (o.percent || 0) + '"></div>' +
-        '<div class="field"><label for="ofMin">الحد الأدنى للطلب</label><input type="number" id="ofMin" min="0" step="0.5" value="' + (o.minOrder || 0) + '"></div></div>' +
-        '<div class="field"><label for="ofEnd">ينتهي في <span class="opt">(اختياري)</span></label><input type="date" id="ofEnd" value="' + end + '"></div>' +
-        '<p class="mut" style="margin:0 0 12px">الخصم يُطبَّق تلقائيًا على قيمة المنتجات في سلة العميل، وتستلم من الكابتن المبلغ بعد الخصم. ضع 0 لإعلان بدون خصم.</p>' +
-        '<div class="sh-actions">' + (id ? '<button type="button" class="ghost-btn dng" onclick="deleteOffer()">حذف</button>' : '') + '<button type="button" class="submit-btn" style="flex:1" onclick="saveOffer()"><span class="btn-label">حفظ العرض</span></button></div>');
-}
-function saveOffer() {
-    const title = $s('ofTitle').value.trim(), pct = Math.max(0, Math.min(50, parseFloat($s('ofPct').value) || 0));
-    if (!title) { HWOrders.toast('اكتب عنوان العرض'); return; }
-    const endV = $s('ofEnd').value;
-    const rec = { storeId: currentUser.id, title, sub: $s('ofSub').value.trim(), percent: pct, minOrder: Math.max(0, parseFloat($s('ofMin').value) || 0), endsAt: endV ? new Date(endV + 'T23:59:59').getTime() : 0, demo: false };
-    if (editOffer) HWBiz.offers.patch(editOffer, rec); else HWBiz.offers.create(Object.assign({ active: true }, rec));
-    closeMenuSheet(); buzz(15); HWOrders.toast('تم حفظ العرض');
-}
-function deleteOffer() { if (confirm('حذف هذا العرض؟')) { HWBiz.offers.remove(editOffer); closeMenuSheet(); } }
-
 /* =========================================================
    5) الرئيسية للمتجر + التقارير
    ========================================================= */
@@ -328,3 +216,6 @@ function openCallChoice() {
 }
 function callWithDest() { closeMenuSheet(); buzz(); tabGo('screen-prices'); }
 function callNoDest() { closeMenuSheet(); buzz(); openOrderModal('direct'); }
+
+/* الإشعارات الحقيقية: طلبات جديدة حتى والتطبيق مغلق */
+HWPush.init('store', () => (isStore() ? currentUser.id : ''), { open: (id) => { if (HWOrders.get(id)) openOrderSheet(id); } });

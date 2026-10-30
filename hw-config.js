@@ -5,8 +5,12 @@
                  https://اسم-مشروعك-default-rtdb.firebaseio.com
                  فتتزامن البيانات بين كل الأجهزة. */
 window.HW_CONFIG = {
-  dbUrl: "",
+  dbUrl: "https://highway-delivery-fd2b3-default-rtdb.firebaseio.com",
   pollMs: 3000,
+
+  /* الإشعارات الحقيقية (تعمل مع الوضع الحقيقي + خادم HIGHWAY-Server).
+     publicKey هو المفتاح العام لـ VAPID — المفتاح الخاص يبقى سرًّا في الخادم فقط */
+  push: { publicKey: "BIoQtkBzCV2-Gbzws0Tk9ZcP2u-eVpXZQTxMQiJgqLDByRQo50y9bWwIW5wgF0FkDXk-7qKlhhtocWfGkqt7yfo" },
 
   commissionRate: 0.10,   // عمولة الشركة من أجرة التوصيل (10%)
   rangePolicy: "max",     // أجرة نطاقها (2.00 - 2.50): "max" تُحتسب الأعلى، "min" تُحتسب الأدنى
