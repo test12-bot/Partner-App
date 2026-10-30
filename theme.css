@@ -202,3 +202,21 @@ body.bar-mini .tabbar{transform:scale(.86) translateY(2px)}
 
 /* ===== إطارات الصور بالليموني ===== */
 .lg-it img,.vc-logo,.v-logo,.co-logo,.sc-logo,.st-logo,.bn-store img,.mk-store img,.pf-avatar,.sr img{border:3px solid var(--yellow) !important;background:var(--white) !important}
+
+/* ===== التنبيهات ===== */
+.hw-sound-pill{position:fixed;top:calc(78px + env(safe-area-inset-top));inset-inline:0;margin-inline:auto;width:max-content;max-width:calc(100% - 32px);z-index:96;display:none;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 16px;background:var(--yellow);color:var(--ink);font:inherit;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 10px 24px -12px rgba(14,58,59,.45);animation:pillPulse 1.8s ease-in-out infinite}
+.hw-sound-pill.show{display:flex}.hw-sound-pill svg{width:18px;height:18px}
+@keyframes pillPulse{50%{transform:scale(1.04)}}
+.hw-sa-warn{position:fixed;inset-inline:12px;top:calc(78px + env(safe-area-inset-top));z-index:97;background:var(--ink);color:var(--cream);font-size:12.5px;font-weight:700;line-height:1.6;border-radius:16px;padding:12px 14px;text-align:center}
+
+/* ===== المظهر واللغة (hw-ui.js) ===== */
+.hw-prefs{padding:24px 18px calc(18px + env(safe-area-inset-bottom)) !important}
+.hw-prefs h3{margin:0 0 12px;font-size:18px;color:var(--ink)}
+.hw-prefs small{display:block;font-size:12px;font-weight:800;color:var(--ink-soft);margin:10px 0 6px}
+.hw-seg{display:flex;gap:6px;background:var(--cream);border-radius:16px;padding:5px;margin-bottom:6px}
+.hw-seg button{flex:1;border:0;background:transparent;border-radius:12px;padding:10px 6px;font:inherit;font-weight:800;font-size:13px;color:var(--ink);cursor:pointer}
+.hw-seg button.on{background:var(--teal);color:#0E3A3B}
+.hw-prefs .submit-btn{margin-top:14px}
+/* ===== الإنجليزية: قلب الأسهم مع اتجاه LTR ===== */
+html[dir="ltr"] .pf-chev,html[dir="ltr"] .hero-cta svg,html[dir="ltr"] .header-back svg,html[dir="ltr"] .ofr-cta svg,html[dir="ltr"] .sec-more svg{transform:scaleX(-1)}
+html[dir="ltr"] body{font-family:"Tajawal","Segoe UI",system-ui,sans-serif}

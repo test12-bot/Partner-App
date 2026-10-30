@@ -66,10 +66,14 @@ function sha256(str) {
     }
     function start() {
       if (started) return; started = true; load();
-      if (remote) {
-        setInterval(function () { if (!document.hidden) load(); }, CFG.pollMs || 3000);
-        document.addEventListener('visibilitychange', function () { if (!document.hidden) load(); });
-      } else g.addEventListener('storage', function (e) { if (e.key === key) load(); });
+      /* المزامنة: الوضع الحقيقي يستطلع قاعدة البيانات، والتجريبي يقرأ ذاكرة المتصفح.
+         iOS يجمّد التبويبات في الخلفية فتضيع أحداث storage، لذلك نعيد القراءة دوريًا
+         وفور عودة الصفحة للواجهة (visibilitychange / focus / pageshow). */
+      var refresh = function () { if (!document.hidden) load(); };
+      setInterval(refresh, remote ? (CFG.pollMs || 3000) : 1500);
+      document.addEventListener('visibilitychange', refresh);
+      g.addEventListener('focus', refresh); g.addEventListener('pageshow', refresh);
+      if (!remote) g.addEventListener('storage', function (e) { if (e.key === key) load(); });
     }
     function send(method, path, body) {
       return fetch(base + path, { method: method, headers: { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) }).catch(function () {});
@@ -135,6 +139,7 @@ function sha256(str) {
     if (o.status === 'cancelled') return 'ملغي';
     if (isMarket(o) && o.status === 'new') {
       if (o.storeState === 'pending') return 'بانتظار المتجر';
+      if (o.scheduledFor && Date.now() < dispatchAt(o)) return 'مجدول ' + fmtTime(o.scheduledFor);
       return 'يبحث عن كابتن';
     }
     return SHORT[o.status];
@@ -144,7 +149,8 @@ function sha256(str) {
   var origCreate = Orders.create;
   function createOrder(data) {
     var id = uid(), t = Date.now();
-    var o = Object.assign({ id: id, code: 'HW-' + id.slice(-4).toUpperCase(), status: 'new', createdAt: t, updatedAt: t, history: [{ s: 'new', t: t }] }, data);
+    var pin = String(1000 + Math.floor(Math.random() * 9000));   // رمز إثبات التسليم يعطيه العميل للكابتن
+    var o = Object.assign({ id: id, code: 'HW-' + id.slice(-4).toUpperCase(), status: 'new', pin: pin, createdAt: t, updatedAt: t, history: [{ s: 'new', t: t }] }, data);
     return origCreate(o);
   }
   /* ev = اسم حدث يُسجَّل في الخط الزمني (إن لم يكن تغيّر status) */
@@ -165,13 +171,20 @@ function sha256(str) {
     var a = m.map(parseFloat);
     return (CFG.rangePolicy === 'min' ? Math.min.apply(null, a) : Math.max.apply(null, a));
   }
-  function settle(o) {                                  // ما يحصّله الكابتن ويدفعه ويستحقه
+  /* التسوية المالية للطلب:
+     items      = ما يدفعه الكابتن للمتجر (بعد خصم عرض المتجر، فالمتجر يتحمّله)
+     promo      = خصم كود HIGHWAY (تتحمّله المنصة، فيُخصم من المستحق عليها)
+     collected  = ما يحصّله الكابتن من العميل = items + fee - promo
+     due        = صافي ما يسلّمه الكابتن للمنصة = العمولة - promo (سالب = المنصة تدفع للكابتن) */
+  function settle(o) {
     var fee = o.fee != null ? Number(o.fee) : feeFrom(o.price);
     var rate = CFG.commissionRate != null ? CFG.commissionRate : 0.10;
-    var commission = Math.round(fee * rate * 100) / 100;
+    var commission = r2(fee * rate), promo = Number(o.promoAmount) || 0;
     var items = isMarket(o) ? Number(o.itemsTotal) || 0 : 0;
-    return { fee: fee, commission: commission, net: Math.round((fee - commission) * 100) / 100, items: items, collected: isMarket(o) ? Math.round((items + fee) * 100) / 100 : 0 };
+    return { fee: fee, commission: commission, net: r2(fee - commission), items: items, promo: promo,
+      collected: isMarket(o) ? r2(items + fee - promo) : 0, due: r2(commission - promo) };
   }
+  function r2(x) { return Math.round(x * 100) / 100; }
   function isToday(ts) { var a = new Date(ts), b = new Date(); return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
   function stats(list) {
     var s = { today: 0, active: 0, fresh: 0, delivered: 0, cancelled: 0, fees: 0 };
@@ -197,8 +210,10 @@ function sha256(str) {
   function offerable(o) {
     if (o.status !== 'new' || o.captain) return false;
     if (isMarket(o) && o.storeState !== 'preparing' && o.storeState !== 'ready') return false;
+    if (o.scheduledFor && Date.now() < dispatchAt(o)) return false;   // طلب مجدول: يُعرض قبل موعده بوقت التحضير والطريق
     return true;
   }
+  function dispatchAt(o) { return o.scheduledFor ? o.scheduledFor - ((o.routeMin || 15) + 10) * 60000 : 0; }
   function claim(id, cap) {
     var capObj = { id: cap.id, name: cap.name, phone: cap.phone || '' };
     var o = Orders.get(id);
@@ -274,22 +289,12 @@ function sha256(str) {
     t.textContent = msg; t.classList.add('show');
     clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('show'); }, 3800);
   }
-  var actx = null;
-  function beep(times) {                                // تنبيه صوتي قصير (يحتاج تفاعل سابق من المستخدم)
-    try {
-      actx = actx || new (g.AudioContext || g.webkitAudioContext)();
-      for (var i = 0; i < (times || 2); i++) {
-        var o = actx.createOscillator(), gn = actx.createGain(), t0 = actx.currentTime + i * 0.28;
-        o.type = 'sine'; o.frequency.value = i % 2 ? 660 : 880; gn.gain.setValueAtTime(0.0001, t0); gn.gain.exponentialRampToValueAtTime(0.25, t0 + 0.02); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.24);
-        o.connect(gn); gn.connect(actx.destination); o.start(t0); o.stop(t0 + 0.26);
-      }
-      if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
-    } catch (e) {}
-  }
+  /* الصوت: يُدار من hw-notify.js (فك قفل الصوت في iOS، نغمات مختلفة، رنين متكرر) */
+  function beep() { if (g.HWNotify) g.HWNotify.play('order'); }
   function openNav(q) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q); }
 
   g.HWDB = { mode: remote ? 'remote' : 'local', col: Col, uid: uid, esc: esc, num: num, money: money, cfg: CFG };
   g.HWOrders = { mode: remote ? 'remote' : 'local', STEPS: STEPS, SHORT: SHORT, create: createOrder, update: updateOrder, subscribe: Orders.subscribe, get: Orders.get, list: Orders.list, _raw: Orders._raw,
-    stats: stats, isActive: isActive, isToday: isToday, isMarket: isMarket, stage: stage, steps: steps, label: label, offerable: offerable, claim: claim, settle: settle, feeFrom: feeFrom,
+    stats: stats, isActive: isActive, isToday: isToday, isMarket: isMarket, stage: stage, steps: steps, label: label, offerable: offerable, dispatchAt: dispatchAt, claim: claim, settle: settle, feeFrom: feeFrom,
     fmtTime: fmtTime, ago: ago, card: card, timeline: timeline, routeRows: routeRows, progress_: progress, captainRow: captainRow, esc: esc, num: num, money: money, toast: toast, beep: beep, openNav: openNav };
 })(window);

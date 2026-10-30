@@ -264,8 +264,11 @@ function findUserByName(name) {
 function readSession() {
     let id = null;
     try { id = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY); } catch (e) {}
-    return USERS.find(u => u.id === id) || null;
+    const u = USERS.find(x => x.id === id) || null;
+    return u && acctOf(u).active === false ? null : u;
 }
+/* الإدارة تستطيع تغيير كلمة مرور المتجر أو إيقاف حسابه (مجموعة accounts) */
+function acctOf(u) { return (window.HWDB && HWDB.col('accounts').get(u.id)) || {}; }
 function saveSession(user, remember) {
     try {
         localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY);
@@ -372,9 +375,10 @@ async function submitLogin(ev) {
 
     btn.classList.add('loading');
     await new Promise(r => setTimeout(r, 350));
-    const user = findUserByName(nameEl.value);
-    const ok = user && sha256(`HIGHWAY|${user.id}|${passEl.value}`) === user.hash;
+    const user = findUserByName(nameEl.value), acct = user ? acctOf(user) : {};
+    const ok = user && sha256(`HIGHWAY|${user.id}|${passEl.value}`) === (acct.hash || user.hash);
     btn.classList.remove('loading');
+    if (ok && acct.active === false) { err.textContent = 'الحساب موقوف، تواصل مع HIGHWAY'; passEl.value = ''; return; }
 
     if (!ok) {
         document.getElementById('loginUserField').classList.add('invalid');
@@ -750,10 +754,10 @@ function onOrders(list) {
     if (prevStatus) {
         mine.forEach(o => {
             const was = prevStatus[o.id];
-            if (was && was !== o.status && ST_MSG[o.status]) { HWOrders.toast(ST_MSG[o.status](o)); buzz(24); delete dismissedLive[o.id]; }
+            if (was && was !== o.status && ST_MSG[o.status]) { HWOrders.toast(ST_MSG[o.status](o)); HWNotify.play('status'); buzz(24); delete dismissedLive[o.id]; }
         });
     }
-    if (prevStatus) mine.forEach(o => { if (!(o.id in prevStatus) && HWOrders.isMarket(o) && o.storeState === 'pending' && currentUser && currentUser.start) { HWOrders.beep(3); HWOrders.toast('طلب جديد من عميل ' + o.code); buzz(60); } });
+    if (prevStatus) mine.forEach(o => { if (!(o.id in prevStatus) && HWOrders.isMarket(o) && o.storeState === 'pending' && currentUser && currentUser.start) { HWOrders.toast('طلب جديد ' + o.code + ' بانتظار قبولك'); HWNotify.notify('HIGHWAY · طلب جديد', o.code + ' بانتظار قبولك'); } });
     prevStatus = {}; mine.forEach(o => { prevStatus[o.id] = o.status; });
     renderOrdersUI();
 }
@@ -800,7 +804,9 @@ function renderLive(act) {
     bar.classList.toggle('show', show); document.body.classList.toggle('has-live', show);
     if (!o) return;
     bar.dataset.id = o.id;
-    document.getElementById('lvTitle').textContent = o.status === 'new' ? 'طلبك بانتظار كابتن' :
+    document.getElementById('lvTitle').textContent = HWOrders.isMarket(o) && o.storeState === 'pending' ? 'طلب جديد بانتظار قبولك' :
+        HWOrders.isMarket(o) && o.status === 'new' ? HWOrders.label(o) :
+        o.status === 'new' ? 'طلبك بانتظار كابتن' :
         o.status === 'accepted' ? 'الكابتن ' + ((o.captain && o.captain.name) || '') + ' في الطريق للمتجر' : 'طلبك في الطريق للتسليم';
     document.getElementById('lvSub').textContent = o.code + ' · ' + (o.to ? o.from + ' ← ' + o.to : o.from);
     const n = liveSteps(o);
@@ -821,14 +827,17 @@ function renderSheet(id) {
     if (o.price) rows.push(['رسوم التوصيل', o.price + ' دينار']);
     if (o.notes) rows.push(['ملاحظات', o.notes]);
     if (o.discount) rows.push(['خصم العرض', '−' + HWOrders.money(o.discount) + ' د.أ' + (o.offerTitle ? ' (' + o.offerTitle + ')' : '')]);
+    if (o.promoCode) rows.push(['كود خصم (على HIGHWAY)', o.promoCode + ' · −' + HWOrders.money(o.promoAmount) + ' د.أ']);
+    if (o.scheduledFor) rows.push(['موعد التوصيل', 'مجدول ' + HWOrders.fmtTime(o.scheduledFor)]);
+    if (o.rating) rows.push(['تقييم العميل', HWBiz.stars(o.rating.store) + (o.rating.comment ? ' · ' + o.rating.comment : '')]);
     const ph = o.captain && o.captain.phone ? String(o.captain.phone).replace(/[^\d+]/g, '') : '';
     body.innerHTML =
         '<div class="sh-head"><div><small>تفاصيل الطلب</small><h3>' + HWOrders.esc(o.code) + '</h3></div><span class="oc-chip" style="' + '' + '">' + HWOrders.SHORT[o.status] + '</span></div>' +
         '<div class="s-' + o.status + '">' + HWOrders.routeRows(o).replace('oc-route', 'oc-route') + '</div>' +
         HWOrders.timeline(o) + HWOrders.captainRow(o, true) +
         '<div class="sh-rows">' + rows.map(r => '<div><span>' + r[0] + '</span><b>' + HWOrders.esc(r[1]) + '</b></div>').join('') + '</div>' +
-        (HWOrders.isMarket(o) ? '<div class="sh-rows">' + o.items.map(l => '<div><span>' + l.qty + '× ' + HWOrders.esc(l.name) + (l.notes ? ' (' + HWOrders.esc(l.notes) + ')' : '') + '</span><b>' + HWOrders.money(l.price * l.qty) + '</b></div>').join('') + (o.customer ? '<div><span>العميل</span><b>' + HWOrders.esc(o.customer.name) + '</b></div>' : '') + '</div>' + (storeActions(o) ? '<div class="oc-actions" style="margin-top:10px">' + storeActions(o) + '</div>' : '') : '') +
-        '<div class="sh-actions">' + (o.status === 'new' && !HWOrders.isMarket(o) ? '<button type="button" class="ghost-btn dng" onclick="cancelOrder(\'' + o.id + '\')">إلغاء الطلب</button>' : '') +
+        (HWOrders.isMarket(o) ? '<div class="sh-rows">' + itemLines(o) + (o.customer ? '<div><span>العميل</span><b>' + HWOrders.esc(o.customer.name) + '</b></div>' : '') + '</div>' + (storeActions(o) ? '<div class="oc-actions" style="margin-top:10px">' + storeActions(o) + '</div>' : '') : '') +
+        '<div class="sh-actions">' + (HWOrders.isMarket(o) && currentUser.start ? '<button type="button" class="ghost-btn" onclick="printTicket(\'' + o.id + '\')">طباعة التذكرة</button>' : '') + (o.status === 'new' && !HWOrders.isMarket(o) ? '<button type="button" class="ghost-btn dng" onclick="cancelOrder(\'' + o.id + '\')">إلغاء الطلب</button>' : '') +
         '<button type="button" class="ghost-btn" style="flex:1" onclick="closeOrderSheet()">إغلاق</button></div>';
     body.className = 'modal-card glass s-' + o.status;
 }
@@ -850,4 +859,12 @@ document.addEventListener('DOMContentLoaded', () => {
     HWOrders.subscribe(onOrders);
     const _show = window.showScreen;
     window.showScreen = function (id) { _show(id); renderOrdersUI(); };
+});
+
+/* ---------- تنبيه الطلبات الجديدة: رنين متكرر حتى يقبل المتجر أو يرفض (مثل أجهزة المطاعم) ---------- */
+window.HWNotifyAskPerm = true;
+HWOrders.subscribe(list => {
+    const pend = currentUser && currentUser.start ? list.filter(o => o.storeId === currentUser.id && HWOrders.isMarket(o) && o.status === 'new' && o.storeState === 'pending') : [];
+    if (pend.length) HWNotify.ring('store-new', 'order', 4000); else HWNotify.stop('store-new');
+    HWNotify.keepAwake(!!(currentUser && currentUser.start));
 });
