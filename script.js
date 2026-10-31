@@ -251,7 +251,21 @@ function fillUserUI(u) {
     pdf.style.display = has ? '' : 'none';
     pdf.href = u.pdf || '#';
     pdf.onclick = has ? (e) => { e.preventDefault(); HWBiz.openPdf(u.id); } : null;
+    fillStoreInfo(u);
 }
+/* رقم المتجر وموقعه: للعرض فقط، تعدّلهما الإدارة من لوحة التحكم */
+function fillStoreInfo(u) {
+    u = u || currentUser; if (!u) return;
+    const d = HWBiz.storeById(u.id) || {}, st = HWDB.col('storestate').get(u.id) || {}, has = st.lat != null;
+    const ph = document.getElementById('pfPhone'); if (!ph) return;
+    ph.textContent = d.phone || '—';
+    const a = document.getElementById('pfLoc');
+    document.getElementById('pfLocV').textContent = has ? ((d.addr || 'محدد') + ' · فتح') : (d.addr || 'غير محدد');
+    a.href = has ? 'https://www.google.com/maps/search/?api=1&query=' + st.lat + ',' + st.lng : '#';
+    a.onclick = has ? null : (e) => e.preventDefault();
+    a.classList.toggle('pf-link', has);
+}
+HWBiz.storesCol.subscribe(() => fillStoreInfo()); HWDB.col('storestate').subscribe(() => fillStoreInfo());
 
 function closeUserMenu() {
     const m = document.getElementById('userMenu'), b = document.getElementById('avatarBtn');
@@ -565,8 +579,10 @@ function submitOrder() {
 
     const isArea = pendingOrderData.type === 'area', isCalc = pendingOrderData.type === 'calc';
     const myName = (currentUser && currentUser.label) || 'HIGHWAY Delivery';
+    const myState = currentUser ? HWDB.col('storestate').get(currentUser.id) || {} : {}, myDoc = currentUser ? HWBiz.storeById(currentUser.id) || {} : {};
     HWOrders.create({
         source: 'store', storeId: currentUser ? currentUser.id : 'guest', storeName: myName, kind: pendingOrderData.type,
+        storeLoc: myState.lat != null ? { lat: myState.lat, lng: myState.lng } : null, storePhone: myDoc.phone || '',
         from: isArea ? pendingOrderData.startPoint : myName,
         to: isArea ? pendingOrderData.area : isCalc ? 'حسب المسافة (' + calcState.dist + ' كم)' : '',
         price: isArea ? pendingOrderData.price : isCalc ? calcState.total : '',

@@ -3,6 +3,7 @@
    1) تصغير الشريط السفلي أثناء التمرير (مثل إنستغرام)
    2) المظهر: فاتح / داكن / حسب الجهاز (يُحفظ في hw-theme)
    3) صف "المظهر واللغة" يُضاف تلقائيًا لصفحة "حسابي" في كل تطبيق
+   4) سحب النوافذ السفلية للأسفل لإغلاقها (مثل iPhone)
    ========================================================= */
 (function () {
   var timer = null, last = window.scrollY;
@@ -62,4 +63,39 @@
     list.appendChild(row); fill();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject); else inject();
+})();
+
+/* ---------- سحب النافذة السفلية للأسفل لإغلاقها ----------
+   يبدأ السحب من أعلى النافذة (منطقة المقبض) أو من أي مكان إن كان محتواها في الأعلى.
+   الإغلاق = نفس الضغط على الخلفية، فتعمل دالة الإغلاق الخاصة بكل نافذة */
+(function () {
+  var card = null, modal = null, y0 = 0, t0 = 0, dy = 0, mode = '', fromTop = false;
+  function reset(c) { c.style.transition = ''; c.style.transform = ''; }
+  document.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) return;
+    var c = e.target.closest && e.target.closest('.modal.show > .modal-card');
+    if (!c || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.closest('.leaflet-container,[data-no-swipe]')) return;
+    var r = c.getBoundingClientRect(); y0 = e.touches[0].clientY; t0 = Date.now(); dy = 0;
+    fromTop = y0 - r.top < 56; if (!fromTop && c.scrollTop > 0) return;
+    card = c; modal = c.parentElement; mode = '';
+  }, { passive: true });
+  document.addEventListener('touchmove', function (e) {
+    if (!card) return;
+    dy = e.touches[0].clientY - y0;
+    if (!mode) { if (Math.abs(dy) < 6) return; mode = dy > 0 && (fromTop || card.scrollTop <= 0) ? 'drag' : 'scroll'; }
+    if (mode !== 'drag') { card = null; return; }
+    if (e.cancelable) e.preventDefault();
+    card.style.transition = 'none'; card.style.transform = 'translateY(' + Math.max(0, dy) + 'px)';
+  }, { passive: false });
+  function end() {
+    if (!card) return; var c = card, m = modal; card = null;
+    if (mode !== 'drag') return;
+    var v = dy / Math.max(1, Date.now() - t0);
+    c.style.transition = 'transform .22s ease-out';
+    if (dy > 110 || (dy > 40 && v > .55)) {
+      c.style.transform = 'translateY(105%)';
+      setTimeout(function () { m.dispatchEvent(new MouseEvent('click', { bubbles: true })); setTimeout(function () { reset(c); }, 60); }, 200);
+    } else { c.style.transform = 'translateY(0)'; setTimeout(function () { reset(c); }, 230); }
+  }
+  document.addEventListener('touchend', end); document.addEventListener('touchcancel', end);
 })();
