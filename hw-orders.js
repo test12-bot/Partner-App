@@ -65,14 +65,16 @@ function sha256(str) {
   }
   /* عقدة /pulse: اتصال بث واحد يخبر كل المجموعات متى تغيّرت */
   var pulse = (function () {
-    var es = null, seen = {}, fns = {};
+    var es = null, seen = {}, fns = {}, primed = false;
     function ok() {
       if (!remote || !g.EventSource) return false;
       if (es && es.readyState !== 2) return true;
       try { es = new EventSource(base + '/pulse.json'); } catch (e) { return false; }
-      var fire = function (k, v) { if (seen[k] === v) return; var first = !(k in seen); seen[k] = v; if (!first) (fns[k] || []).forEach(function (f) { f(); }); };
+      /* أول لقطة كاملة تُسجَّل فقط (المجموعات تُحمَّل بنفسها). بعدها أي تغيير يُطلق إعادة التحميل،
+         بما فيها مفتاح جديد لم يكن موجودًا (مثل أول تغيير للإعدادات في قاعدة جديدة) */
+      var fire = function (k, v, quiet) { if (seen[k] === v) return; seen[k] = v; if (!quiet) (fns[k] || []).forEach(function (f) { f(); }); };
       es.addEventListener('put', function (e) { try { var d = JSON.parse(e.data), ks = d.path.split('/').filter(Boolean);
-        if (!ks.length) Object.keys(d.data || {}).forEach(function (k) { fire(k, d.data[k]); }); else fire(ks[0], d.data); } catch (x) {} });
+        if (!ks.length) { var q = !primed; primed = true; Object.keys(d.data || {}).forEach(function (k) { fire(k, d.data[k], q); }); } else fire(ks[0], d.data); } catch (x) {} });
       es.addEventListener('patch', function (e) { try { var d = JSON.parse(e.data); Object.keys(d.data || {}).forEach(function (k) { fire(k, d.data[k]); }); } catch (x) {} });
       return true;
     }
