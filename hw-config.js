@@ -10,7 +10,8 @@ window.HW_CONFIG = {
 
   /* الإشعارات الحقيقية (تعمل مع الوضع الحقيقي + خادم HIGHWAY-Server).
      publicKey هو المفتاح العام لـ VAPID — المفتاح الخاص يبقى سرًّا في الخادم فقط */
-  push: { publicKey: "BIoQtkBzCV2-Gbzws0Tk9ZcP2u-eVpXZQTxMQiJgqLDByRQo50y9bWwIW5wgF0FkDXk-7qKlhhtocWfGkqt7yfo" },
+  push: { server: false,   // اجعلها true بعد تشغيل خادم HIGHWAY-Server
+          publicKey: "BIoQtkBzCV2-Gbzws0Tk9ZcP2u-eVpXZQTxMQiJgqLDByRQo50y9bWwIW5wgF0FkDXk-7qKlhhtocWfGkqt7yfo" },
 
   commissionRate: 0.10,   // عمولة الشركة من أجرة التوصيل (10%)
   rangePolicy: "max",     // أجرة نطاقها (2.00 - 2.50): "max" تُحتسب الأعلى، "min" تُحتسب الأدنى

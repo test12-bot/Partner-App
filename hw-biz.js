@@ -176,6 +176,31 @@
   function priceList(start, region, fallback) { var d = priceCol.get(start); return d && d[region] ? d[region] : (fallback || []); }
   storesCol.subscribe(syncMedia);
 
+  /* ---------- صور الأصناف: itemimg/<متجر>__<صنف> = { data } ، والصنف يحمل img = رقم النسخة ---------- */
+  var iimg = {}, iwait = {};
+  function itemImg(sid, it) {
+    if (!it || !it.img) return '';
+    var k = sid + '__' + it.id, c = iimg[k];
+    if (!c) { try { c = iimg[k] = JSON.parse(localStorage.getItem('hw-ii-' + k)) || null; } catch (e) { c = null; } }
+    if (c && c.v === it.img) return c.data;
+    if (iwait[k] !== it.img) {
+      iwait[k] = it.img;
+      getDoc('itemimg', k).then(function (d) {
+        if (!d || !d.data) return; iimg[k] = { v: it.img, data: d.data };
+        try { localStorage.setItem('hw-ii-' + k, JSON.stringify(iimg[k])); } catch (e) {}
+        mediaSubs.forEach(function (f) { try { f(sid); } catch (e) {} });
+      });
+    }
+    return c ? c.data : '';                              // نسخة أقدم إلى أن تصل الجديدة
+  }
+  function saveItemImg(sid, iid, data) {
+    var k = sid + '__' + iid, v = Date.now();
+    return putDoc('itemimg', k, data ? { data: data } : null).then(function () {
+      iimg[k] = data ? { v: v, data: data } : null; try { if (data) localStorage.setItem('hw-ii-' + k, JSON.stringify(iimg[k])); else localStorage.removeItem('hw-ii-' + k); } catch (e) {}
+      return data ? v : 0;
+    });
+  }
+
   /* ---------- الطباعة: تذكرة الطلب (80 مم) والتقارير (A4) بهوية HIGHWAY ---------- */
   var PRINT_CSS = '*{box-sizing:border-box}body{margin:0;font-family:"Tajawal","Segoe UI",Tahoma,sans-serif;color:#0E3A3B;direction:rtl}' +
     '.hd{background:#25CED1;color:#0E3A3B;padding:18px 22px;border-radius:0 0 18px 18px;display:flex;justify-content:space-between;align-items:center}' +
@@ -215,6 +240,6 @@
     announcements: announcements, todayTargets: todayTargets, dayKey: dayKey, cover: cover, r2: r2,
     printHtml: printHtml, reportHead: reportHead, periodStart: periodStart, optsText: optsText,
     storesCol: storesCol, priceCol: priceCol, storeList: storeList, storeById: storeById, logo: logo, onMedia: onMedia, saveMedia: saveMedia,
-    savePdf: savePdf, openPdf: openPdf, hasPdf: hasPdf, priceList: priceList
+    savePdf: savePdf, openPdf: openPdf, hasPdf: hasPdf, priceList: priceList, itemImg: itemImg, saveItemImg: saveItemImg
   };
 })(window);

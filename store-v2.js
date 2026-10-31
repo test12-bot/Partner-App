@@ -3,20 +3,19 @@
    ميزات المتجر الشريك فوق الملف الأساسي (script.js):
    1) طلبات العملاء: قبول/رفض/جاهز + طباعة التذكرة
    2) حالة المتجر: فتح/إغلاق، إيقاف مؤقت، أوقات الدوام الأسبوعية، وقت التحضير
-   3) القائمة: التوفر اليومي فقط (إطفاء الصنف، "نفد اليوم").
-      الأسماء والأسعار والخيارات والعروض والموقع والصور تديرها الإدارة من لوحتها
-   5) التقارير: اليوم / ٧ أيام / الشهر + طباعة
-   6) استدعاء كابتن: بوجهة أو بدون وجهة
+   3) المنيو كاملًا عبر المحرر المشترك hw-menued.js (مثل طلبات: المطعم يدير منيوه وصوره وأسعاره)
+      الشعار والغلاف والموقع والعروض وحساب الدخول تديرها الإدارة من لوحتها
+   4) التقارير: اليوم / ٧ أيام / الشهر + طباعة
+   5) استدعاء كابتن: بوجهة أو بدون وجهة
    يعتمد على: hw-orders.js, hw-biz.js, hw-food.js, hw-map.js
    ========================================================= */
-const menusCol = HWDB.col('menus'), stateCol = HWDB.col('storestate');
+const stateCol = HWDB.col('storestate');
 const EH = HWOrders.esc, MNY = HWOrders.money, $s = (id) => document.getElementById(id);
-let _menus = {}, _states = {}, repPeriod = 'day';
+let _states = {}, repPeriod = 'day';
 
 function isStore() { return !!(currentUser && currentUser.start); }
 function myState() { return (currentUser && _states[currentUser.id]) || {}; }
 function refreshStoreUI() { const s = currentScreen_(); if (s === 'screen-menu') renderMenuAdmin(); if (s === 'screen-reports') renderReports(); renderStoreHome(); }
-menusCol.subscribe(l => { _menus = {}; l.forEach(m => { _menus[m.id] = m; }); refreshStoreUI(); });
 stateCol.subscribe(l => { _states = {}; l.forEach(m => { _states[m.id] = m; }); refreshStoreUI(); });
 HWBiz.announcementsCol.subscribe(renderStoreHome);
 /* حساب المتجر: إن أوقفته الإدارة يخرج المستخدم فورًا */
@@ -107,40 +106,21 @@ function saveHours() {
 }
 
 /* =========================================================
-   3) القائمة: الأقسام، الأصناف، الخيارات
+   3) المنيو (المحرر المشترك hw-menued.js)
    ========================================================= */
-function myMenu() { return _menus[currentUser.id] || { id: currentUser.id, cats: [] }; }
-function saveMenu(m) { m.demo = false; menusCol.replace(currentUser.id, m); }
 function renderMenuAdmin() {
     const box = $s('menuAdmin'); if (!box) return;
     if (!isStore()) { box.innerHTML = '<div class="empty-orders">إدارة القائمة متاحة لحسابات المتاجر</div>'; return; }
-    const st = myState(), m = myMenu(), now = Date.now();
+    const st = myState();
     box.innerHTML = statusCard() +
         '<div class="cart-card">' +
         '<div class="mrow"><div><b>وقت التحضير المعتاد</b><small class="mut">يظهر للعميل قبل الطلب</small></div><select id="prepSel" onchange="setPrep(this.value)">' + [10, 15, 20, 30, 45].map(n => '<option value="' + n + '"' + ((st.prepMin || 20) === n ? ' selected' : '') + '>' + n + ' د</option>').join('') + '</select></div>' +
         '<div class="mrow"><div><b>أوقات الدوام</b><small class="mut">' + EH(hoursSummary(st.hours)) + '</small></div><button type="button" class="ghost-btn" onclick="openHours()">تعديل</button></div></div>' +
-        '<div class="note-card"><b>التوفر اليومي</b><small>أطفئ الصنف إذا نفد أو توقف. لإضافة أصناف أو تغيير الأسعار والعروض تواصل مع HIGHWAY.</small></div>' +
-        (m.cats.length ? m.cats.map((c, ci) => '<div class="cart-card"><div class="mrow"><b>' + EH(c.name) + '</b></div>' +
-            c.items.map((it, ii) => {
-                const out = it.outUntil && it.outUntil > now, on = HWBiz.itemOn(it, now);
-                return '<div class="mrow it' + (on ? '' : ' off') + '"><span class="em">' + HWFood.forItem(it.name, it.desc, c.name, '') + '</span><div class="mt"><b>' + EH(it.name) + '</b><small class="mut">' + MNY(it.price) + ' د.أ' + (out ? ' · نفد حتى الغد' : it.on === false ? ' · موقوف' : '') + '</small></div>' +
-                    '<button type="button" class="sw sm' + (on ? ' on' : '') + '" onclick="toggleItem(' + ci + ',' + ii + ')" aria-label="التوفر"></button></div>';
-            }).join('') + '</div>').join('') : '<div class="empty-orders">لم تُضف الإدارة منيو متجرك بعد</div>');
-}
-function toggleItem(ci, ii) {
-    const m = myMenu(), it = m.cats[ci].items[ii];
-    if (!HWBiz.itemOn(it)) { it.on = true; it.outUntil = 0; saveMenu(m); buzz(); HWOrders.toast(it.name + ' متوفر الآن'); return; }
-    openMenuSheet(sheetHead(EH(it.name), 'إيقاف الصنف') +
-        '<button type="button" class="call-opt y" onclick="setItemOff(' + ci + ',' + ii + ',1)"><span class="co-t"><b>نفد اليوم</b><small>يعود متوفرًا تلقائيًا صباح الغد</small></span></button>' +
-        '<button type="button" class="call-opt" onclick="setItemOff(' + ci + ',' + ii + ',0)"><span class="co-t"><b>إيقاف حتى أعيد تفعيله</b><small>يختفي من قائمة العملاء</small></span></button>');
-}
-function setItemOff(ci, ii, today) {
-    const m = myMenu(), it = m.cats[ci].items[ii];
-    if (today) { it.outUntil = HWBiz.nextMorning(6); it.on = true; } else { it.on = false; it.outUntil = 0; }
-    saveMenu(m); closeMenuSheet(); buzz(12);
+        '<h3 class="sec-t">المنيو</h3><div id="menuEd"></div>';
+    HWMenuEd.render($s('menuEd'), currentUser.id, {});
 }
 /* =========================================================
-   5) الرئيسية للمتجر + التقارير
+   4) الرئيسية للمتجر + التقارير
    ========================================================= */
 function storeOrders(from) { return isStore() ? allOrders.filter(o => o.storeId === currentUser.id && HWOrders.isMarket(o) && o.createdAt >= (from || 0)) : []; }
 function report(from) {
@@ -205,7 +185,7 @@ function printReport() {
 setInterval(() => { if (!document.hidden && isStore() && currentScreen_() === 'screen-menu') renderMenuAdmin(); }, 60000);   // انتهاء الإيقاف المؤقت
 
 /* =========================================================
-   6) استدعاء كابتن: اختيار نوع الطلب
+   5) استدعاء كابتن: اختيار نوع الطلب
    ========================================================= */
 function openCallChoice() {
     const pin = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';

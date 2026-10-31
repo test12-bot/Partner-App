@@ -17,7 +17,7 @@
   var standalone = (g.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 
   function supported() { return 'serviceWorker' in navigator && 'PushManager' in g && 'Notification' in g; }
-  function ready() { return !!(KEY && g.HWDB && g.HWDB.mode === 'remote'); }
+  function ready() { return !!(KEY && CFG.push && CFG.push.server && g.HWDB && g.HWDB.mode === 'remote'); }
   /* حالة الإشعارات كما يراها المستخدم */
   function state() {
     if (!ready()) return 'off-server';                       // الخادم غير مفعّل بعد (الوضع التجريبي)

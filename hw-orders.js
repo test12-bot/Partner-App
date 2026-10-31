@@ -46,35 +46,96 @@ function sha256(str) {
      مجموعات البيانات العامة: orders / captains / menus / storestate
      ========================================================= */
   var cols = {};
+  /* Firebase يحذف المصفوفات الفارغة ([]) وقد يعيد المصفوفة ككائن {0:..,1:..}.
+     نعيد كل حقل مصفوفة لشكله الصحيح قبل أن يصل لأي تطبيق */
+  function arr(x) { return Array.isArray(x) ? x.filter(function (v) { return v != null; }) : (x && typeof x === 'object' ? Object.keys(x).sort(function (a, b) { return a - b; }).map(function (k) { return x[k]; }).filter(function (v) { return v != null; }) : []); }
+  function repair(name, o) {
+    if (name === 'orders') {
+      o.history = arr(o.history); o.items = arr(o.items).map(function (l) { if (l.opts) l.opts = arr(l.opts); return l; });
+      if (o.offered) o.offered = arr(o.offered); if (o.reassigns) o.reassigns = arr(o.reassigns);
+    } else if (name === 'menus') {
+      o.cats = arr(o.cats).map(function (c) {
+        c.items = arr(c.items).map(function (it) { if (it.options) it.options = arr(it.options).map(function (gr) { gr.choices = arr(gr.choices); return gr; }); return it; });
+        return c;
+      });
+    } else if (name === 'stores') { o.alias = arr(o.alias); }
+    else if (name === 'captains') { if (o.declined) o.declined = arr(o.declined); }
+    else if (name === 'pricelists') { if (o.salt) o.salt = arr(o.salt); if (o.amman) o.amman = arr(o.amman); }
+    return o;
+  }
+  /* عقدة /pulse: اتصال بث واحد يخبر كل المجموعات متى تغيّرت */
+  var pulse = (function () {
+    var es = null, seen = {}, fns = {};
+    function ok() {
+      if (!remote || !g.EventSource) return false;
+      if (es && es.readyState !== 2) return true;
+      try { es = new EventSource(base + '/pulse.json'); } catch (e) { return false; }
+      var fire = function (k, v) { if (seen[k] === v) return; var first = !(k in seen); seen[k] = v; if (!first) (fns[k] || []).forEach(function (f) { f(); }); };
+      es.addEventListener('put', function (e) { try { var d = JSON.parse(e.data), ks = d.path.split('/').filter(Boolean);
+        if (!ks.length) Object.keys(d.data || {}).forEach(function (k) { fire(k, d.data[k]); }); else fire(ks[0], d.data); } catch (x) {} });
+      es.addEventListener('patch', function (e) { try { var d = JSON.parse(e.data); Object.keys(d.data || {}).forEach(function (k) { fire(k, d.data[k]); }); } catch (x) {} });
+      return true;
+    }
+    return { ok: ok, on: function (n, f) { if ((fns[n] = fns[n] || []).indexOf(f) < 0) fns[n].push(f); } };
+  })();
   function Col(name) {
     if (cols[name]) return cols[name];
     var key = 'hw-' + name + '-v1', cache = [], subs = [], started = false, sig = '', loaded = false, waiters = [];
     function markLoaded() { loaded = true; var w = waiters; waiters = []; w.forEach(function (f) { try { f(); } catch (e) {} }); }
     function readLocal() { try { var a = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
     function writeLocal(a) { try { localStorage.setItem(key, JSON.stringify(a.slice(0, 600))); } catch (e) {} }
-    function norm(list) { return list.filter(function (o) { return o && o.id; }).map(function (o) { if (name === 'orders' && !Array.isArray(o.history)) o.history = []; return o; }).sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }); }
+    function norm(list) { return list.filter(function (o) { return o && o.id; }).map(function (o) { return repair(name, o); }).sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }); }
     function emit() {
       var s = JSON.stringify(cache);
       if (s === sig) return; sig = s;
       subs.slice().forEach(function (fn) { try { fn(cache.slice()); } catch (e) { console.error(e); } });
     }
+    var tree = {}, es = null, rebuildT = 0;
+    function rebuild() {                                  // الشجرة القادمة من Firebase → قائمة مرتبة للتطبيقات
+      clearTimeout(rebuildT);
+      rebuildT = setTimeout(function () { cache = norm(Object.keys(tree).map(function (k) { var o = JSON.parse(JSON.stringify(tree[k])); if (o && typeof o === 'object' && !o.id) o.id = k; return o; })); markLoaded(); emit(); }, 30);
+    }
+    function setAt(path, val) {                           // path مثل "/id/field"
+      var ks = path.split('/').filter(Boolean);
+      if (!ks.length) { tree = val && typeof val === 'object' ? val : {}; return; }
+      var n = tree; for (var i = 0; i < ks.length - 1; i++) { if (!n[ks[i]] || typeof n[ks[i]] !== 'object') n[ks[i]] = {}; n = n[ks[i]]; }
+      if (val === null) delete n[ks[ks.length - 1]]; else n[ks[ks.length - 1]] = val;
+    }
     function load() {
       if (!remote) { cache = norm(readLocal()); markLoaded(); emit(); return Promise.resolve(); }
       return fetch(base + '/' + name + '.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (obj) {
-        cache = norm(Object.keys(obj || {}).map(function (k) { return obj[k]; })); markLoaded(); emit();
+        tree = obj && typeof obj === 'object' ? obj : {}; rebuild();
       }).catch(function () {});
     }
-    function start() {
-      if (started) return; started = true; load();
-      /* المزامنة: الوضع الحقيقي يستطلع قاعدة البيانات، والتجريبي يقرأ ذاكرة المتصفح.
-         iOS يجمّد التبويبات في الخلفية فتضيع أحداث storage، لذلك نعيد القراءة دوريًا
-         وفور عودة الصفحة للواجهة (visibilitychange / focus / pageshow). */
-      var refresh = function () { if (!document.hidden) load(); };
-      setInterval(refresh, remote ? (CFG.pollMs || 3000) : 1500);
-      document.addEventListener('visibilitychange', refresh);
-      g.addEventListener('focus', refresh); g.addEventListener('pageshow', refresh);
-      if (!remote) g.addEventListener('storage', function (e) { if (e.key === key) load(); });
+    /* البث المباشر من Firebase: يصل كل تغيير لحظة حدوثه ويُرسل التغيير فقط.
+       المتصفح يسمح بعدد محدود من الاتصالات المفتوحة، لذلك:
+       - الطلبات (الأكثر تغيرًا) لها بث خاص
+       - باقي المجموعات تستمع لعقدة صغيرة واحدة /pulse تتغير عند كل كتابة، فتعيد تحميل نفسها فقط */
+    function stream() {
+      if (name !== 'orders') { pulse.on(name, load); return pulse.ok(); }
+      if (!g.EventSource) return false;
+      if (es && es.readyState !== 2) return true;
+      try { es = new EventSource(base + '/' + name + '.json'); } catch (e) { return false; }
+      es.addEventListener('put', function (e) { try { var d = JSON.parse(e.data); setAt(d.path, d.data); rebuild(); } catch (x) {} });
+      es.addEventListener('patch', function (e) { try { var d = JSON.parse(e.data); Object.keys(d.data || {}).forEach(function (k) { setAt(d.path.replace(/\/$/, '') + '/' + k, d.data[k]); }); rebuild(); } catch (x) {} });
+      es.addEventListener('cancel', function () { es.close(); es = null; });
+      return true;
     }
+    function start() {
+      if (started) return; started = true;
+      if (!remote) {
+        /* الوضع التجريبي: ذاكرة المتصفح. iOS يجمّد التبويبات فتضيع أحداث storage، لذلك نعيد القراءة دوريًا */
+        load(); setInterval(function () { if (!document.hidden) load(); }, 1500);
+        g.addEventListener('storage', function (e) { if (e.key === key) load(); });
+      } else {
+        load(); var live = stream();
+        /* احتياط: إن انقطع البث (الهاتف في الخلفية أو الشبكة) نعيد الاتصال ونقرأ نسخة كاملة */
+        setInterval(function () { if (!document.hidden) { if (!stream()) load(); else if (name !== 'orders') load(); } }, live ? 60000 : (CFG.pollMs || 3000));
+      }
+      var back = function () { if (document.hidden) return; load(); if (remote) stream(); };
+      document.addEventListener('visibilitychange', back); g.addEventListener('focus', back); g.addEventListener('pageshow', back);
+    }
+    function bump() { if (remote && name !== 'orders') send('PUT', '/pulse/' + name + '.json', Date.now()); }
     function send(method, path, body) {
       return fetch(base + path, { method: method, headers: { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) }).catch(function () {});
     }
@@ -89,7 +150,7 @@ function sha256(str) {
       create: function (data) {
         var id = (data && data.id) || uid(), o = Object.assign({ id: id, createdAt: Date.now(), updatedAt: Date.now() }, data, { id: id });
         fresh(); cache = cache.filter(function (x) { return x.id !== id; }); cache.unshift(o);
-        if (remote) send('PUT', '/' + name + '/' + id + '.json', o); else writeLocal(cache);
+        if (remote) { tree[id] = JSON.parse(JSON.stringify(o)); send('PUT', '/' + name + '/' + id + '.json', o).then(bump); } else writeLocal(cache);
         emit(); return o;
       },
       /* دمج حقول في سجل موجود (أو إنشاؤه إن لم يوجد عند create=true) */
@@ -99,18 +160,18 @@ function sha256(str) {
         if (!o) { if (!createIfMissing) return null; return api.create(Object.assign({ id: id }, patch)); }
         Object.keys(patch).forEach(function (k) { o[k] = patch[k]; });
         o.updatedAt = Date.now();
-        if (remote) send('PATCH', '/' + name + '/' + id + '.json', Object.assign({}, patch, { updatedAt: o.updatedAt })); else writeLocal(cache);
+        if (remote) { tree[id] = JSON.parse(JSON.stringify(o)); send('PATCH', '/' + name + '/' + id + '.json', Object.assign({}, patch, { updatedAt: o.updatedAt })).then(bump); } else writeLocal(cache);
         emit(); return o;
       },
       replace: function (id, obj) {
         fresh(); var o = Object.assign({ createdAt: Date.now() }, obj, { id: id, updatedAt: Date.now() });
         cache = cache.filter(function (x) { return x.id !== id; }); cache.unshift(o);
-        if (remote) send('PUT', '/' + name + '/' + id + '.json', o); else writeLocal(cache);
+        if (remote) { tree[id] = JSON.parse(JSON.stringify(o)); send('PUT', '/' + name + '/' + id + '.json', o).then(bump); } else writeLocal(cache);
         emit(); return o;
       },
       remove: function (id) {
         fresh(); cache = cache.filter(function (x) { return x.id !== id; });
-        if (remote) send('DELETE', '/' + name + '/' + id + '.json'); else writeLocal(cache);
+        if (remote) { delete tree[id]; send('DELETE', '/' + name + '/' + id + '.json').then(bump); } else writeLocal(cache);
         emit();
       },
       _raw: function () { return { remote: remote, base: base, key: key, send: send, fresh: fresh, writeLocal: writeLocal, cache: function () { return cache; }, emit: emit }; }
