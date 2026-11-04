@@ -1,0 +1,79 @@
+/* =========================================================
+   HIGHWAY — تخطيط مشترك للتطبيقات الأربعة (hw-layout.css)
+   1) الهيدر: يختفي عند النزول ويعود عند الصعود بانتقال ناعم
+   2) صفحات الخريطة: خريطة ثابتة في الأعلى، وبطاقة بخلفية صلبة
+      وحافة مستديرة تنزلق فوقها وتغطي ما تحتها بالكامل
+   ========================================================= */
+:root{--hdr-h:66px;--mp-h:46vh;--ease-hdr:cubic-bezier(.22,.8,.24,1)}
+
+/* ---------- 1) الهيدر ---------- */
+.app-header{transition:transform .42s var(--ease-hdr);will-change:transform}
+body.hdr-hide .app-header{transform:translateY(calc(-100% - 12px))}
+.cat-tabs{transition:top .42s var(--ease-hdr)}
+body.hdr-hide .cat-tabs{top:env(safe-area-inset-top,0px) !important}
+@media (prefers-reduced-motion:reduce){.app-header,.cat-tabs{transition:none}}
+
+/* ---------- 2) صفحات الخريطة ---------- */
+.mp-map{position:fixed;left:0;right:0;top:0;height:var(--mp-h);z-index:0;background:var(--cream);overflow:hidden}
+.mp-map .lmap{position:absolute;inset:0;border:0 !important;border-radius:0 !important;box-shadow:none !important}
+.mp-map::after{display:none !important}
+.mp-sheet{position:relative;z-index:2;margin:calc(var(--mp-h) - var(--hdr-h) - 24px) 0 0;
+  background:var(--white);border-radius:26px 26px 0 0;
+  padding:10px 16px calc(132px + env(safe-area-inset-bottom));
+  min-height:calc(100vh - var(--mp-h) + 24px);min-height:calc(100dvh - var(--mp-h) + 24px);
+  /* الظل الثاني يمدّ لون البطاقة للأسفل فلا تظهر الخريطة تحتها حتى مع ارتداد التمرير */
+  box-shadow:0 -12px 30px -16px rgba(10,53,54,.38),0 70vh 0 0 var(--white)}
+.mp-grab{display:block;width:42px;height:5px;border-radius:5px;background:rgba(14,58,59,.16);margin:0 auto 14px}
+.screen.mp{padding:0 !important;background:transparent;animation:none !important;transform:none !important}
+.mp-sheet > .container{max-width:520px;margin-inline:auto}
+body:has(.screen.mp.active) .app-shell,body:has(.screen.mp.active) .main{padding-bottom:0 !important;background:transparent}
+body:has(.screen.mp.active){background:var(--white)}
+/* شارات فوق الخريطة (أسفل المساحة الظاهرة منها) */
+.mp-chips{position:absolute;left:12px;right:12px;bottom:36px;z-index:500;display:flex;flex-wrap:nowrap;gap:6px;overflow:hidden;justify-content:flex-start;pointer-events:none}
+.mp-chip{pointer-events:auto;display:inline-flex;align-items:center;gap:6px;background:var(--white);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;box-shadow:0 4px 14px -6px rgba(10,53,54,.45);white-space:nowrap}
+.mp-chip.mp-key{gap:5px}.mp-chip.mp-key i:not(:first-child){margin-inline-start:6px}
+.mp-chip i{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.mp-chip i.n{background:#E8EF44;box-shadow:inset 0 0 0 1.5px #0E3A3B}.mp-chip i.a{background:#25CED1}.mp-chip i.p{background:#0E3A3B}
+/* شاشة كبيرة: الخريطة بعرض المحتوى نفسه */
+@media (min-width:1024px){.mp-sheet{max-width:760px;margin-inline:auto}}
+
+/* ---------- 3) سطور التعديل بالقلم (بدل البطاقات والأزرار الكثيرة) ---------- */
+.er-list{margin:12px 0;border-radius:18px;background:var(--cream);overflow:hidden}
+.er{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:10px 14px;border:0;background:transparent;color:var(--ink);font:inherit;text-align:start;cursor:pointer}
+.er + .er{border-top:1px solid var(--white)}
+.er-k{flex:1;min-width:0;font-size:13.5px;font-weight:800;line-height:1.35}
+.er-k small{display:block;font-size:11.5px;font-weight:600;color:var(--ink-soft);margin-top:2px}
+.er-v{max-width:58%;font-size:12.5px;font-weight:700;color:var(--ink-soft);text-align:end;line-height:1.45;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.er-pen{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--white);color:var(--ink);font-style:normal}
+.er-pen svg{width:15px;height:15px}
+.er.warn .er-v{color:#B4570B}
+.er.warn .er-pen{background:var(--yellow);color:#0E3A3B}
+.er.sw-row{cursor:default}
+.er:active:not(.sw-row){background:rgba(14,58,59,.05)}
+.er-del{display:block;width:100%;margin:14px 0 4px;padding:12px;border:0;background:none;color:#C2410C;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}
+.er-del.back{color:var(--ink-soft)}
+/* بطاقة المتجر في القائمة: بطاقة واحدة قابلة للضغط مع قلم */
+.mg-card.st-row{display:block;width:100%;border:0;font:inherit;color:inherit;text-align:start;cursor:pointer}
+.mg-card.st-row .mg-top{align-items:center}
+.mg-card.st-row .mg-top > div{flex:1;min-width:0}
+.st-warn{display:inline-block;margin-top:5px;font-style:normal;font-size:11px;font-weight:800;color:#0E3A3B;background:var(--yellow);border-radius:999px;padding:2px 9px}
+:root[data-theme="dark"] .er.warn .er-v{color:#F5B971}
+:root[data-theme="dark"] .er-del{color:#FB923C}
+
+/* ---------- 4) محرر المنيو: القلم بدل كلمة "تعديل"، والصورة 4:3 ---------- */
+.me-pen{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:0;background:var(--white);color:var(--ink);cursor:pointer;padding:0}
+.me-pen svg{width:15px;height:15px}
+.me-pen:active{transform:scale(.92)}
+.me-photo-l{position:relative;display:block;margin:4px 0 8px;cursor:pointer}
+.me-photo-l .me-photo{aspect-ratio:4/3;height:auto !important;width:100%;margin:0 !important}
+.me-photo-l .ed-pen{position:absolute;top:10px;inset-inline-end:10px;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#0E3A3B;color:#E8EF44;box-shadow:0 4px 12px rgba(14,58,59,.35);font-style:normal}
+.me-photo-l .ed-pen svg{width:17px;height:17px}
+.me-ph-btns{display:flex;gap:18px;justify-content:center;margin:0 0 6px}
+.me-ph-btns .more-link{padding:6px 0}
+.me-ph-btns .more-link.dng{color:#C2410C}
+
+/* ---------- 5) حقول الإدخال: نفس الشكل لكل الأنواع (بعض الحقول بلا type كانت تظهر خطًا رفيعًا) ---------- */
+.field select,.field input:not([type]),.field input[type=tel],.field input[type=email],.field input[type=search],.field input[type=url],.field input[type=password]{
+  width:100%;border:1.5px solid rgba(14,58,59,.14);background:rgba(255,255,255,.75);border-radius:var(--r-sm,14px);
+  padding:13px 14px;font:inherit;font-size:14px;font-weight:600;color:var(--ink);outline:none}
+.login-form .field input[type=tel],.login-form .field input:not([type]){border:1.5px solid rgba(255,255,255,.55);background:rgba(255,255,255,.9);color:#0E3A3B;text-align:left}

@@ -1,0 +1,214 @@
+/* =========================================================
+   HIGHWAY — النظام اللوني الموحّد للتطبيقات الأربعة
+   مستوحى من تقرير الكباتن: صفحة بيضاء، بطاقات كريمية، رأس فيروزي،
+   لمسات صفراء للتمييز، ونص داكن مريح للعين. بلا تدرجات ولا ظلال ثقيلة.
+   ========================================================= */
+:root{
+  --teal:#25CED1; --teal-600:#25CED1; --yellow:#E8EF44; --yellow-700:#E8EF44; --cream:#F3F0E7; --white:#FFFFFF;
+  --ink:#0E3A3B; --teal-800:#0E3A3B; --teal-900:#0E3A3B; --ink-soft:rgba(14,58,59,.62);
+  --cream-line:#E7E2D3;                       /* فاصل خفيف بدرجة من الكريمي نفسه */
+  --glass-bg:var(--cream); --glass-bg-strong:var(--cream); --glass-border:transparent; --card:var(--cream);
+  --shadow-neu:none; --shadow-float:none; --shadow-btn:none;
+  --food-bg:var(--teal);
+}
+
+/* ===== الصفحة ===== */
+body{background:var(--white);color:var(--ink)}
+.ambient{display:none}
+.app-shell .glass,.modal .glass{backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;border-color:transparent}
+
+/* ===== الرأس: كتلة فيروزية مثل ترويسة التقرير ===== */
+.app-header{background:var(--teal) !important;border:0 !important;box-shadow:none !important}
+.brand-mini-title{color:var(--white)}.brand-mini-title em{color:var(--yellow)}
+.brand-mini-sub{color:rgba(14,58,59,.78)}
+.header-back{background:rgba(255,255,255,.3) !important;color:var(--ink) !important;border:0 !important;box-shadow:none !important}
+.header-avatar{border:3px solid var(--cream) !important;background:var(--cream) !important;box-shadow:none;transition:border-color .2s,box-shadow .2s,transform .2s}
+.header-avatar[aria-expanded="true"]{border-color:var(--yellow) !important;box-shadow:none !important}
+.header-avatar img{border-color:var(--white)}
+
+/* ===== العناوين ===== */
+.page-heading h1{color:var(--ink)}
+.page-heading h1::after{background:var(--yellow) !important}
+.page-heading p{color:var(--ink-soft)}
+.sec-t,.sec-label{color:var(--ink)}
+
+/* ===== البطاقات: كريمي فوق الأبيض، بلا ظلال ===== */
+.action-card,.price-row,.stat,.oc,.cart-card,.mi,.fi,.offer,.pf-list,.form-card,.result-box,.calc-input,.empty-orders,.sc{
+  background:var(--cream) !important;border-color:transparent !important;box-shadow:none !important}
+.pf-card{background:var(--cream) !important;box-shadow:none !important;border:0 !important}
+.pf-cover{background:var(--teal) !important}
+.pf-row{border-color:var(--white) !important}
+
+/* عناصر داخل البطاقة الكريمية: أبيض للتباين */
+.oc-tag,.oc-store,.cart-card .qty,.pf-ico,.sh-rows>div{background:var(--white) !important}
+.mrow .em{background:var(--teal) !important;color:var(--white) !important}
+.cl{border-color:var(--white) !important}
+.sum>div{border-color:var(--white) !important}
+.sum .tot{border-top:2px dashed var(--cream-line) !important}
+
+/* البطاقات الرئيسية الفيروزية */
+.action-card.hero,.stat.hot{background:var(--teal) !important;color:var(--ink) !important}
+.hero-txt h2,.hero-txt p,.stat.hot b,.stat.hot small{color:var(--ink) !important}
+.action-card.hero::before{opacity:.55}
+.hero-tag{background:var(--white) !important;color:var(--ink)}
+.hero-cta{background:var(--yellow) !important;color:var(--ink) !important;box-shadow:none !important}
+.hero-bolt{background:var(--yellow) !important;color:var(--ink) !important;box-shadow:none !important}
+
+/* أيقونات بطاقات الإجراءات: دوائر مسطّحة بالهوية */
+.action-card .glyph,.action-card.prep .glyph,.pf-verified{background:var(--teal) !important;box-shadow:none !important;color:var(--white) !important}
+.action-card .glyph svg{color:var(--white) !important}
+.action-card.confirm .glyph{background:var(--yellow) !important}.action-card.confirm .glyph svg{color:var(--ink) !important}
+.action-card .glyph.insta,.action-card .glyph.fb,.action-card .glyph.wa{background:var(--ink) !important;box-shadow:none !important}
+.action-card .glyph.insta svg,.action-card .glyph.fb svg,.action-card .glyph.wa svg{color:var(--yellow) !important}
+.action-card .glyph::before{display:none}
+
+/* رسومات الطعام والأغلفة: أبيض رفيع على فيروزي مسطّح */
+
+/* ===== الأزرار ===== */
+.submit-btn{background:var(--yellow) !important;color:var(--ink) !important;box-shadow:none !important}
+.ghost-btn{background:var(--cream) !important;color:var(--ink) !important;border:0 !important;box-shadow:none !important}
+.cart-card .ghost-btn,.offer .ghost-btn,.oc .ghost-btn,.mrow .ghost-btn{background:var(--white) !important}
+.act-btn.go{background:var(--teal) !important;color:var(--ink) !important;box-shadow:none !important}
+.qty button{background:var(--teal) !important;color:var(--ink) !important}
+.more-link{color:var(--ink) !important;text-decoration:underline;text-decoration-color:var(--teal);text-decoration-thickness:2px;text-underline-offset:4px}
+.pf-logout{background:var(--cream) !important;color:var(--ink) !important;border:0 !important}
+
+/* مفاتيح التشغيل */
+.sw{background:var(--cream-line) !important}
+.sw::after{background:var(--white) !important;box-shadow:none !important}
+.sw.on{background:var(--ink) !important}.sw.on::after{background:var(--yellow) !important}
+
+/* ===== الحقول ===== */
+.field input,.field textarea,.field select,.search-wrap input,.mrow select,input[type=time],.calc-input input{
+  background:var(--white) !important;border:1.5px solid var(--cream-line) !important;color:var(--ink) !important;box-shadow:none !important}
+.modal .field input,.modal .field textarea,.modal .field select{background:var(--cream) !important;border-color:var(--cream) !important}
+.field input:focus,.field textarea:focus,.search-wrap input:focus,.modal .field input:focus,.modal .field textarea:focus{border-color:var(--teal) !important}
+.search-wrap input{background:var(--cream) !important;border-color:var(--cream) !important}
+
+/* ===== الشرائح والتبويبات: كريمي، والمختار فيروزي ===== */
+.seg{background:var(--cream) !important}
+.seg button{color:var(--ink-soft)}.seg button.on{background:var(--teal) !important;color:var(--ink) !important;box-shadow:none !important}
+.seg button i{background:var(--white) !important;color:var(--ink)}
+.chip{background:var(--cream) !important;color:var(--ink) !important;border:0 !important;box-shadow:none !important}
+.chip.on{background:var(--teal) !important;color:var(--ink) !important}
+
+/* ===== الشريط السفلي ===== */
+/* شريط سفلي بأسلوب إنستغرام: كبسولة زجاجية عائمة بلا حواف، تصغر أثناء التمرير وتعود عند التوقف */
+.tabbar{left:0 !important;right:0 !important;bottom:calc(12px + env(safe-area-inset-bottom)) !important;width:calc(100% - 52px) !important;max-width:430px !important;margin-inline:auto !important;
+  padding:5px !important;gap:0 !important;border-radius:999px !important;border:0 !important;outline:0 !important;
+  background:rgba(243,240,231,.74) !important;box-shadow:0 8px 28px -6px rgba(14,58,59,.14),0 1px 4px rgba(14,58,59,.05) !important;
+  backdrop-filter:blur(24px) saturate(180%) !important;-webkit-backdrop-filter:blur(24px) saturate(180%) !important;
+  transform-origin:50% 100%;transition:transform .32s cubic-bezier(.22,1,.36,1),width .32s cubic-bezier(.22,1,.36,1) !important}
+body.bar-mini .tabbar{transform:scale(.86) translateY(2px)}
+.tab{flex:1 1 0 !important;flex-direction:row !important;gap:7px !important;height:50px;padding:0 !important;justify-content:center;align-items:center;border-radius:999px;color:var(--ink) !important;
+  transition:flex-grow .32s cubic-bezier(.22,1,.36,1),background .25s var(--ease-out),transform .12s}
+.tab.on{flex-grow:2.1 !important;background:rgba(37,206,209,.36)}
+.tab .ti{width:auto !important;height:auto !important;background:none !important;transform:none !important}
+.tab svg{width:25px;height:25px;stroke-width:2}
+.tab>span:last-child{font-size:13px;font-weight:800;white-space:nowrap;animation:tabLbl .3s ease}
+.tab:not(.on)>span:last-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@keyframes tabLbl{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:none}}
+.tab .tb{top:-6px;inset-inline-end:-10px;box-shadow:none !important}
+.tb{background:var(--yellow) !important;color:var(--ink) !important}
+
+/* ===== حالات الطلب ===== */
+.oc::before{width:5px}
+.oc.s-new::before{background:var(--yellow)}.oc.s-accepted::before,.oc.s-picked::before{background:var(--teal)}
+.oc.s-delivered::before{background:var(--ink)}.oc.s-cancelled::before{background:var(--cream-line)}
+.oc-chip{background:var(--white);color:var(--ink)}
+.s-new .oc-chip{background:var(--yellow) !important;color:var(--ink) !important}
+.s-accepted .oc-chip,.s-picked .oc-chip{background:var(--teal) !important;color:var(--ink) !important}
+.s-delivered .oc-chip{background:var(--ink) !important;color:var(--cream) !important}
+.s-cancelled .oc-chip{background:var(--white) !important;color:var(--ink-soft) !important}
+.oc-price{background:var(--yellow) !important;color:var(--ink) !important}
+.oc-prog i{background:var(--white) !important}.oc-prog i.done{background:var(--ink) !important}.oc-prog i.act{background:rgba(37,206,209,.35) !important}
+.oc-prog i.act::after{background:var(--teal) !important}
+.oc-cap{background:var(--white) !important}
+.oc-cap .av{background:var(--ink) !important;color:var(--yellow) !important}
+.oc-call{background:var(--teal) !important;color:var(--ink) !important}
+.tl li::before{background:var(--cream-line) !important}
+.tl li i{background:var(--white) !important;border-color:var(--cream-line) !important}
+.tl li.done i{background:var(--teal) !important;border-color:var(--teal) !important}
+.tl li.act i{background:var(--yellow) !important;border-color:var(--ink) !important}
+.stat b,.stat small{color:var(--ink)}
+.pill.ok{background:var(--teal) !important;color:var(--ink) !important}.pill.bad{background:var(--white) !important;color:var(--ink-soft) !important}
+
+/* ===== شريط الحالة العائم والتنبيه ===== */
+.live-bar{background:var(--ink) !important;color:var(--cream) !important;box-shadow:0 14px 30px -18px rgba(14,58,59,.7) !important;border:0 !important}
+.lv-dot{background:var(--yellow) !important}
+.toast{background:var(--ink) !important;color:var(--cream) !important;box-shadow:none !important}
+
+/* ===== النوافذ ===== */
+.modal{background:rgba(14,58,59,.45) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+.modal-card{background:var(--white) !important;box-shadow:none !important;border:0 !important}
+.modal-summary{background:var(--teal) !important}
+.rt-price{background:var(--yellow) !important;color:var(--ink) !important}
+.user-menu{background:var(--white) !important;box-shadow:0 18px 40px -20px rgba(14,58,59,.45) !important}
+.um-item{color:var(--ink)}
+
+/* ===== التتبع والخرائط ===== */
+.leaflet-container{background:var(--cream) !important}
+.mk-store img{border-color:var(--white) !important}.mk-cap div{background:var(--ink) !important;border-color:var(--yellow) !important}
+
+/* ===== الملاحظات والشارات ===== */
+.route-pill.sarou{background:var(--teal) !important;color:var(--ink) !important;box-shadow:none !important}
+.price-row .price{background:var(--yellow) !important;color:var(--ink) !important}
+
+/* ===== إطارات الصور بالليموني ===== */
+.mk-store img,.pf-avatar{border:3px solid var(--yellow) !important;background:var(--white) !important}
+
+/* ===== التنبيهات ===== */
+.hw-sound-pill{position:fixed;top:calc(78px + env(safe-area-inset-top));inset-inline:0;margin-inline:auto;width:max-content;max-width:calc(100% - 32px);z-index:96;display:none;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 16px;background:var(--yellow);color:var(--ink);font:inherit;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 10px 24px -12px rgba(14,58,59,.45);animation:pillPulse 1.8s ease-in-out infinite}
+.hw-sound-pill.show{display:flex}.hw-sound-pill svg{width:18px;height:18px}
+@keyframes pillPulse{50%{transform:scale(1.04)}}
+.hw-sa-warn{position:fixed;inset-inline:12px;top:calc(78px + env(safe-area-inset-top));z-index:97;background:var(--ink);color:var(--cream);font-size:12.5px;font-weight:700;line-height:1.6;border-radius:16px;padding:12px 14px;text-align:center}
+
+/* ===== المظهر واللغة (hw-ui.js) ===== */
+.hw-prefs{padding:24px 18px calc(18px + env(safe-area-inset-bottom)) !important}
+.hw-prefs h3{margin:0 0 12px;font-size:18px;color:var(--ink)}
+.hw-prefs small{display:block;font-size:12px;font-weight:800;color:var(--ink-soft);margin:10px 0 6px}
+.hw-seg{display:flex;gap:6px;background:var(--cream);border-radius:16px;padding:5px;margin-bottom:6px}
+.hw-seg button{flex:1;border:0;background:transparent;border-radius:12px;padding:10px 6px;font:inherit;font-weight:800;font-size:13px;color:var(--ink);cursor:pointer}
+.hw-seg button.on{background:var(--teal);color:#0E3A3B}
+.hw-prefs .submit-btn{margin-top:14px}
+/* ===== الإنجليزية: قلب الأسهم مع اتجاه LTR ===== */
+html[dir="ltr"] .pf-chev,html[dir="ltr"] .hero-cta svg,html[dir="ltr"] .header-back svg{transform:scaleX(-1)}
+html[dir="ltr"] body{font-family:"Tajawal","Segoe UI",system-ui,sans-serif}
+/* ===== الإشعارات (hw-push.js) ===== */
+.hw-nag{display:flex;align-items:center;gap:12px;background:var(--yellow);color:#0E3A3B;border-radius:18px;padding:12px 14px;margin:0 0 12px}
+.hw-nag div{flex:1}.hw-nag b{display:block;font-size:14px}.hw-nag small{font-size:12px;font-weight:700;opacity:.75}
+.hw-nag button{flex:none;border:0;border-radius:12px;padding:9px 16px;background:#0E3A3B;color:#E8EF44;font:inherit;font-weight:800;cursor:pointer}
+.hw-steps{margin:6px 0 10px;padding-inline-start:20px;line-height:2;font-size:14px;color:var(--ink)}
+/* ===== محرر المنيو المشترك (hw-menued.js) ===== */
+.me-card{padding:22px 18px calc(18px + env(safe-area-inset-bottom)) !important}
+.me-card .sh-head{display:flex;justify-content:space-between;align-items:center}
+.me-x{border:0;background:var(--cream);color:var(--ink);width:36px;height:36px;border-radius:50%;font-size:22px;line-height:1;cursor:pointer}
+.me-acts{display:flex;align-items:center;gap:10px}
+.me-mv{border:0;background:var(--cream);color:var(--ink);width:28px;height:28px;border-radius:9px;cursor:pointer;font-weight:800}
+.me-ph{width:44px;height:44px;border-radius:12px;object-fit:cover;flex:none}
+.me-photo{height:170px;border-radius:18px;overflow:hidden;background:var(--teal);display:grid;place-items:center;margin:4px 0 10px;color:#fff}
+.me-photo img{width:100%;height:100%;object-fit:cover}
+.me-photo span{display:flex;flex-direction:column;align-items:center;gap:6px}
+.me-photo span svg{width:64px;height:64px;stroke-width:1.5}
+.me-photo small{font-size:12px;font-weight:700;color:#0E3A3B;background:rgba(255,255,255,.85);border-radius:9px;padding:3px 9px}
+.me-ph-btns{margin-bottom:6px}
+.me-en{margin:0 0 12px;border-radius:14px;background:rgba(37,206,209,.12);padding:10px 12px}.me-en summary{cursor:pointer;font-weight:800;font-size:13px;color:var(--ink)}.me-en .field{margin:10px 0 0}
+/* زر تفعيل الصوت: أسفل الشاشة فوق شريط التنقل، لا يغطي العناوين */
+.hw-sound-pill{top:auto !important;bottom:calc(98px + env(safe-area-inset-bottom)) !important;box-shadow:0 10px 26px -8px rgba(14,58,59,.45) !important}
+/* التذييل لا يختفي تحت شريط التنقل، ووسوم البطاقات بخط التطبيق */
+.oc .oc-meta .oc-tag,.oc .oc-top .oc-store{background:rgba(37,206,209,.16) !important;color:#0E3A3B !important;border-radius:99px;padding:3px 10px;font-size:11.5px;font-weight:800;font-family:inherit}
+/* مساحة لمس 44px على الأقل للأزرار الصغيرة (دون تغيير شكلها) */
+.sw{position:relative}
+.sw::before{content:"";position:absolute;inset:-8px -4px}
+/* القيمة الطويلة (خصوصًا بالإنجليزية) تلتف لسطرين بدل أن تُقص */
+.pf-k{white-space:normal;flex-shrink:1;max-width:58%}
+.pf-v{white-space:normal;line-height:1.4}
+/* حاسبة السعر: عنوان مقروء في الفاتح، وبطاقة داكنة في الوضع الداكن */
+.result-label{color:var(--ink-soft) !important}
+:root[data-theme="dark"] body .result-box{--cream:#163334;--ink:#EAF5F4;--teal-800:#EAF5F4;--teal-900:#EAF5F4;--ink-soft:rgba(234,245,244,.66);color:#EAF5F4}
+.result-display{color:var(--ink) !important}
+.result-display small{color:var(--ink-soft) !important}
+.min-note{background:var(--yellow) !important;color:#0E3A3B !important}
+/* ردّ فعل موحّد عند اللمس لكل البطاقات والأزرار (بديل حركة البطاقة المختارة) */
+.action-card,.today-card,.pf-link,.submit-btn,.ghost-btn,.act-btn,.call-opt,.kpi,.stat{transition:transform .12s ease,opacity .12s ease}
+.action-card:active,.today-card:active,.pf-link:active,.submit-btn:active:not(:disabled),.ghost-btn:active,.act-btn:active,.call-opt:active,.kpi:active,.stat:active{transform:scale(.97)}
