@@ -542,16 +542,6 @@ button.brand-mini:active{transform:scale(.95);}
 }
 .pf-body{display:flex; flex-direction:column; align-items:center; text-align:center; padding:0 20px 24px;}
 .pf-avatar-wrap{position:relative; margin-top:-56px; width:112px; height:112px;}
-.pf-avatar{
-    display:block; width:100%; height:100%; border-radius:50%; object-fit:cover; background:#fff;
-    border:5px solid #fff; box-shadow:0 14px 28px -10px rgba(10,53,54,.5);
-}
-.pf-verified{
-    position:absolute; inset-inline-end:2px; bottom:4px; width:28px; height:28px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    background:var(--yellow); color:var(--teal-900); border:3px solid #fff; box-shadow:0 4px 10px -3px rgba(10,53,54,.4);
-}
-.pf-verified svg{width:14px; height:14px;}
 .pf-name{margin:14px 0 2px; font-size:22px; font-weight:700; color:var(--teal-900); line-height:1.35;}
 .pf-handle{margin:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13.5px; font-weight:500; color:var(--ink-soft); letter-spacing:.2px;}
 .pf-chip{

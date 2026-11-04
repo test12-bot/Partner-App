@@ -80,7 +80,7 @@
     var m = menu(), it = ii >= 0 ? m.cats[ci].items[ii] : { name: '', desc: '', price: '' }, ph = ii >= 0 ? g.HWBiz.itemImg(sid, it) : ''; curPh = ph; origPh = '';
     opts = JSON.parse(JSON.stringify(it.options || []));
     sheet(head(E(m.cats[ci].name), ii >= 0 ? 'تعديل الصنف' : 'صنف جديد') +
-      '<label class="me-photo-l"><span class="me-photo" id="mePhoto">' + (ph ? '<img src="' + E(ph) + '" alt="">' : '<span>' + g.HWFood.forItem(it.name || '', it.desc || '', m.cats[ci].name, '') + '<small>أضف صورة 4:3، والصور الأخرى تظهر كاملة دون قص</small></span>') + '</span>' +
+      '<label class="me-photo-l"><span class="me-photo" id="mePhoto">' + (ph ? '<img src="' + E(ph) + '" alt="">' : '<span>' + g.HWFood.forItem(it.name || '', it.desc || '', m.cats[ci].name, '') + '<small>أضف صورة 3:4، والصور الأخرى تظهر كاملة دون قص</small></span>') + '</span>' +
       '<input type="file" accept="image/*" hidden onchange="HWMenuEd.pickPhoto(this.files[0])"><i class="ed-pen">' + PEN + '</i></label>' +
       '<div class="me-ph-btns"><button type="button" class="more-link" id="meAdj" onclick="HWMenuEd.adjustPhoto()"' + (ph ? '' : ' style="display:none"') + '>ضبط يدوي</button>' + (ph ? '<button type="button" class="more-link dng" onclick="HWMenuEd.dropPhoto()">حذف الصورة</button>' : '') + '</div>' +
       field('meIN', 'الاسم', it.name) + field('meID', 'الوصف <span class="opt">(اختياري)</span>', it.desc || '', 'placeholder="مثال: مع بطاطا وصوص الثوم"') +
@@ -91,7 +91,7 @@
       '<div class="sh-actions">' + (ii >= 0 ? '<button type="button" class="ghost-btn dng" onclick="HWMenuEd.itemDel()">حذف</button>' : '') + '<button type="button" class="submit-btn" style="flex:1" id="meSave" onclick="HWMenuEd.itemSave()"><span class="btn-label">حفظ</span></button></div>');
     renderOpts();
   }
-  /* صورة الصنف بنسبة 4:3: تُضبط تلقائيًا دون قص (hw-crop.js)، ويبقى خيار "ضبط يدوي" لمن يريد تحريكها */
+  /* صورة الصنف بنسبة 3:4 (مثل منشورات إنستغرام): تُضبط تلقائيًا دون قص (hw-crop.js)، ويبقى خيار "ضبط يدوي" لمن يريد تحريكها */
   var curPh = '', origPh = '';
   function setPhoto(d) {
     if (!d) return; photo = d; curPh = d;
@@ -102,10 +102,10 @@
     if (!file) return;
     if (!g.HWCrop) { toast('تعذر فتح الصورة'); return; }
     var fr = new FileReader();
-    fr.onload = function () { origPh = fr.result; g.HWCrop.fit(origPh, { w: 960, h: 720 }).then(setPhoto).catch(function () { toast('تعذرت قراءة الصورة'); }); };
+    fr.onload = function () { origPh = fr.result; g.HWCrop.fit(origPh, { w: 768, h: 1024 }).then(setPhoto).catch(function () { toast('تعذرت قراءة الصورة'); }); };
     fr.onerror = function () { toast('تعذرت قراءة الصورة'); }; fr.readAsDataURL(file);
   }
-  function adjustPhoto() { var src = origPh || curPh; if (src && g.HWCrop) g.HWCrop.open(src, { w: 960, h: 720, title: 'ضبط يدوي للصورة' }).then(setPhoto); }
+  function adjustPhoto() { var src = origPh || curPh; if (src && g.HWCrop) g.HWCrop.open(src, { w: 768, h: 1024, title: 'ضبط يدوي للصورة' }).then(setPhoto); }
   function dropPhoto() { photo = ''; curPh = ''; var a = $('meAdj'); if (a) a.style.display = 'none'; $('mePhoto').innerHTML = '<span><small>ستُحذف الصورة عند الحفظ</small></span>'; }
   function renderOpts() {
     $('meOpts').innerHTML = opts.map(function (gr, gi) {

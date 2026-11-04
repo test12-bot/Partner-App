@@ -207,6 +207,35 @@
     });
   }
 
+  /* ---------- صورة الكابتن: شخصية HIGHWAY (هادي أو سلمى) أو صورة ترفعها الإدارة فقط ----------
+     سجل الكابتن (وكائن captain داخل الطلب) يحمل av: 'm' | 'f' و pv = رقم نسخة الصورة المرفوعة
+     capimg/<كابتن> = { data } تُجلب مرة واحدة وتُحفظ في الجهاز */
+  var cimg = {}, cwait = {};
+  function capAv(c) {
+    var def = 'art/av-' + (c && c.av === 'f' ? 'cf' : 'cm') + '.png';
+    if (!c || !c.pv || !c.id) return def;
+    var x = cimg[c.id];
+    if (!x) { try { x = cimg[c.id] = JSON.parse(localStorage.getItem('hw-ci-' + c.id)) || null; } catch (e) { x = null; } }
+    if (x && x.v === c.pv) return x.data;
+    if (cwait[c.id] !== c.pv) {
+      cwait[c.id] = c.pv;
+      getDoc('capimg', c.id).then(function (d) {
+        if (!d || !d.data) return; cimg[c.id] = { v: c.pv, data: d.data };
+        try { localStorage.setItem('hw-ci-' + c.id, JSON.stringify(cimg[c.id])); } catch (e) {}
+        mediaSubs.forEach(function (f) { try { f(''); } catch (e) {} });
+      });
+    }
+    return x ? x.data : def;
+  }
+  function saveCapImg(id, data) {
+    var v = Date.now();
+    return putDoc('capimg', id, data ? { data: data } : null).then(function () {
+      cimg[id] = data ? { v: v, data: data } : null;
+      try { if (data) localStorage.setItem('hw-ci-' + id, JSON.stringify(cimg[id])); else localStorage.removeItem('hw-ci-' + id); } catch (e) {}
+      return data ? v : 0;
+    });
+  }
+
   /* ---------- الطباعة: تذكرة الطلب (80 مم) والتقارير (A4) بهوية HIGHWAY ---------- */
   var PRINT_CSS = '*{box-sizing:border-box}body{margin:0;font-family:"Tajawal","Segoe UI",Tahoma,sans-serif;color:#0E3A3B;direction:rtl}' +
     '.hd{background:#25CED1;color:#0E3A3B;padding:18px 22px;border-radius:0 0 18px 18px;display:flex;justify-content:space-between;align-items:center}' +
@@ -247,6 +276,6 @@
     printHtml: printHtml, reportHead: reportHead, periodStart: periodStart, optsText: optsText,
     storesCol: storesCol, priceCol: priceCol, storeList: storeList, storeById: storeById, logo: logo, onMedia: onMedia, saveMedia: saveMedia,
     priceList: priceList, basePrices: basePrices, copyBasePrices: copyBasePrices, itemImg: itemImg, saveItemImg: saveItemImg,
-    getDoc: getDoc, putDoc: putDoc, setting: setting, surgeNow: surgeNow, customers: customers, customerFlag: customerFlag, myRecord: myRecord, deviceId: deviceId
+    getDoc: getDoc, putDoc: putDoc, capAv: capAv, saveCapImg: saveCapImg, setting: setting, surgeNow: surgeNow, customers: customers, customerFlag: customerFlag, myRecord: myRecord, deviceId: deviceId
   };
 })(window);

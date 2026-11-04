@@ -412,7 +412,7 @@ function sha256(str) {
   }
   function dispatchAt(o) { return o.scheduledFor ? o.scheduledFor - ((o.routeMin || 15) + 10) * 60000 : 0; }
   function claim(id, cap) {
-    var capObj = { id: cap.id, name: cap.name, phone: cap.phone || '' };
+    var capObj = { id: cap.id, name: cap.name, phone: cap.phone || '', av: cap.av === 'f' ? 'f' : 'm', pv: cap.pv || 0 };
     var o = Orders.get(id);
     if (!remote) {
       Orders._raw().fresh(); o = Orders.get(id);
@@ -470,7 +470,7 @@ function sha256(str) {
   function captainRow(o, withCall) {
     if (!o.captain || !o.captain.name) return '';
     var ph = o.captain.phone ? String(o.captain.phone).replace(/[^\d+]/g, '') : '';
-    return '<div class="oc-cap"><span class="av">' + esc(o.captain.name.trim().charAt(0)) + '</span><div class="cp"><b>' + esc(o.captain.name) + '</b><small>' +
+    return '<div class="oc-cap"><img class="av" src="' + esc(g.HWBiz ? g.HWBiz.capAv(o.captain) : 'art/av-cm.png') + '" alt=""><div class="cp"><b>' + esc(o.captain.name) + '</b><small>' +
       (o.eta ? 'الوصول المتوقع ' + esc(o.eta) : 'الكابتن المعيّن') + '</small></div>' +
       (withCall && ph ? '<a class="oc-call" href="tel:' + esc(ph) + '" aria-label="اتصال بالكابتن"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></a>' : '') + '</div>';
   }

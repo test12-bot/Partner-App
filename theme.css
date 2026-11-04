@@ -55,7 +55,7 @@ body{background:var(--white);color:var(--ink)}
 .hero-bolt{background:var(--yellow) !important;color:var(--ink) !important;box-shadow:none !important}
 
 /* أيقونات بطاقات الإجراءات: دوائر مسطّحة بالهوية */
-.action-card .glyph,.action-card.prep .glyph,.pf-verified{background:var(--teal) !important;box-shadow:none !important;color:var(--white) !important}
+.action-card .glyph,.action-card.prep .glyph{background:var(--teal) !important;box-shadow:none !important;color:var(--white) !important}
 .action-card .glyph svg{color:var(--white) !important}
 .action-card.confirm .glyph{background:var(--yellow) !important}.action-card.confirm .glyph svg{color:var(--ink) !important}
 .action-card .glyph.insta,.action-card .glyph.fb,.action-card .glyph.wa{background:var(--ink) !important;box-shadow:none !important}
@@ -155,7 +155,7 @@ body.bar-mini .tabbar{transform:scale(.86) translateY(2px)}
 .price-row .price{background:var(--yellow) !important;color:var(--ink) !important}
 
 /* ===== إطارات الصور بالليموني ===== */
-.mk-store img,.pf-avatar{border:3px solid var(--yellow) !important;background:var(--white) !important}
+.mk-store img{border:3px solid var(--yellow) !important;background:var(--white) !important}
 
 /* ===== التنبيهات ===== */
 .hw-sound-pill{position:fixed;top:calc(78px + env(safe-area-inset-top));inset-inline:0;margin-inline:auto;width:max-content;max-width:calc(100% - 32px);z-index:96;display:none;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 16px;background:var(--yellow);color:var(--ink);font:inherit;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 10px 24px -12px rgba(14,58,59,.45);animation:pillPulse 1.8s ease-in-out infinite}
@@ -185,7 +185,7 @@ html[dir="ltr"] body{font-family:"Tajawal","Segoe UI",system-ui,sans-serif}
 .me-x{border:0;background:var(--cream);color:var(--ink);width:36px;height:36px;border-radius:50%;font-size:22px;line-height:1;cursor:pointer}
 .me-acts{display:flex;align-items:center;gap:10px}
 .me-mv{border:0;background:var(--cream);color:var(--ink);width:28px;height:28px;border-radius:9px;cursor:pointer;font-weight:800}
-.me-ph{width:44px;height:44px;border-radius:12px;object-fit:cover;flex:none}
+.me-ph{width:42px;height:56px;border-radius:12px;object-fit:cover;flex:none}
 .me-photo{height:170px;border-radius:18px;overflow:hidden;background:var(--teal);display:grid;place-items:center;margin:4px 0 10px;color:#fff}
 .me-photo img{width:100%;height:100%;object-fit:cover}
 .me-photo span{display:flex;flex-direction:column;align-items:center;gap:6px}
