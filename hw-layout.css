@@ -275,3 +275,17 @@ body.sp-open .toast{bottom:calc(84px + env(safe-area-inset-bottom)) !important}
 .co-re{min-height:40px;padding:10px 16px !important;border-radius:14px !important}
 .me-mv{width:40px !important;height:40px !important;border-radius:12px !important}
 .sw.sm::before{content:"";position:absolute;inset:-9px -4px}
+
+/* ---------- 15) أجور التوصيل: اختيار سريع، وطلب بلا أجرة ---------- */
+.fee-quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.fq{min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid rgba(14,58,59,.12);background:var(--white);color:var(--ink);font:inherit;font-size:13px;font-weight:800;cursor:pointer;direction:ltr}
+.fq:active{background:#E8EF44}
+.btn-s.warn{background:#E8EF44 !important;color:#0E3A3B !important}
+.cm-earn.tbd b{font-size:26px !important}
+/* شعار المطعم يملأ إطاره بالكامل */
+.rest-card .ico.lg{width:64px !important;height:64px !important;padding:0 !important;overflow:hidden;background:#fff !important;border:3px solid #E8EF44 !important;box-shadow:none !important}
+.rest-card .ico.lg::before{display:none}
+.rest-card .ico.lg img{display:block;width:100%;height:100%;object-fit:cover;border-radius:0 !important}
+/* نافذة سفلية مفتوحة: رسالة التأكيد أعلى الشاشة حتى لا تغطي أزرارها */
+body:has(.modal.show) .toast{top:calc(14px + env(safe-area-inset-top)) !important;bottom:auto !important;transform:translateY(-14px) !important}
+body:has(.modal.show) .toast.show{transform:none !important}
