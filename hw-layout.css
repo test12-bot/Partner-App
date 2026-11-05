@@ -394,3 +394,10 @@ body.scr-screen-dashboard{overflow:hidden}
 /* شاشة الكابتن الرئيسية: الأزرار المهمة في الأسفل، فرسائل التأكيد تظهر أعلى الخريطة */
 body.cap-home .toast{top:calc(78px + env(safe-area-inset-top)) !important;bottom:auto !important;transform:translateY(-14px) !important}
 body.cap-home .toast.show{transform:none !important}
+.lv-more{display:block;width:100%;min-height:44px;border:0;border-radius:14px;background:var(--cream);color:var(--ink);font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+/* العميل: رسالة التأكيد فوق شريط السلة لا عليه، واسم الهيدر لا يتداخل مع الأزرار */
+body.has-cart .toast{bottom:calc(172px + env(safe-area-inset-bottom)) !important}
+.app-header .brand-mini{min-width:0;overflow:hidden}
+.app-header .brand-mini-text{min-width:0}
+.app-header .brand-mini-title,.app-header .w-addr{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.app-header.hdr-tight .brand-mini-title em{display:none}

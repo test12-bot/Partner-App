@@ -328,7 +328,15 @@ function sha256(str) {
   /* ---------- عدّادات لا تتكرر (رقم الطلب، رقم الكابتن) ----------
      قراءة العدّاد مع بصمته (ETag) ثم الكتابة بشرط ألا يكون تغيّر (if-match)؛ إن سبقنا جهاز آخر نعيد المحاولة.
      في الوضع التجريبي (بلا قاعدة بيانات) يُحفظ العدّاد في المتصفح. لاحقًا ينتقل هذا للخادم في مرحلة الأمان. */
+  /* طلبات العدّاد من نفس الجهاز تمر واحدًا بعد الآخر، فلا تتسابق مع بعضها (مثلًا عدة طلبات في نفس اللحظة) */
+  var ctrChain = {};
   function counter(path) {
+    var run = function () { return counter1(path); };
+    var p = (ctrChain[path] || Promise.resolve()).then(run, run);
+    ctrChain[path] = p.catch(function () {});
+    return p;
+  }
+  function counter1(path) {
     if (!remote) {
       var k = 'hw-ctr-' + path, n = 0;
       try { n = (+localStorage.getItem(k) || 0) + 1; localStorage.setItem(k, n); } catch (e) { n = 1; }
@@ -375,7 +383,10 @@ function sha256(str) {
     var id = uid(), t = Date.now();
     var pin = String(1000 + Math.floor(Math.random() * 9000));   // رمز إثبات التسليم يعطيه العميل للكابتن
     var o = Object.assign({ id: id, code: '', status: 'new', pin: pin, createdAt: t, updatedAt: t, history: [{ s: 'new', t: t }] }, data);
-    var res = origCreate(keyed(o, o)); assignNo(id); return res;
+    /* الوضع التجريبي (بلا قاعدة): الرقم يُحسب فورًا من عدّاد المتصفح، بلا كتابة إضافية */
+    if (!remote && !o.code) { var d = ymd(t), ln = function (k) { var n = 0; try { n = (+localStorage.getItem('hw-ctr-' + k) || 0) + 1; localStorage.setItem('hw-ctr-' + k, n); } catch (e) { n = 1; } return n; };
+      var mn = ln('ord/' + d.slice(0, 4)), dn = ln('ord/' + d); o.code = 'ORD#' + d + '-' + String(mn).padStart(4, '0') + '-' + String(dn).padStart(3, '0'); }
+    var res = origCreate(keyed(o, o)); if (remote) assignNo(id); return res;
   }
   /* رقم الكابتن: سنة وشهر الانضمام + ترتيبه بين من انضموا في ذلك الشهر، مثل 261101 */
   function capNo(t) { var m = ymd(t || Date.now()).slice(0, 4); return counter('cap/' + m).then(function (n) { return m + String(n).padStart(2, '0'); }); }
