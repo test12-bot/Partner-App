@@ -17,6 +17,21 @@
     last = y; clearTimeout(timer);
     timer = setTimeout(function () { b.classList.remove('bar-mini'); }, 260);
   }, { passive: true });
+  /* حالة الصفحة كأصناف على html/body بدل :has() — Safari في الآيفون لا يحدّث :has() دائمًا،
+     فيبقى منع التمرير من شاشة البداية بعد إغلاقها، فيتحول body لحاوية تمرير ويتحرك الهيدر والشريط السفلي مع المحتوى */
+  function pageState() {
+    var sp = document.getElementById('splash'), b = document.body; if (!b) return;
+    root0.classList.toggle('hw-splash', !!(sp && !sp.classList.contains('hide')));
+    var act = document.querySelector('.screen.active');
+    b.classList.toggle('mp-on', !!(act && act.classList.contains('mp')));
+    var sc = act ? 'scr-' + act.id : ''; if (b.dataset.scr !== sc) { if (b.dataset.scr) b.classList.remove(b.dataset.scr); if (sc) b.classList.add(sc); b.dataset.scr = sc; }
+    b.classList.toggle('modal-on', !!document.querySelector('.modal.show'));
+  }
+  function watchState() {
+    pageState();
+    new MutationObserver(pageState).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watchState); else watchState();
   function strip() { if (document.querySelector('.hw-sb')) return; var d = document.createElement('div'); d.className = 'hw-sb'; d.setAttribute('aria-hidden', 'true'); document.body.appendChild(d); }
   window.addEventListener('resize', hdrH);
   document.addEventListener('DOMContentLoaded', function () { hdrH(); strip(); }); window.addEventListener('load', hdrH); setTimeout(hdrH, 1500);

@@ -594,7 +594,7 @@ button.brand-mini:active{transform:scale(.95);}
 
 /* لا يظهر شيء من الموقع تحت الشاشة الافتتاحية (حتى مع مستخدم محفوظ) */
 #splash:not(.hide) ~ .app-shell{visibility:hidden;}
-html:has(#splash:not(.hide)),html:has(#splash:not(.hide)) body{background:var(--teal-800); overflow:hidden; height:100%;}
+html.hw-splash,html.hw-splash body{background:var(--teal-800); overflow:hidden; height:100%;}
 
 /* =========================================================
    وضع التطبيق: شريط سفلي، بطاقة رئيسية، ورقة سفلية، حالة الطلب
