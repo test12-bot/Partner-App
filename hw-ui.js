@@ -11,11 +11,23 @@
   /* الهيدر ثابت دائمًا في أعلى الشاشة؛ نقيس ارتفاعه ليبدأ المحتوى تحته */
   var timer = null, last = window.scrollY, root0 = document.documentElement;
   function hdrH() { var h = document.querySelector('.app-header'); if (h && h.offsetHeight) root0.style.setProperty('--hdr-h', h.offsetHeight + 'px'); }
+  /* الهيدر يختفي بنعومة عند النزول ويعود فور الصعود، ويبقى ثابتًا صلبًا في أعلى الصفحة.
+     لا يختفي في صفحات الخريطة أو مع نافذة مفتوحة، ونتجاهل ارتداد iPhone عند الأطراف */
+  var acc = 0, raf = 0, hy = window.scrollY;
+  function hdrTick() {
+    raf = 0; var b = document.body; if (!b) return;
+    var max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight), y = Math.min(Math.max(window.scrollY, 0), max), dy = y - hy; hy = y;
+    var h = parseInt(getComputedStyle(root0).getPropertyValue('--hdr-h'), 10) || 70;
+    if (b.classList.contains('mp-on') || b.classList.contains('modal-on') || b.classList.contains('cap-home') || b.classList.contains('sp-open') || y <= h || max < h * 2) { acc = 0; b.classList.remove('hdr-hide'); return; }
+    if ((dy > 0) !== (acc > 0)) acc = 0; acc += dy;
+    if (acc > 14) b.classList.add('hdr-hide'); else if (acc < -10) b.classList.remove('hdr-hide');
+  }
   window.addEventListener('scroll', function () {
     var y = window.scrollY, b = document.body;
     if (Math.abs(y - last) > 3 && y > 20) b.classList.add('bar-mini');
     last = y; clearTimeout(timer);
     timer = setTimeout(function () { b.classList.remove('bar-mini'); }, 260);
+    if (!raf) raf = requestAnimationFrame(hdrTick);
   }, { passive: true });
   /* حالة الصفحة كأصناف على html/body بدل :has() — Safari في الآيفون لا يحدّث :has() دائمًا،
      فيبقى منع التمرير من شاشة البداية بعد إغلاقها، فيتحول body لحاوية تمرير ويتحرك الهيدر والشريط السفلي مع المحتوى */
@@ -26,6 +38,7 @@
     b.classList.toggle('mp-on', !!(act && act.classList.contains('mp')));
     var sc = act ? 'scr-' + act.id : ''; if (b.dataset.scr !== sc) { if (b.dataset.scr) b.classList.remove(b.dataset.scr); if (sc) b.classList.add(sc); b.dataset.scr = sc; }
     b.classList.toggle('modal-on', !!document.querySelector('.modal.show'));
+    if (b.dataset.scr2 !== sc) { b.dataset.scr2 = sc; b.classList.remove('hdr-hide'); }
   }
   function watchState() {
     pageState();

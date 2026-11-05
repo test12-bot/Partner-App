@@ -200,7 +200,7 @@ function renderStoreHome() {
     const r = report(HWBiz.periodStart('day')), s = HWBiz.storeStatus(myState()), ann = HWBiz.announcements('stores');
     box.innerHTML = ann.slice(0, 2).map(a => '<div class="ann-s"><b>' + EH(a.title) + '</b>' + (a.body ? '<small>' + EH(a.body) + '</small>' : '') + '</div>').join('') +
         '<button type="button" class="today-card" onclick="daySummary()"><div class="tc-st ' + (s.open ? 'on' : 'off') + '"><i></i>' + (s.open ? 'مفتوح' : EH(s.paused ? 'متوقف مؤقتًا' : 'مغلق')) + '</div>' +
-        '<div class="tc-k"><div><small>مبيعات اليوم</small><b>' + MNY(r.sales) + '<em> د.أ</em></b></div><div><small>طلبات مكتملة</small><b>' + r.done.length + '</b></div><div><small>التقييم</small><b>' + (r.rt.n ? '★ ' + HWBiz.storeRating(currentUser.id, allOrders).avg.toFixed(1) : '—') + '</b></div></div>' +
+        '<div class="tc-k"><div><small>مبيعات اليوم</small><b>' + MNY(r.sales) + '<em> د.أ</em></b></div><div><small>طلبات مكتملة</small><b>' + r.done.length + '</b></div><div><small>التقييم</small><b>' + (r.rt.n ? '★ ' + HWBiz.storeRating(currentUser.id, allOrders).avg.toFixed(1) : 'جديد') + '</b></div></div>' +
         '<span class="tc-go"><span>ملخص اليوم والتقارير</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span></button>';
     maybeDaySummary();
 }
@@ -224,7 +224,7 @@ function renderReports() {
 function printReport() {
     const r = report(HWBiz.periodStart(repPeriod)), name = currentUser.label || currentUser.id;
     HWBiz.printHtml('تقرير ' + name, HWBiz.reportHead('تقرير المبيعات · ' + PERIODS[repPeriod], EH(name) + ' · ' + new Date().toLocaleDateString('ar-JO')) + '<div class="wrap">' +
-        '<div class="kp"><div><small>المبيعات</small><b>' + MNY(r.sales) + '</b></div><div><small>طلبات مكتملة</small><b>' + r.done.length + '</b></div><div><small>متوسط الطلب</small><b>' + MNY(r.avg) + '</b></div><div><small>التقييم</small><b>' + (r.rt.n ? r.rt.avg.toFixed(1) : '—') + '</b></div></div>' +
+        '<div class="kp"><div><small>المبيعات</small><b>' + MNY(r.sales) + '</b></div><div><small>طلبات مكتملة</small><b>' + r.done.length + '</b></div><div><small>متوسط الطلب</small><b>' + MNY(r.avg) + '</b></div><div><small>التقييم</small><b>' + (r.rt.n ? r.rt.avg.toFixed(1) : 'جديد') + '</b></div></div>' +
         '<h2>الطلبات المكتملة</h2><table><thead><tr><th>الطلب</th><th>الوقت</th><th>الأصناف</th><th>الخصم</th><th>المستحق</th></tr></thead><tbody>' +
         r.done.map(o => '<tr><td>' + EH(o.code) + '</td><td>' + new Date(o.createdAt).toLocaleDateString('ar-JO') + ' ' + HWOrders.fmtTime(o.createdAt) + '</td><td>' + o.items.reduce((n, l) => n + l.qty, 0) + '</td><td>' + MNY(o.discount || 0) + '</td><td>' + MNY(o.itemsTotal) + '</td></tr>').join('') +
         '</tbody><tfoot><tr><td colspan="3">الإجمالي</td><td>' + MNY(r.disc) + '</td><td>' + MNY(r.sales) + ' د.أ</td></tr></tfoot></table>' +

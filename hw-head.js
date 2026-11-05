@@ -58,7 +58,8 @@
     if (opt.logout) items.push({ k: 'logout', t: 'تسجيل الخروج', ic: IC.out, danger: 1, fn: opt.logout });
     opt.items = items.filter(function (x, i, a) { return a.map(function (y) { return y.k; }).indexOf(x.k) === i; });
     menu.innerHTML = '<div class="hd-mh"><img alt="" width="44" height="44" src="' + esc(me && me.img || '') + '"><div><b>' + esc(me && me.name || '') + '</b><small>' + esc(me && me.role || '') + '</small></div></div>' +
-      opt.items.map(function (x) { return '<button type="button" role="menuitem" class="hd-mi' + (x.danger ? ' dng' : '') + '" data-hd="' + x.k + '">' + (x.ic || (x.k === 'support' ? IC.help : IC.user)) + '<span>' + esc(x.t) + '</span></button>'; }).join('');
+      opt.items.map(function (x) { return '<button type="button" role="menuitem" class="hd-mi' + (x.danger ? ' dng' : '') + '" data-hd="' + x.k + '">' + (x.ic || (x.k === 'support' ? IC.help : IC.user)) + '<span>' + esc(x.t) + '</span></button>'; }).join('') +
+      '<div class="hd-ver">HIGHWAY · الإصدار ' + esc((g.HW_CONFIG || {}).version || '1.0') + '</div>';
   }
   function toggle() { if (menu.classList.contains('open')) close(); else { paintMenu(); menu.classList.add('open'); menu.setAttribute('aria-hidden', 'false'); box.querySelector('.hd-av').setAttribute('aria-expanded', 'true'); } }
   function close() { if (!menu) return; menu.classList.remove('open'); menu.setAttribute('aria-hidden', 'true'); box.querySelector('.hd-av').setAttribute('aria-expanded', 'false'); }

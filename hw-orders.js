@@ -555,7 +555,7 @@ function sha256(str) {
       (withCall && ph ? '<a class="oc-call" href="tel:' + esc(ph) + '" aria-label="اتصال بالكابتن"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></a>' : '') + '</div>';
   }
   function card(o, actionsHtml, showStore) {
-    var meta = '<span class="oc-price">' + (o.price ? esc(o.price) + ' <small>دينار</small>' : '—') + '</span>';
+    var meta = '<span class="oc-price">' + (o.price ? esc(o.price) + ' <small>دينار</small>' : '<small>تُحدد لاحقًا</small>') + '</span>';
     if (o.orderValue) meta += '<span class="oc-val">' + 'قيمة الطلب ' + esc(o.orderValue) + ' د.أ</span>';
     if (isMarket(o) && showStore) meta += '<span class="oc-tag">طلب تطبيق</span>';   // المطعم لا يحتاجه: كل طلباته من التطبيق
     return '<article class="oc s-' + o.status + '" data-id="' + esc(o.id) + '" tabindex="0" role="button">' +

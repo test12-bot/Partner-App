@@ -78,7 +78,7 @@
     var m = document.getElementById('hwSup');
     if (m) return m;
     m = document.createElement('div'); m.id = 'hwSup'; m.className = 'hw-sup'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-label', 'الدعم');
-    m.innerHTML = '<div class="sp-top"><button type="button" class="sp-x" data-sp="close" aria-label="رجوع">' + IC.back + '</button><img class="sp-av" alt="" width="40" height="40"><div class="sp-id"><b></b><small></small></div><span class="sp-act"></span></div>' +
+    m.innerHTML = '<div class="sp-top"><button type="button" class="sp-x" data-sp="close" aria-label="رجوع">' + IC.back + '</button><button type="button" class="sp-who" data-sp="prof" aria-label="عرض الملف"><img class="sp-av" alt="" width="40" height="40"><span class="sp-id"><b></b><small></small></span></button><span class="sp-act"></span></div>' +
       '<div class="sp-body" data-no-swipe></div>' +
       '<div class="sp-foot"><div class="sp-att"></div><div class="sp-row"><label class="sp-cam" aria-label="إرفاق صورة">' + IC.cam + '<input type="file" accept="image/*" hidden></label>' +
       '<textarea rows="1" placeholder="اكتب رسالتك…" aria-label="رسالتك"></textarea><button type="button" class="sp-send" data-sp="send" aria-label="إرسال">' + IC.send + '</button></div></div>';
@@ -100,8 +100,27 @@
       else if (k === 'solve') { col.patch(cur, { status: 'closed' }); send(cur, { f: 'a', auto: 1, t: 'تم إغلاق المحادثة. إن احتجت أي شيء آخر اكتب لنا هنا في أي وقت.' }); paint(); }
       else if (k === 'call') { var th = col.get(cur); if (th && th.phone) location.href = 'tel:' + th.phone; }
       else if (k === 'img') b.classList.toggle('zoom');
+      else if (k === 'prof') prof(true);
+      else if (k === 'unprof') prof(false);
     });
     return m;
+  }
+  /* الضغط على صورة من تتحدث معه: ملفه (للإدارة: أهم بيانات الكابتن أو المتجر أو العميل؛ للمستخدم: فريق الدعم) */
+  function prof(on) {
+    var m = shell(), p = m.querySelector('.sp-prof');
+    if (!on) { if (p) { p.classList.remove('show'); setTimeout(function () { if (p && !p.classList.contains('show')) p.remove(); }, 300); } return; }
+    if (!p) { p = document.createElement('div'); p.className = 'sp-prof'; p.addEventListener('click', function (e) { if (e.target === p) prof(false); }); m.appendChild(p); }
+    var th = col.get(cur), h;
+    if (isAdmin()) h = (opt.profile && th && opt.profile(th)) || '<div class="ip"><div class="ip-h"><img src="' + esc(avOf(th)) + '" alt=""><div><b>' + esc(th ? th.name : '') + '</b><span><em class="ip-st idle">' + (th ? ROLE[th.role] : '') + '</em></span></div></div>' + (th && th.phone ? '<div class="ip-l"><span>الهاتف</span><b dir="ltr">' + esc(th.phone) + '</b></div>' : '') + '</div>';
+    else {
+      var on2 = inHours(), r = hours(), ph = ((g.HW_CONFIG || {}).opsPhone || '').replace(/[^\d+]/g, '');
+      h = '<div class="ip"><div class="ip-h"><img src="art/av-hw.jpg" alt=""><div><b>دعم HIGHWAY</b><span><em class="ip-st ' + (on2 ? 'on' : 'idle') + '">' + (on2 ? 'متاح الآن' : 'خارج الدوام') + '</em></span></div></div>' +
+        '<div class="ip-l"><span>ساعات الدعم</span><b>من ' + hLabel(r[0]) + ' حتى ' + hLabel(r[1]) + '</b></div><div class="ip-l"><span>وقت الرد المعتاد</span><b>خلال دقائق</b></div>' +
+        '<div class="ip-l"><span>للطوارئ أثناء الطلب</span><b>اتصال مباشر</b></div>' +
+        '<div class="ip-a">' + (ph ? '<a class="ip-b go" href="tel:' + esc(ph) + '">' + S('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/>', 16) + 'اتصال بالإدارة</a>' : '') + '<button type="button" class="ip-b" data-sp="unprof">رجوع للمحادثة</button></div></div>';
+    }
+    p.innerHTML = '<div class="sp-pc"><span class="sp-pg"></span>' + h + '</div>';
+    requestAnimationFrame(function () { p.classList.add('show'); });
   }
   function foot() {
     var m = shell(), a = m.querySelector('.sp-att');
@@ -157,7 +176,7 @@
     m.classList.add('show'); document.body.classList.add('sp-open'); foot(); paint();
     if (g.HWHead) HWHead.close();
   }
-  function close() { open = false; var m = document.getElementById('hwSup'); if (m) m.classList.remove('show'); document.body.classList.remove('sp-open'); if (isAdmin() && opt.onChange) opt.onChange(); }
+  function close() { prof(false); open = false; var m = document.getElementById('hwSup'); if (m) m.classList.remove('show'); document.body.classList.remove('sp-open'); if (isAdmin() && opt.onChange) opt.onChange(); }
 
   /* ---------- صندوق الإدارة ---------- */
   var filter = 'open';

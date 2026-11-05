@@ -5,6 +5,7 @@
                  https://اسم-مشروعك-default-rtdb.firebaseio.com
                  فتتزامن البيانات بين كل الأجهزة. */
 window.HW_CONFIG = {
+  version: "1.0",         // الإصدار الأول
   dbUrl: "https://highway-delivery-fd2b3-default-rtdb.firebaseio.com",
   pollMs: 3000,
 
