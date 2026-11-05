@@ -579,10 +579,10 @@ function myOrders() {
     return allOrders.filter(o => o.storeId === currentUser.id);
 }
 const ST_MSG = {
-    accepted: (o) => 'الكابتن ' + ((o.captain && o.captain.name) || '') + ' في الطريق لاستلام طلبك ' + HWOrders.shortNo(o),
-    picked: (o) => 'تم استلام طلبك ' + HWOrders.shortNo(o) + ' وهو في الطريق للتسليم',
-    delivered: (o) => 'تم تسليم الطلب ' + HWOrders.shortNo(o) + ' ✓',
-    cancelled: (o) => 'تم إلغاء الطلب ' + HWOrders.shortNo(o)
+    accepted: (o) => 'الكابتن ' + ((o.captain && o.captain.name) || '') + ' في الطريق لاستلام طلبك ' + o.code,
+    picked: (o) => 'تم استلام طلبك ' + o.code + ' وهو في الطريق للتسليم',
+    delivered: (o) => 'تم تسليم الطلب ' + o.code + ' ✓',
+    cancelled: (o) => 'تم إلغاء الطلب ' + o.code
 };
 
 function onOrders(list) {
@@ -693,7 +693,7 @@ function renderSheet(id) {
     if (o.rating) rows.push(['تقييم العميل', HWBiz.stars(o.rating.store) + (o.rating.comment ? ' · ' + o.rating.comment : '')]);
     const ph = o.captain && o.captain.phone ? String(o.captain.phone).replace(/[^\d+]/g, '') : '';
     body.innerHTML =
-        '<div class="sh-head"><div><small dir="ltr">' + HWOrders.esc(o.code) + '</small><h3>طلب ' + HWOrders.esc(HWOrders.shortNo(o)) + '</h3></div><span class="oc-chip" style="' + '' + '">' + HWOrders.SHORT[o.status] + '</span></div>' +
+        '<div class="sh-head"><div><small>تفاصيل الطلب</small><h3>' + HWOrders.esc(o.code) + '</h3></div><span class="oc-chip" style="' + '' + '">' + HWOrders.SHORT[o.status] + '</span></div>' +
         '<div class="s-' + o.status + '">' + HWOrders.routeRows(o).replace('oc-route', 'oc-route') + '</div>' +
         HWOrders.timeline(o) + HWOrders.captainRow(o, true) +
         '<div class="sh-rows">' + rows.map(r => '<div><span>' + r[0] + '</span><b>' + HWOrders.esc(r[1]) + '</b></div>').join('') + '</div>' +

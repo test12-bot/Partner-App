@@ -548,7 +548,7 @@ function sha256(str) {
     if (o.orderValue) meta += '<span class="oc-val">' + 'قيمة الطلب ' + esc(o.orderValue) + ' د.أ</span>';
     if (isMarket(o) && showStore) meta += '<span class="oc-tag">طلب تطبيق</span>';   // المطعم لا يحتاجه: كل طلباته من التطبيق
     return '<article class="oc s-' + o.status + '" data-id="' + esc(o.id) + '" tabindex="0" role="button">' +
-      '<div class="oc-top"><span class="oc-code" dir="ltr" title="' + esc(o.code) + '">' + esc(shortNo(o)) + '</span>' + (showStore ? '<span class="oc-store">' + esc(o.storeName || '') + '</span>' : '') +
+      '<div class="oc-top"><span class="oc-code" dir="ltr" title="' + esc(o.code) + '">' + esc(g.HW_SHORT ? shortNo(o) : codeOf(o)) + '</span>' + (showStore ? '<span class="oc-store">' + esc(o.storeName || '') + '</span>' : '') +
       '<span class="oc-time">' + ago(o.createdAt) + '</span><span class="oc-chip">' + label(o) + '</span></div>' +
       routeRows(o) + '<div class="oc-meta">' + meta + '</div>' + captainRow(o, true) + progress(o) +
       (actionsHtml ? '<div class="oc-actions">' + actionsHtml + '</div>' : '') + '</article>';

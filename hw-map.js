@@ -80,7 +80,8 @@
   }
   function fit(m, pts, pad) { if (!pts.length) return; var o = !pad || Array.isArray(pad) ? { padding: pad || [40, 40] } : pad; m.fitBounds(L.latLngBounds(pts), Object.assign({ maxZoom: 16, animate: false }, o)); }
   /* هوامش خرائط الصفحات (الخريطة الثابتة أعلى الصفحة): الهيدر فوقها والبطاقة تغطي أسفلها */
-  function mpPad() { var h = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hdr-h'), 10) || 66; return { paddingTopLeft: [36, h + 26], paddingBottomRight: [36, 78] }; }
+  /* مساحة الخريطة الظاهرة: تحت الهيدر وفوق البطاقة السفلية (--map-bottom تضعه البطاقة القابلة للسحب) */
+  function mpPad() { var cs = getComputedStyle(document.documentElement), h = parseInt(cs.getPropertyValue('--hdr-h'), 10) || 66, b = document.querySelector('#screen-dashboard.active') ? parseInt(cs.getPropertyValue('--map-bottom'), 10) || 0 : 0; return { paddingTopLeft: [36, h + 26], paddingBottomRight: [36, Math.max(78, b + 24)] }; }
   function reverse(p) {                                 // اسم تقريبي للمكان (اختياري، قد يفشل)
     var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 4000);
     return fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&accept-language=ar&zoom=17&lat=' + p[0] + '&lon=' + p[1], ctl ? { signal: ctl.signal } : {}).then(function (r) { return r.json(); }).then(function (j) {

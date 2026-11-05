@@ -8,17 +8,12 @@
    6) زر الرجوع في أندرويد: يغلق النافذة ثم يرجع شاشة ثم للرئيسية
    ========================================================= */
 (function () {
-  /* الهيدر يختفي عند النزول ويعود عند أول حركة للأعلى.
-     لا يختفي في الصفحات القصيرة (كان يقفز مع أي حركة بسيطة)، ويبقى شريط الساعة بلون الهيدر دائمًا */
-  var timer = null, last = window.scrollY, run = 0, root0 = document.documentElement;
+  /* الهيدر ثابت دائمًا في أعلى الشاشة؛ نقيس ارتفاعه ليبدأ المحتوى تحته */
+  var timer = null, last = window.scrollY, root0 = document.documentElement;
   function hdrH() { var h = document.querySelector('.app-header'); if (h && h.offsetHeight) root0.style.setProperty('--hdr-h', h.offsetHeight + 'px'); }
-  function room() { return root0.scrollHeight - window.innerHeight; }        // كم يمكن النزول في هذه الصفحة
   window.addEventListener('scroll', function () {
-    var y = window.scrollY, dy = y - last, b = document.body, long = room() > 360;
-    if (Math.abs(dy) > 3 && y > 20) b.classList.add('bar-mini');
-    if (y < 120 || !long) { run = 0; b.classList.remove('hdr-hide'); }
-    else if (dy > 0) { run = Math.max(0, run) + dy; if (run > 48) b.classList.add('hdr-hide'); }
-    else if (dy < 0) { run = Math.min(0, run) + dy; if (run < -18) b.classList.remove('hdr-hide'); }
+    var y = window.scrollY, b = document.body;
+    if (Math.abs(y - last) > 3 && y > 20) b.classList.add('bar-mini');
     last = y; clearTimeout(timer);
     timer = setTimeout(function () { b.classList.remove('bar-mini'); }, 260);
   }, { passive: true });

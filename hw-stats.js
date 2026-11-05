@@ -61,7 +61,7 @@
   function stLabel(o) { return o.status === 'delivered' ? ['تم التسليم', 'd'] : o.status === 'cancelled' ? ['ملغي', 'r'] : o.status === 'picked' ? ['في طريقه للعميل', 't'] : o.status === 'accepted' ? ['الكابتن متجه للمطعم', 'a'] : ['بانتظار كابتن', '']; }
   /* سطر الطلب: اسم المتجر بخط واضح، وتحته رقم الطلب المختصر (ترتيبه في اليوم) والعميل والوقت */
   function shortNo(c) { var m = /^ORD#\d{6}-\d{4}-(\d{3})$/.exec(c || ''); return m ? '#' + m[1] : (c || ''); }
-  function orderItem(o, v) { var s = stLabel(o); return { id: o.id, t: o.storeName || o.from || '—', c: shortNo(o.code), s: (o.customer && o.customer.name ? o.customer.name + ' · ' : '') + (g.HWOrders ? HWOrders.ago(o.updatedAt || o.createdAt) : ''), tag: s[0], tc: s[1], v: v }; }
+  function orderItem(o, v) { var s = stLabel(o); return { id: o.id, t: o.storeName || o.from || '—', c: g.HW_SHORT ? shortNo(o.code) : (o.code || ''), s: (o.customer && o.customer.name ? o.customer.name + ' · ' : '') + (g.HWOrders ? HWOrders.ago(o.updatedAt || o.createdAt) : ''), tag: s[0], tc: s[1], v: v }; }
   /* الضغط على طلب في القائمة يفتح تفاصيله */
   document.addEventListener('click', function (e) {
     var it = e.target.closest && e.target.closest('.hs-it[data-oid]'); if (!it) return;

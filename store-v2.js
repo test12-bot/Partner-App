@@ -85,7 +85,7 @@ function openAccept(id) {
     const o = HWOrders.get(id); if (!o) return;
     if (openSheetId) closeOrderSheet();   /* من نافذة التفاصيل: تُغلق وتظهر بطاقة وقت التحضير فورًا */
     const sug = o.prepMin || myState().prepMin || 20;
-    openMenuSheet(sheetHead(EH(HWOrders.shortNo(o)), 'كم يحتاج التحضير؟') +
+    openMenuSheet(sheetHead(EH(o.code), 'كم يحتاج التحضير؟') +
         (o.scheduledFor ? '<div class="sched-note">طلب مجدول للتوصيل ' + EH(HWOrders.fmtTime(o.scheduledFor)) + ' · سيُرسل الكابتن قبل الموعد تلقائيًا</div>' : '') +
         noShowWarn(o) + '<div class="sh-rows">' + itemLines(o) + '</div><div class="prep-grid">' +
         [10, 15, 20, 30, 45].map(m => '<button type="button" class="chip' + (m === sug ? ' on' : '') + '" onclick="acceptOrder(\'' + id + '\',' + m + ')">' + m + ' دقيقة</button>').join('') + '</div>');
@@ -99,7 +99,7 @@ function printTicket(id) {
     const o = HWOrders.get(id); if (!o) return;
     const row = (a, b) => '<div class="row"><span>' + a + '</span><b>' + b + '</b></div>';
     HWBiz.printHtml('تذكرة ' + o.code, '<div class="tk"><div class="hd"><b>HIGHWAY</b><small>' + EH(o.storeName || currentUser.label || '') + '</small></div>' +
-        '<div class="big">' + EH(HWOrders.shortNo(o)) + '</div><div style="text-align:center;font-size:11px">' + EH(o.code) + '</div>' + row('الوقت', HWOrders.fmtTime(o.createdAt)) +
+        '<div class="big">' + EH(o.code) + '</div>' + row('الوقت', HWOrders.fmtTime(o.createdAt)) +
         (o.scheduledFor ? row('موعد التوصيل', HWOrders.fmtTime(o.scheduledFor)) : '') + (o.customer ? row('العميل', EH(o.customer.name)) : '') + '<hr>' +
         o.items.map(l => row(l.qty + '× ' + EH(l.name), MNY(l.price * l.qty)) + (l.opts && l.opts.length ? '<div class="op">' + EH(HWBiz.optsText(l.opts)) + '</div>' : '') + (l.notes ? '<div class="op">ملاحظة: ' + EH(l.notes) + '</div>' : '')).join('') + '<hr>' +
         row('المجموع الفرعي', MNY(o.itemsGross || o.itemsTotal)) + (o.discount ? row('خصم العرض', '−' + MNY(o.discount)) : '') +

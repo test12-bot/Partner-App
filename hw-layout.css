@@ -6,17 +6,16 @@
    ========================================================= */
 :root{--hdr-h:66px;--mp-h:46vh;--ease-hdr:cubic-bezier(.22,.8,.24,1)}
 
-/* ---------- 1) الهيدر ----------
-   لون صافٍ بلا توهج ولا ظل ضبابي. شريط الساعة (hw-sb) ثابت بلون الهيدر دائمًا،
-   فحين ينزلق الهيدر للأعلى يختفي تحته ولا يظهر فراغ أبيض مكانه */
-.app-header{transition:transform .38s var(--ease-hdr);will-change:transform;box-shadow:none !important;border:0 !important;background:var(--teal) !important}
+/* ---------- 1) الهيدر: ثابت دائمًا في أعلى الشاشة في كل التطبيقات ----------
+   لون صافٍ بلا توهج. شريط الساعة (hw-sb) بلون الهيدر، والمحتوى يبدأ تحته */
+.app-header{position:fixed !important;top:0;left:0;right:0;z-index:50 !important;transform:none !important;box-shadow:none !important;border:0 !important;background:var(--teal) !important}
 .app-header::before,.app-header::after{display:none !important}
-body.hdr-hide .app-header{transform:translateY(-100%)}
+.app-shell{padding-top:var(--hdr-h)}
+body.cap-home .app-shell{padding-top:0}
 .hw-sb{position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#25CED1;z-index:60;pointer-events:none}
 body.cap-home .hw-sb,body:not(.authed) .hw-sb{display:none}
-.cat-tabs{transition:top .38s var(--ease-hdr)}
-body.hdr-hide .cat-tabs{top:env(safe-area-inset-top,0px) !important}
-@media (prefers-reduced-motion:reduce){.app-header,.cat-tabs{transition:none}}
+.cat-tabs{top:var(--hdr-h) !important}
+@media (min-width:1024px){.app-shell{padding-top:calc(var(--hdr-h) + 28px)}}
 
 /* جرس التنبيهات + صورة الحساب (hw-head.js) */
 .hd-act{position:relative;display:flex;align-items:center;gap:8px;margin-inline-start:auto;flex:none}
@@ -369,3 +368,29 @@ body:has(.modal.show) .toast.show{transform:none !important}
 .lv-empty{padding:18px;text-align:center;border-radius:18px;background:var(--cream);font-size:13.5px;font-weight:700;color:var(--ink-soft);margin-bottom:14px}
 .kpi-none{padding:14px;text-align:center;font-size:13px;color:var(--ink-soft)}
 @media (min-width:1024px){#screen-dashboard{--mp-h:58vh}}
+
+/* ---------- 18) لوحة الإدارة: خريطة بملء الشاشة وبطاقة العمليات تُسحب (شريط · نصف · كاملة) ---------- */
+#screen-dashboard .mp-map{top:0;bottom:0;height:auto}
+#screen-dashboard .mp-sheet{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;min-height:0;height:var(--dsh,46vh);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  box-shadow:0 -14px 34px -18px rgba(10,53,54,.45);padding-bottom:calc(120px + env(safe-area-inset-bottom));transition:height .32s var(--ease-hdr)}
+#screen-dashboard .mp-sheet.dragging{transition:none}
+#screen-dashboard .mp-grab{position:sticky;top:-10px;z-index:3;width:100%;height:30px;margin:-10px 0 4px;background:transparent;cursor:grab;touch-action:none;display:flex;align-items:center;justify-content:center}
+#screen-dashboard .mp-grab::before{content:"";width:46px;height:5px;border-radius:5px;background:rgba(14,58,59,.22)}
+#screen-dashboard .ops-head{touch-action:none}
+#screen-dashboard .mp-chips{bottom:calc(var(--dsh,46vh) + 12px);transition:bottom .32s var(--ease-hdr)}
+body:has(#screen-dashboard.active){overflow:hidden}
+@media (min-width:1024px){#screen-dashboard .mp-sheet{max-width:760px;margin-inline:auto}}
+
+/* ---------- 19) الكابتن: أكثر من طلب معه (شريط تبديل بين الطلبات) ---------- */
+.jtabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -2px 12px;padding:2px}
+.jtabs::-webkit-scrollbar{display:none}
+.jt{flex:1 0 auto;min-width:46%;display:flex;align-items:center;gap:8px;min-height:52px;padding:8px 12px;border-radius:16px;border:2px solid transparent;background:var(--cream);color:var(--ink);font:inherit;text-align:start;cursor:pointer}
+.jt i{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:900;background:#25CED1;color:#0E3A3B}
+.jt.p i{background:#0E3A3B;color:#E8EF44}
+.jt span{min-width:0}.jt b{display:block;font-size:13.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jt small{display:block;font-size:11.5px;font-weight:700;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jt.on{border-color:#0E3A3B;background:var(--white)}
+.cm-main.alt{margin-top:8px;background:#E8EF44 !important;color:#0E3A3B !important}
+/* شاشة الكابتن الرئيسية: الأزرار المهمة في الأسفل، فرسائل التأكيد تظهر أعلى الخريطة */
+body.cap-home .toast{top:calc(78px + env(safe-area-inset-top)) !important;bottom:auto !important;transform:translateY(-14px) !important}
+body.cap-home .toast.show{transform:none !important}
