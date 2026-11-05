@@ -204,7 +204,9 @@ function sha256(str) {
       src.addEventListener('patch', function (e) { try { var d = JSON.parse(e.data); var t = get(); Object.keys(d.data || {}).forEach(function (k) { t = setIn(t, d.path.replace(/\/$/, '') + '/' + k, d.data[k]); }); set(t); rebuild(); } catch (x) {} });
     }
     function stream() {
-      if (name !== 'orders' && !scopes) { pulse.on(name, load); return pulse.ok(); }
+      /* كل المجموعات غير الطلبات (حتى المحدودة مثل محادثة الدعم) تتحدث عبر /pulse:
+         المتصفح يسمح بستة اتصالات فقط لنفس الخادم، فبث مستقل لكل مجموعة يحجز طلبات الكتابة */
+      if (name !== 'orders') { pulse.on(name, load); return pulse.ok(); }
       if (!g.EventSource) return false;
       if (scopes) {
         if (qes.length && qes.every(function (x) { return x.readyState !== 2; })) return true;
@@ -323,19 +325,62 @@ function sha256(str) {
   function isActive(o) { return o.status === 'new' || o.status === 'accepted' || o.status === 'picked'; }
 
   var origCreate = Orders.create;
-  /* رمز الطلب: يوم الشهر + 5 رموز (بدون 0/O و1/I المتشابهة)، مع التأكد من عدم تكراره بين الطلبات المعروفة */
-  function newCode(t) {
-    var A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', used = {}, c, n = 0;
-    Orders.list().forEach(function (o) { used[o.code] = 1; });
-    do { c = 'HW-' + pad(new Date(t).getDate()); for (var i = 0; i < 5; i++) c += A[Math.floor(Math.random() * A.length)]; } while (used[c] && ++n < 20);
-    return c;
+  /* ---------- عدّادات لا تتكرر (رقم الطلب، رقم الكابتن) ----------
+     قراءة العدّاد مع بصمته (ETag) ثم الكتابة بشرط ألا يكون تغيّر (if-match)؛ إن سبقنا جهاز آخر نعيد المحاولة.
+     في الوضع التجريبي (بلا قاعدة بيانات) يُحفظ العدّاد في المتصفح. لاحقًا ينتقل هذا للخادم في مرحلة الأمان. */
+  function counter(path) {
+    if (!remote) {
+      var k = 'hw-ctr-' + path, n = 0;
+      try { n = (+localStorage.getItem(k) || 0) + 1; localStorage.setItem(k, n); } catch (e) { n = 1; }
+      return Promise.resolve(n);
+    }
+    var url = base + '/counters/' + path + '.json', tries = 0;
+    return (function attempt() {
+      return fetch(url, { cache: 'no-store', headers: { 'X-Firebase-ETag': 'true' } }).then(function (r) {
+        var tag = r.headers.get('ETag'); return r.json().then(function (v) { return { tag: tag, v: +v || 0 }; });
+      }).then(function (x) {
+        var n = x.v + 1, h = { 'Content-Type': 'application/json' }; if (x.tag) h['if-match'] = x.tag;
+        return fetch(url, { method: 'PUT', headers: h, body: JSON.stringify(n) }).then(function (r) {
+          if (r.status === 412 && ++tries < 12) return new Promise(function (ok) { setTimeout(ok, 40 + Math.random() * 160); }).then(attempt);
+          if (!r.ok) throw new Error('counter ' + r.status);
+          return n;
+        });
+      });
+    })();
   }
+  function ymd(t) { var d = new Date(t); return String(d.getFullYear()).slice(2) + pad(d.getMonth() + 1) + pad(d.getDate()); }
+  /* رقم الطلب: ORD#يوم-ترتيبه في الشهر-ترتيبه في اليوم، مثل ORD#261105-0347-021
+     يُعطى فور وصول الطلب للقاعدة؛ إن كان الجهاز بلا إنترنت يُعطى عند عودة الاتصال */
+  var NOQ = 'hw-ordno-q', noBusy = {};
+  function noQueue(add, del) {
+    var q = []; try { q = JSON.parse(localStorage.getItem(NOQ) || '[]'); } catch (e) {}
+    if (add && q.indexOf(add) < 0) q.push(add); if (del) q = q.filter(function (x) { return x !== del; });
+    try { localStorage.setItem(NOQ, JSON.stringify(q)); } catch (e) {}
+    return q;
+  }
+  function assignNo(id) {
+    if (noBusy[id]) return; var o = Orders.get(id);
+    if (!o) { if (Orders.loaded()) noQueue(null, id); return; }
+    if (o.code) { noQueue(null, id); return; }
+    noBusy[id] = 1; noQueue(id);
+    var d = ymd(o.createdAt), m = d.slice(0, 4), mn = 0;
+    counter('ord/' + m).then(function (n) { mn = n; return counter('ord/' + d); }).then(function (dn) {
+      Orders.patch(id, { code: 'ORD#' + d + '-' + String(mn).padStart(4, '0') + '-' + String(dn).padStart(3, '0') });
+      noQueue(null, id); delete noBusy[id];
+    }).catch(function () { delete noBusy[id]; });
+  }
+  function retryNos() { noQueue().forEach(assignNo); }
+  g.addEventListener('online', retryNos); g.addEventListener('hw-netok', retryNos); setTimeout(retryNos, 3000);
   function createOrder(data) {
     var id = uid(), t = Date.now();
     var pin = String(1000 + Math.floor(Math.random() * 9000));   // رمز إثبات التسليم يعطيه العميل للكابتن
-    var o = Object.assign({ id: id, code: newCode(t), status: 'new', pin: pin, createdAt: t, updatedAt: t, history: [{ s: 'new', t: t }] }, data);
-    return origCreate(keyed(o, o));
+    var o = Object.assign({ id: id, code: '', status: 'new', pin: pin, createdAt: t, updatedAt: t, history: [{ s: 'new', t: t }] }, data);
+    var res = origCreate(keyed(o, o)); assignNo(id); return res;
   }
+  /* رقم الكابتن: سنة وشهر الانضمام + ترتيبه بين من انضموا في ذلك الشهر، مثل 261101 */
+  function capNo(t) { var m = ymd(t || Date.now()).slice(0, 4); return counter('cap/' + m).then(function (n) { return m + String(n).padStart(2, '0'); }); }
+  /* الرقم الظاهر للطلب: قبل وصول الرقم من القاعدة نعرض "ORD#…" */
+  function codeOf(o) { return o && o.code ? o.code : 'ORD#…'; }
   /* مفاتيح القراءة المحدودة: المتجر والكابتن يقرآن طلباتهما لآخر 40 يومًا فقط (لا كل التاريخ) */
   function keyed(p, o) {
     if (o.storeId && !o.storeKey) p.storeKey = o.storeId + '|' + o.createdAt;
@@ -412,7 +457,7 @@ function sha256(str) {
   }
   function dispatchAt(o) { return o.scheduledFor ? o.scheduledFor - ((o.routeMin || 15) + 10) * 60000 : 0; }
   function claim(id, cap) {
-    var capObj = { id: cap.id, name: cap.name, phone: cap.phone || '', av: cap.av === 'f' ? 'f' : 'm', pv: cap.pv || 0 };
+    var capObj = { id: cap.id, num: cap.num || '', name: cap.name, phone: cap.phone || '', av: cap.av === 'f' ? 'f' : 'm', pv: cap.pv || 0 };
     var o = Orders.get(id);
     if (!remote) {
       Orders._raw().fresh(); o = Orders.get(id);
@@ -512,6 +557,6 @@ function sha256(str) {
 
   g.HWDB = { mode: remote ? 'remote' : 'local', col: Col, uid: uid, esc: esc, num: num, money: money, cfg: CFG };
   g.HWOrders = { mode: remote ? 'remote' : 'local', STEPS: STEPS, SHORT: SHORT, create: createOrder, update: updateOrder, patchLite: function (id, p) { return Orders.patch(id, p); }, keyRange: keyRange, pending: function (id) { return id ? outbox.has('orders', id) : outbox.count(); }, subscribe: Orders.subscribe, scope: Orders.scope, scoped: Orders.scoped, get: Orders.get, list: Orders.list, _raw: Orders._raw,
-    stats: stats, isActive: isActive, isToday: isToday, isMarket: isMarket, stage: stage, steps: steps, label: label, offerable: offerable, dispatchAt: dispatchAt, claim: claim, settle: settle, feeFrom: feeFrom,
+    stats: stats, isActive: isActive, isToday: isToday, isMarket: isMarket, stage: stage, steps: steps, label: label, offerable: offerable, dispatchAt: dispatchAt, claim: claim, settle: settle, counter: counter, capNo: capNo, codeOf: codeOf, feeFrom: feeFrom,
     fmtTime: fmtTime, ago: ago, card: card, timeline: timeline, routeRows: routeRows, progress_: progress, captainRow: captainRow, esc: esc, num: num, money: money, toast: toast, beep: beep, openNav: openNav };
 })(window);

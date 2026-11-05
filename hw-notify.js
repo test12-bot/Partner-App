@@ -19,7 +19,7 @@
     var c = ac(); if (!c) return;
     if (c.state === 'suspended') c.resume();
     try { var b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) {}
-    unlocked = true; renderPill();
+    unlocked = true;
     if (g.Notification && Notification.permission === 'default' && g.HWNotifyAskPerm) { try { Notification.requestPermission(); } catch (e) {} }
     if (wantWake) keepAwake(true);
   }
@@ -53,7 +53,9 @@
   }
   /* إشعار للنظام عندما تكون الصفحة مخفية (لا يعمل في Safari iOS داخل التبويب) */
   function tr(x) { return g.HWI18n ? g.HWI18n.t(x) : x; }   // بالإنجليزية عند اختيارها
-  function notify(title, body) {
+  /* كل تنبيه يُحفظ في جرس أعلى الشاشة، ويظهر كإشعار نظام إن كانت الصفحة مخفية */
+  function notify(title, body, go) {
+    if (g.HWHead) g.HWHead.push(tr(title), tr(body), go);
     try { if (document.hidden && g.Notification && Notification.permission === 'granted') new Notification(tr(title), { body: tr(body), icon: 'icon-192.png', tag: 'hw' }); } catch (e) {}
   }
   /* إبقاء الشاشة مضاءة */
@@ -65,21 +67,6 @@
   }
   document.addEventListener('visibilitychange', function () { if (!document.hidden && wantWake) keepAwake(true); });
 
-  /* شارة "تفعيل الصوت" تظهر حتى أول لمسة */
-  var pill = null;
-  function renderPill() {
-    if (!document.body) return;
-    if (!pill) {
-      pill = document.createElement('button'); pill.type = 'button'; pill.className = 'hw-sound-pill';
-      pill.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg><span>اضغط لتفعيل صوت التنبيهات</span>';
-      pill.addEventListener('click', function () { unlock(); play('status'); });
-      document.body.appendChild(pill);
-    }
-    var need = !unlocked && document.body.classList.contains('authed');
-    pill.classList.toggle('show', need);
-    /* أي لمسة على الشاشة تفعّل الصوت، فالشارة تذكير قصير لا يغطي المحتوى طويلًا */
-    if (need && !pill.dataset.t) pill.dataset.t = setTimeout(function () { pill.classList.remove('show'); }, 7000);
-  }
   /* تحذير مهم في النسخة التجريبية: تطبيقات الشاشة الرئيسية في iOS لا تتشارك البيانات */
   function standaloneWarn() {
     var sa = g.navigator.standalone || (g.matchMedia && g.matchMedia('(display-mode: standalone)').matches);
@@ -90,8 +77,7 @@
     document.body.appendChild(d);
   }
   document.addEventListener('DOMContentLoaded', function () {
-    renderPill(); standaloneWarn();
-    new MutationObserver(renderPill).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    standaloneWarn();
   });
   g.HWNotify = { ringing: function () { return Object.keys(rings); }, play: play, ring: ring, stop: stop, stopAll: stopAll, notify: notify, keepAwake: keepAwake, unlock: unlock, isUnlocked: function () { return unlocked; } };
 })(window);

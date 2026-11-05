@@ -36,4 +36,6 @@ window.HW_CONFIG = {
      التعبئة من: Firebase Console → Project settings → General → Your apps → Web app (apiKey و authDomain و projectId) */
   otp: { apiKey: "", authDomain: "", projectId: "" },
   cashLimit: 3,           // حد النقد الافتراضي مع الكابتن (د.أ) — يُعدّل من لوحة الإدارة
+  opsPhone: "+962791819432",   // هاتف مركز العمليات: زر "اتصل بالمنسق" للطوارئ فقط (لا يُنشئ طلبًا)
+  supportHours: [9, 24],       // ساعات رد الدعم داخل التطبيقات (من 9 صباحًا حتى 12 ليلًا)؛ خارجها رد تلقائي
 };

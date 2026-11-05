@@ -196,9 +196,7 @@ function applyUser(user) {
     currentUser = user;
     if (user) HWOrders.scope([Object.assign({ by: 'storeKey' }, HWOrders.keyRange(user.id, 40))]);   /* المطعم يقرأ طلباته لآخر 40 يومًا فقط */
     document.getElementById('homeTitle').textContent = user && user.label ? `أهلًا بك، ${user.label}` : 'أهلًا بك';
-    document.getElementById('userWrap').style.display = user ? '' : 'none';
-    if (user) fillUserUI(user);
-    closeUserMenu();
+    if (user) fillUserUI(user); else HWHead.user(null);
     document.body.classList.toggle('authed', !!user);          // التطبيق مخفي قبل تسجيل الدخول
     document.getElementById('appShell').inert = !user;         // ولا يمكن الوصول إليه بالكيبورد أيضاً
 }
@@ -207,17 +205,13 @@ function applyUser(user) {
 function userName(u) { return u.label || 'HIGHWAY Delivery'; }
 function userRole() { return 'متجر شريك'; }
 
-function setAvatar(img, u) {
+function fillUserUI(u) {
+    const img = document.getElementById('pfImg');
     img.onerror = () => { img.onerror = null; img.src = 'logo-icon.png'; };
     img.src = HWBiz.logo(u.id);   // شعار المتجر ترفعه الإدارة
-}
-
-function fillUserUI(u) {
-    setAvatar(document.getElementById('avatarImg'), u);
-    setAvatar(document.getElementById('umImg'), u);
-    setAvatar(document.getElementById('pfImg'), u);
-    document.getElementById('umName').textContent = userName(u);
-    document.getElementById('umRole').textContent = userRole(u);
+    const lg = HWBiz.logo(u.id);   /* بلا شعار مرفوع: صورة HIGHWAY الدائرية */
+    HWHead.user({ img: /logo-icon/.test(lg) ? 'art/av-hw.jpg' : lg, name: userName(u), role: userRole(u) });
+    HWSupport.rescope();
     document.getElementById('pfName').textContent = userName(u);
     document.getElementById('pfHandle').textContent = '@' + u.names[0];
     document.getElementById('pfChip').textContent = userRole(u);
@@ -238,22 +232,13 @@ function fillStoreInfo(u) {
 }
 HWBiz.storesCol.subscribe(() => fillStoreInfo()); HWDB.col('storestate').subscribe(() => fillStoreInfo());
 
-function closeUserMenu() {
-    const m = document.getElementById('userMenu'), b = document.getElementById('avatarBtn');
-    if (!m) return;
-    m.classList.remove('open'); m.setAttribute('aria-hidden', 'true'); m.inert = true;
-    b.setAttribute('aria-expanded', 'false');
-}
-function toggleUserMenu() {
-    const m = document.getElementById('userMenu');
-    if (m.classList.contains('open')) return closeUserMenu();
-    m.classList.add('open'); m.setAttribute('aria-hidden', 'false'); m.inert = false;
-    document.getElementById('avatarBtn').setAttribute('aria-expanded', 'true');
-}
-function openProfile() {
-    closeUserMenu();
-    if (currentUser) goTo('screen-profile');
-}
+/* أعلى الشاشة: الجرس وشعار المتجر، وقائمته: الملف الشخصي، الدعم، المظهر واللغة، الخروج */
+HWHead.init({
+    app: 'store', logout: () => logout(),
+    items: [{ k: 'profile', t: 'الملف الشخصي', fn: () => { if (currentUser) goTo('screen-profile'); } }, { k: 'support', t: 'الدعم', fn: () => HWSupport.open() }],
+    go: (k) => { if (/^support/.test(k)) HWSupport.open(); else if (HWOrders.get(k)) openOrderSheet(k); else tabGo('screen-orders'); }
+});
+HWSupport.init({ role: 's', me: () => currentUser ? { uid: currentUser.id, name: userName(currentUser), phone: (HWBiz.storeById(currentUser.id) || {}).phone || '', img: HWBiz.logo(currentUser.id) } : null });
 
 /* الإطار الزجاجي يكبر ليظهر نموذج الدخول، وزر الرجوع يعيد الشاشة الافتتاحية كما كانت */
 let introCtl = null;
@@ -328,7 +313,7 @@ function logout() {
 
 /* ---------- التنقل ---------- */
 function showScreen(id) {
-    closeUserMenu();
+    HWHead.close();
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     document.getElementById('headerBack').classList.toggle('show', id !== 'screen-home');
@@ -505,55 +490,32 @@ function closeOrderModal() {
     document.getElementById('orderModal').classList.remove('show');
 }
 
+/* الطلب يذهب للنظام مباشرة (بلا واتساب): يظهر فورًا عند المنسق والكباتن القريبين */
 function submitOrder() {
-    const val = document.getElementById('modalOrderValue').value.trim() || "غير محدد";
-    const notes = document.getElementById('modalOrderNotes').value.trim() || "لا يوجد";
-    let baseMsg = "";
-    let refText = "";
-
-    if (pendingOrderData.type === 'direct') {
-        baseMsg = `مرحباً، أود استدعاء كابتن من فضلك.`;
-    } else if (pendingOrderData.type === 'area') {
-        baseMsg = `مرحباً HIGHWAY Delivery، أريد طلب كابتن:\n- نقطة البدء: ${pendingOrderData.startPoint}\n- الوجهة: ${pendingOrderData.area}\n- السعر: ${pendingOrderData.price} دينار`;
-        refText = `${pendingOrderData.startPoint} ← ${pendingOrderData.area}`;
-    } else if (pendingOrderData.type === 'calc') {
-        baseMsg = `مرحباً، طلب كابتن (حساب بالكيلو):\n- المسافة: ${calcState.dist} كم\n- السعر التقديري: ${calcState.total} JOD`;
-        refText = `${calcState.dist} كم • ${calcState.total} JOD`;
-    }
-
-    const finalMsg = `${baseMsg}\n- قيمة الطلب: ${val}\n- ملاحظات: ${notes}`;
-    const url = `https://wa.me/?text=${encodeURIComponent(finalMsg)}`;
-    window.open(url, '_blank');
-
-    const isArea = pendingOrderData.type === 'area', isCalc = pendingOrderData.type === 'calc';
+    const val = document.getElementById('modalOrderValue').value.trim();
+    const notes = document.getElementById('modalOrderNotes').value.trim();
+    const d = pendingOrderData, isArea = d.type === 'area', isCalc = d.type === 'calc';
     const myName = (currentUser && currentUser.label) || 'HIGHWAY Delivery';
     const myState = currentUser ? HWDB.col('storestate').get(currentUser.id) || {} : {}, myDoc = currentUser ? HWBiz.storeById(currentUser.id) || {} : {};
     HWOrders.create({
-        source: 'store', storeId: currentUser ? currentUser.id : 'guest', storeName: myName, kind: pendingOrderData.type,
+        source: 'store', storeId: currentUser ? currentUser.id : 'guest', storeName: myName, kind: d.type,
         storeLoc: myState.lat != null ? { lat: myState.lat, lng: myState.lng } : null, storePhone: myDoc.phone || '',
-        from: isArea ? pendingOrderData.startPoint : myName,
-        to: isArea ? pendingOrderData.area : isCalc ? 'حسب المسافة (' + calcState.dist + ' كم)' : '',
-        price: isArea ? pendingOrderData.price : isCalc ? calcState.total : '',
+        from: isArea ? d.startPoint : myName,
+        to: isArea ? d.area : isCalc ? 'حسب المسافة (' + calcState.dist + ' كم)' : '',
+        price: isArea ? d.price : isCalc ? calcState.total : '',
         distance: isCalc ? calcState.dist : '',
-        orderValue: val === 'غير محدد' ? '' : val, notes: notes === 'لا يوجد' ? '' : notes
+        orderValue: val, notes: notes
     });
-
     closeOrderModal();
-
-    const ref = document.getElementById('successRef');
-    if (refText) {
-        ref.textContent = refText;
-        ref.style.display = 'inline-block';
-    } else {
-        ref.style.display = 'none';
-    }
     resetAndGo('screen-home');
-    HWOrders.toast('تم تسجيل طلبك وإرساله لفريق العمليات');
+    HWOrders.toast('تم إرسال طلبك، نبحث لك عن أقرب كابتن');
     buzz(18);
 }
+/* زر الطوارئ: اتصال هاتفي بمركز العمليات فقط، لا يُنشئ طلبًا */
+document.addEventListener('DOMContentLoaded', () => { const a = document.getElementById('opsCall'); if (a) a.href = 'tel:' + (HW_CONFIG.opsPhone || ''); });
 
 /* ---------- سلوك التطبيق: الشريط السفلي، الاهتزاز، حالة الطلب ---------- */
-const TAB_OF = { 'screen-menu': 'menu', 'screen-home': 'home', 'screen-success': 'home', 'screen-prices': 'prices', 'screen-list': 'prices', 'screen-calc': 'prices', 'screen-contact': 'profile', 'screen-orders': 'orders', 'screen-profile': 'profile' };
+const TAB_OF = { 'screen-menu': 'menu', 'screen-home': 'home', 'screen-prices': 'prices', 'screen-list': 'prices', 'screen-calc': 'prices', 'screen-orders': 'orders' };
 function syncTabs(id) {
     document.querySelectorAll('.tab').forEach(t => {
         const on = t.dataset.tab === TAB_OF[id];
@@ -600,10 +562,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (splash.classList.contains('login-mode') && !splash.classList.contains('hide')) closeLogin();
             closeOrderModal();
             closeOrderSheet();
-            closeUserMenu();
         }
     });
-    document.addEventListener('click', (e) => { if (!e.target.closest('#userWrap')) closeUserMenu(); });
 });
 
 
@@ -631,7 +591,7 @@ function onOrders(list) {
     if (prevStatus) {
         mine.forEach(o => {
             const was = prevStatus[o.id];
-            if (was && was !== o.status && ST_MSG[o.status]) { HWOrders.toast(ST_MSG[o.status](o)); HWNotify.play('status'); buzz(24); delete dismissedLive[o.id]; }
+            if (was && was !== o.status && ST_MSG[o.status]) { HWOrders.toast(ST_MSG[o.status](o)); HWNotify.play('status'); HWNotify.notify('HIGHWAY', ST_MSG[o.status](o), o.id); buzz(24); delete dismissedLive[o.id]; }
         });
     }
     if (prevStatus) mine.forEach(o => { if (!(o.id in prevStatus) && HWOrders.isMarket(o) && o.storeState === 'pending' && currentUser) { HWOrders.toast('طلب جديد ' + o.code + ' بانتظار قبولك'); HWNotify.notify('HIGHWAY · طلب جديد', o.code + ' بانتظار قبولك'); } });

@@ -58,7 +58,7 @@ function prepRing(o) {
 function capLine(o) {
     if (o.status === 'new') return '<div class="sa-cap wait"><span class="sa-ic">' + CAP_IC + '</span><div class="sa-t"><b>نبحث عن كابتن</b><small>سيظهر هنا فور تعيينه</small></div></div>';
     if (!o.captain || o.status !== 'accepted') return '';
-    const m = capEtaToStore(o), nm = EH(o.captain.name), ph = o.captain.phone ? String(o.captain.phone).replace(/[^\d+]/g, '') : '';
+    const m = capEtaToStore(o), nm = EH(o.captain.name) + (o.captain.num ? ' <span class="cap-no" dir="ltr">' + EH(o.captain.num) + '</span>' : ''), ph = o.captain.phone ? String(o.captain.phone).replace(/[^\d+]/g, '') : '';
     const sub = m === 0 ? 'وصل تقريبًا · جهّز الطلب' : m == null ? 'في الطريق إليك' : 'في الطريق · يصل ' + EH(HWOrders.fmtTime(Date.now() + m * 60000));
     return '<div class="sa-cap full"><img class="sa-av" src="' + EH(HWBiz.capAv(o.captain)) + '" alt=""><div class="sa-t"><b>' + nm + '</b><small>' + sub + '</small></div>' +
         (m ? '<span class="sa-eta"><b>' + m + '</b><small>د</small></span>' : '') +

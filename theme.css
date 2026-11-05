@@ -22,9 +22,6 @@ body{background:var(--white);color:var(--ink)}
 .brand-mini-title{color:var(--white)}.brand-mini-title em{color:var(--yellow)}
 .brand-mini-sub{color:rgba(14,58,59,.78)}
 .header-back{background:rgba(255,255,255,.3) !important;color:var(--ink) !important;border:0 !important;box-shadow:none !important}
-.header-avatar{border:3px solid var(--cream) !important;background:var(--cream) !important;box-shadow:none;transition:border-color .2s,box-shadow .2s,transform .2s}
-.header-avatar[aria-expanded="true"]{border-color:var(--yellow) !important;box-shadow:none !important}
-.header-avatar img{border-color:var(--white)}
 
 /* ===== العناوين ===== */
 .page-heading h1{color:var(--ink)}
@@ -58,8 +55,8 @@ body{background:var(--white);color:var(--ink)}
 .action-card .glyph,.action-card.prep .glyph{background:var(--teal) !important;box-shadow:none !important;color:var(--white) !important}
 .action-card .glyph svg{color:var(--white) !important}
 .action-card.confirm .glyph{background:var(--yellow) !important}.action-card.confirm .glyph svg{color:var(--ink) !important}
-.action-card .glyph.insta,.action-card .glyph.fb,.action-card .glyph.wa{background:var(--ink) !important;box-shadow:none !important}
-.action-card .glyph.insta svg,.action-card .glyph.fb svg,.action-card .glyph.wa svg{color:var(--yellow) !important}
+.action-card .glyph.fb{background:var(--ink) !important;box-shadow:none !important}
+.action-card .glyph.fb svg{color:var(--yellow) !important}
 .action-card .glyph::before{display:none}
 
 /* رسومات الطعام والأغلفة: أبيض رفيع على فيروزي مسطّح */
@@ -131,7 +128,6 @@ body.bar-mini .tabbar{transform:scale(.86) translateY(2px)}
 .tl li.done i{background:var(--teal) !important;border-color:var(--teal) !important}
 .tl li.act i{background:var(--yellow) !important;border-color:var(--ink) !important}
 .stat b,.stat small{color:var(--ink)}
-.pill.ok{background:var(--teal) !important;color:var(--ink) !important}.pill.bad{background:var(--white) !important;color:var(--ink-soft) !important}
 
 /* ===== شريط الحالة العائم والتنبيه ===== */
 .live-bar{background:var(--ink) !important;color:var(--cream) !important;box-shadow:0 14px 30px -18px rgba(14,58,59,.7) !important;border:0 !important}
@@ -143,8 +139,6 @@ body.bar-mini .tabbar{transform:scale(.86) translateY(2px)}
 .modal-card{background:var(--white) !important;box-shadow:none !important;border:0 !important}
 .modal-summary{background:var(--teal) !important}
 .rt-price{background:var(--yellow) !important;color:var(--ink) !important}
-.user-menu{background:var(--white) !important;box-shadow:0 18px 40px -20px rgba(14,58,59,.45) !important}
-.um-item{color:var(--ink)}
 
 /* ===== التتبع والخرائط ===== */
 .leaflet-container{background:var(--cream) !important}
@@ -158,9 +152,6 @@ body.bar-mini .tabbar{transform:scale(.86) translateY(2px)}
 .mk-store img{border:3px solid var(--yellow) !important;background:var(--white) !important}
 
 /* ===== التنبيهات ===== */
-.hw-sound-pill{position:fixed;top:calc(78px + env(safe-area-inset-top));inset-inline:0;margin-inline:auto;width:max-content;max-width:calc(100% - 32px);z-index:96;display:none;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 16px;background:var(--yellow);color:var(--ink);font:inherit;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 10px 24px -12px rgba(14,58,59,.45);animation:pillPulse 1.8s ease-in-out infinite}
-.hw-sound-pill.show{display:flex}.hw-sound-pill svg{width:18px;height:18px}
-@keyframes pillPulse{50%{transform:scale(1.04)}}
 .hw-sa-warn{position:fixed;inset-inline:12px;top:calc(78px + env(safe-area-inset-top));z-index:97;background:var(--ink);color:var(--cream);font-size:12.5px;font-weight:700;line-height:1.6;border-radius:16px;padding:12px 14px;text-align:center}
 
 /* ===== المظهر واللغة (hw-ui.js) ===== */
@@ -194,7 +185,6 @@ html[dir="ltr"] body{font-family:"Tajawal","Segoe UI",system-ui,sans-serif}
 .me-ph-btns{margin-bottom:6px}
 .me-en{margin:0 0 12px;border-radius:14px;background:rgba(37,206,209,.12);padding:10px 12px}.me-en summary{cursor:pointer;font-weight:800;font-size:13px;color:var(--ink)}.me-en .field{margin:10px 0 0}
 /* زر تفعيل الصوت: أسفل الشاشة فوق شريط التنقل، لا يغطي العناوين */
-.hw-sound-pill{top:auto !important;bottom:calc(98px + env(safe-area-inset-bottom)) !important;box-shadow:0 10px 26px -8px rgba(14,58,59,.45) !important}
 /* التذييل لا يختفي تحت شريط التنقل، ووسوم البطاقات بخط التطبيق */
 .oc .oc-meta .oc-tag,.oc .oc-top .oc-store{background:rgba(37,206,209,.16) !important;color:#0E3A3B !important;border-radius:99px;padding:3px 10px;font-size:11.5px;font-weight:800;font-family:inherit}
 /* مساحة لمس 44px على الأقل للأزرار الصغيرة (دون تغيير شكلها) */

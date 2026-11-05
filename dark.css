@@ -41,9 +41,6 @@
 :root[data-theme="dark"] .note-link{background:#0F4446;--cream:#F3F0E7;--white:#fff;--surface:rgba(255,255,255,.14)}
 :root[data-theme="dark"] .print-chip{background:var(--surface)}
 @media (hover:hover){:root[data-theme="dark"] .print-chip:hover{background:var(--surface)}}
-:root[data-theme="dark"] .header-avatar{background:var(--surface)}
-:root[data-theme="dark"] .user-menu{background:var(--surface)}
-:root[data-theme="dark"] .um-head img{background:var(--surface)}
 :root[data-theme="dark"] .pf-cover{--ink:#0E3A3B;--teal-800:#0E3A3B;--teal-900:#0E3A3B;--ink-soft:rgba(14,58,59,.72);--white:#fff;--surface:#fff;--cream:#F3F0E7;--cream-line:#E7E2D3;color:#0E3A3B}
 :root[data-theme="dark"] .pf-logout{background:var(--surface)}
 :root[data-theme="dark"] .login-form .field input[type=text],:root[data-theme="dark"] .login-form .field input[type=password]{background:var(--surface)}
@@ -183,7 +180,6 @@
 :root[data-theme="dark"] .mk-cap div{background:#0F4446!important;--cream:#F3F0E7;--white:#fff;--surface:rgba(255,255,255,.14)}
 :root[data-theme="dark"] .route-pill.sarou{--ink:#0E3A3B;--teal-800:#0E3A3B;--teal-900:#0E3A3B;--ink-soft:rgba(14,58,59,.72);--white:#fff;--surface:#fff;--cream:#F3F0E7;--cream-line:#E7E2D3;color:#0E3A3B}
 :root[data-theme="dark"] .price-row .price{--ink:#0E3A3B;--teal-800:#0E3A3B;--teal-900:#0E3A3B;--ink-soft:rgba(14,58,59,.72);--white:#fff;--surface:#fff;--cream:#F3F0E7;--cream-line:#E7E2D3;color:#0E3A3B}
-:root[data-theme="dark"] .hw-sound-pill{--ink:#0E3A3B;--teal-800:#0E3A3B;--teal-900:#0E3A3B;--ink-soft:rgba(14,58,59,.72);--white:#fff;--surface:#fff;--cream:#F3F0E7;--cream-line:#E7E2D3;color:#0E3A3B}
 :root[data-theme="dark"] .hw-sa-warn{background:#0F4446;--cream:#F3F0E7;--white:#fff;--surface:rgba(255,255,255,.14)}
 :root[data-theme="dark"] .hw-seg button.on{--ink:#0E3A3B;--teal-800:#0E3A3B;--teal-900:#0E3A3B;--ink-soft:rgba(14,58,59,.72);--white:#fff;--surface:#fff;--cream:#F3F0E7;--cream-line:#E7E2D3;color:#0E3A3B}
 :root[data-theme="dark"] .hw-nag{--ink:#0E3A3B;--teal-800:#0E3A3B;--teal-900:#0E3A3B;--ink-soft:rgba(14,58,59,.72);--white:#fff;--surface:#fff;--cream:#F3F0E7;--cream-line:#E7E2D3;color:#0E3A3B}

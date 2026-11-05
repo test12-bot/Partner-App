@@ -13,6 +13,7 @@
   /* ترتيب أبجدي يتجاهل "ال" التعريف والهمزات */
   function key(n) { return String(n).replace(/[ً-ٟ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').split(/\s+/).map(function (w) { return w.length > 3 && w.indexOf('ال') === 0 ? w.slice(2) : w; }).join(' '); }
   function sorted(l) { return l.slice().sort(function (a, b) { var x = key(a.n), y = key(b.n); return x < y ? -1 : x > y ? 1 : 0; }); }
+  function dmy() { var d = new Date(); return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); }
   function today() { var d = new Date(), M = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']; return d.getDate() + ' ' + M[d.getMonth()] + ' ' + d.getFullYear(); }
 
   /* البيانات بنفس شكل القالب: كل صفحة 15 سطرًا، العمود الأيمن ثم الأيسر */
@@ -28,7 +29,7 @@
       }
       return { title: r[1], lists: lists };
     }).filter(function (a) { return a.lists.length; });
-    return { store: { name: s.name || '', addr: s.addr || '', phone: s.phone || '' }, date: today(), km: Number(cfg.kmPrice || 0.35).toFixed(2), areas: areas };
+    return { store: { name: s.nameEn || s.name || '', addr: s.addrEn || s.addr || '', phone: s.phone || '' }, date: today(), issued: dmy(), km: Number(cfg.kmPrice || 0.35).toFixed(2), areas: areas };
   }
 
   var CSS =
@@ -52,7 +53,7 @@
     '.yellowbar{position:absolute;left:-38pt;width:633pt;height:31pt;background:var(--yellow);line-height:31pt;text-align:center;font-family:NotoKufi;font-size:16pt;color:var(--ink);white-space:nowrap}' +
     '.infobox{position:absolute;left:-10pt;width:253pt;height:58pt;background:var(--beige);line-height:21pt;padding:6pt 10pt 0 0;font-family:NotoKufi;font-size:16pt;text-align:right}' +
     '.kmbar{position:absolute;left:-15pt;width:258pt;height:31pt;background:var(--yellow);line-height:31pt;font-family:NotoKufi;font-weight:700;font-size:16pt;white-space:nowrap}' +
-    '.stamp{position:absolute;width:153pt;height:auto}' +
+    '.issued{position:absolute;left:-10pt;width:253pt;text-align:right;padding-right:10pt;font-family:NotoKufi;font-size:9.5pt;color:#5b6b6b;white-space:nowrap}' +
     '.thanks{position:absolute;left:0;width:595.5pt;top:790pt;text-align:center;font-family:Quicksand;font-weight:700;font-size:12.1pt;color:var(--ink);letter-spacing:.5pt}' +
     '.pay{position:absolute;left:421pt;font-family:Quicksand;color:var(--ink);white-space:nowrap}' +
     '@media screen{#doc{zoom:var(--z,1)}}' +
@@ -61,7 +62,7 @@
 
   /* نفس منطق القالب الأصلي (المقاسات بالنقاط من التصميم) */
   function build(D) {
-    var TOP_ROW = 236, PITCH = 35.4, NOTE_H = 150, COL = { feeL: 64, areaL: 270, feeR: 363, areaR: 571 };
+    var TOP_ROW = 236, PITCH = 35.4, NOTE_H = 168, COL = { feeL: 64, areaL: 270, feeR: 363, areaR: 571 };
     var FOOT = 'Al-Salt,Al-balqa - +962791819432 - highway.delivery.jor@gmail.com', doc = document.getElementById('doc');
     function el(tag, cls, style, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (style) e.setAttribute('style', style); if (html !== undefined) e.innerHTML = html; return e; }
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -93,12 +94,12 @@
       return p;
     }
     function note(p, top) {
-      var st = el('img', 'stamp', 'left:40pt;top:' + (top + 78) + 'pt'); st.src = 'a/stamp.png'; p.appendChild(st);
       p.appendChild(el('div', 'yellowbar', 'top:' + top + 'pt', 'يتم تحديد أجور التوصيل بناءً على مناطق التوصيل المحددة.'));
       p.appendChild(el('div', 'infobox', 'top:' + (top + 41) + 'pt', 'تُحتسب أجور التوصيل للمناطق<br>غير المدرجة حسب الكيلومتر.'));
       var km = top + 105;
       p.appendChild(el('div', 'kmbar', 'top:' + km + 'pt', '<span class="abs" style="left:29pt;top:0;font-family:NotoSans;font-weight:700;direction:ltr">' + esc(D.km) + '</span><span class="abs" style="right:12pt;top:0;font-family:NotoKufi;font-weight:700">سـعـر الـكـيلومتر</span>'));
-      p.appendChild(el('div', 'pay', 'top:' + (km + 8) + 'pt', '<div style="font-size:12.1pt;font-weight:700">PAYMENT METHOD</div><div style="font-size:9.5pt;font-weight:400;margin-top:4pt">CASH &amp; CliQ</div>'));
+      p.appendChild(el('div', 'pay', 'top:' + (km + 8) + 'pt', '<div style="font-size:12.1pt;font-weight:700">PAYMENT METHOD</div><div style="font-size:9.5pt;font-weight:400;margin-top:4pt">CASH</div>'));
+      p.appendChild(el('div', 'issued', 'top:' + (km + 40) + 'pt', 'صادرة إلكترونيًا من HIGHWAY · <span style="font-family:NotoSans;direction:ltr;unicode-bidi:embed">' + esc(D.issued) + '</span>'));
       p.appendChild(el('div', 'thanks', '', 'THANK YOU'));
     }
     full(newPage(), 'a/bg-cover.jpg');
