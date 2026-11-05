@@ -301,7 +301,7 @@ function sha256(str) {
      ========================================================= */
   var Orders = Col('orders');
   var STEPS = ['new', 'accepted', 'picked', 'delivered'];
-  var SHORT = { new: 'بانتظار كابتن', accepted: 'تم تعيين كابتن', picked: 'في الطريق', delivered: 'تم التسليم', cancelled: 'ملغي' };
+  var SHORT = { new: 'بانتظار كابتن', accepted: 'الكابتن متجه للمطعم', picked: 'في طريقه للعميل', delivered: 'تم التسليم', cancelled: 'ملغي' };
   var STEP_TXT = { new: 'تم إرسال الطلب', accepted: 'تم تعيين كابتن', picked: 'تم استلام الطلب من المتجر', delivered: 'تم التسليم' };
   var M_STEPS = [['new', 'تم إرسال الطلب'], ['store_accepted', 'المتجر يحضّر طلبك'], ['accepted', 'تم تعيين كابتن'], ['picked', 'الكابتن استلم الطلب'], ['delivered', 'تم التسليم']];
   var N_STEPS = [['new', 'تم إرسال الطلب'], ['accepted', 'تم تعيين كابتن'], ['picked', 'تم استلام الطلب من المتجر'], ['delivered', 'تم التسليم']];
@@ -381,6 +381,30 @@ function sha256(str) {
   function capNo(t) { var m = ymd(t || Date.now()).slice(0, 4); return counter('cap/' + m).then(function (n) { return m + String(n).padStart(2, '0'); }); }
   /* الرقم الظاهر للطلب: قبل وصول الرقم من القاعدة نعرض "ORD#…" */
   function codeOf(o) { return o && o.code ? o.code : 'ORD#…'; }
+  /* الرقم المختصر الذي يُقال بالهاتف: ترتيب الطلب في اليوم، مثل #021 (الكامل داخل التفاصيل) */
+  function shortNo(o) { var c = o && o.code || '', m = /^ORD#\d{6}-\d{4}-(\d{3})$/.exec(c); return m ? '#' + m[1] : c || '#…'; }
+
+  /* ---------- أولوية الطلبات ومن يأخذها (مشتركة بين لوحة الإدارة وتطبيق الكابتن) ----------
+     الطلبات: العاجل أولًا، ثم ما رُفض أو أعيد إسناده، ثم الأقدم انتظارًا.
+     الكباتن: الأقرب للمطعم، ومن يرفض كثيرًا اليوم يتأخر قليلًا؛ وإن تقاربت المسافة (أقل من كيلو) يفوز الأطول انتظارًا منذ آخر طلب */
+  function prioritySort(list) {
+    var w = function (o) { return o.urgent ? 0 : ((o.offered || []).length || (o.reassigns || []).length || o.declinedAt) ? 1 : 2; };
+    return list.slice().sort(function (a, b) { return w(a) - w(b) || (a.createdAt || 0) - (b.createdAt || 0); });
+  }
+  function dayKey() { var d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); }
+  function declinesToday(c) { return c.decl && c.decl.d === dayKey() ? c.decl.n || 0 : 0; }
+  function idleSince(c) { return Math.max(c.lastJobAt || 0, c.shiftStart || 0); }
+  function rankCaptains(list, o, loc) {
+    var sl = loc || (o && o.storeLoc) || null;
+    var dist = function (c) { return c.lat != null && sl && g.HWMap ? g.HWMap.est([c.lat, c.lng], [sl.lat, sl.lng]) : null; };
+    var rows = list.map(function (c) { var d = dist(c); return { c: c, d: d, e: d == null ? 999 : d + Math.min(3, declinesToday(c) * 0.5), idle: idleSince(c) }; });
+    rows.sort(function (a, b) { if (Math.abs(a.e - b.e) < 1) return (a.idle || 0) - (b.idle || 0) || a.e - b.e; return a.e - b.e; });
+    return rows.map(function (r) {
+      var mins = r.idle ? Math.round((Date.now() - r.idle) / 60000) : null;
+      r.c._why = r.d != null ? 'الأقرب · ' + r.d.toFixed(1) + ' كم' + (mins != null && mins >= 10 ? ' · ينتظر ' + mins + ' د' : '') : (mins != null ? 'ينتظر منذ ' + mins + ' د' : 'متاح');
+      r.c._km = r.d; return r.c;
+    });
+  }
   /* مفاتيح القراءة المحدودة: المتجر والكابتن يقرآن طلباتهما لآخر 40 يومًا فقط (لا كل التاريخ) */
   function keyed(p, o) {
     if (o.storeId && !o.storeKey) p.storeKey = o.storeId + '|' + o.createdAt;
@@ -524,7 +548,7 @@ function sha256(str) {
     if (o.orderValue) meta += '<span class="oc-val">' + 'قيمة الطلب ' + esc(o.orderValue) + ' د.أ</span>';
     if (isMarket(o) && showStore) meta += '<span class="oc-tag">طلب تطبيق</span>';   // المطعم لا يحتاجه: كل طلباته من التطبيق
     return '<article class="oc s-' + o.status + '" data-id="' + esc(o.id) + '" tabindex="0" role="button">' +
-      '<div class="oc-top"><span class="oc-code">' + esc(o.code) + '</span>' + (showStore ? '<span class="oc-store">' + esc(o.storeName || '') + '</span>' : '') +
+      '<div class="oc-top"><span class="oc-code" dir="ltr" title="' + esc(o.code) + '">' + esc(shortNo(o)) + '</span>' + (showStore ? '<span class="oc-store">' + esc(o.storeName || '') + '</span>' : '') +
       '<span class="oc-time">' + ago(o.createdAt) + '</span><span class="oc-chip">' + label(o) + '</span></div>' +
       routeRows(o) + '<div class="oc-meta">' + meta + '</div>' + captainRow(o, true) + progress(o) +
       (actionsHtml ? '<div class="oc-actions">' + actionsHtml + '</div>' : '') + '</article>';
@@ -557,6 +581,6 @@ function sha256(str) {
 
   g.HWDB = { mode: remote ? 'remote' : 'local', col: Col, uid: uid, esc: esc, num: num, money: money, cfg: CFG };
   g.HWOrders = { mode: remote ? 'remote' : 'local', STEPS: STEPS, SHORT: SHORT, create: createOrder, update: updateOrder, patchLite: function (id, p) { return Orders.patch(id, p); }, keyRange: keyRange, pending: function (id) { return id ? outbox.has('orders', id) : outbox.count(); }, subscribe: Orders.subscribe, scope: Orders.scope, scoped: Orders.scoped, get: Orders.get, list: Orders.list, _raw: Orders._raw,
-    stats: stats, isActive: isActive, isToday: isToday, isMarket: isMarket, stage: stage, steps: steps, label: label, offerable: offerable, dispatchAt: dispatchAt, claim: claim, settle: settle, counter: counter, capNo: capNo, codeOf: codeOf, feeFrom: feeFrom,
+    stats: stats, isActive: isActive, isToday: isToday, isMarket: isMarket, stage: stage, steps: steps, label: label, offerable: offerable, dispatchAt: dispatchAt, claim: claim, settle: settle, counter: counter, capNo: capNo, codeOf: codeOf, shortNo: shortNo, prioritySort: prioritySort, rankCaptains: rankCaptains, dayKey: dayKey, feeFrom: feeFrom,
     fmtTime: fmtTime, ago: ago, card: card, timeline: timeline, routeRows: routeRows, progress_: progress, captainRow: captainRow, esc: esc, num: num, money: money, toast: toast, beep: beep, openNav: openNav };
 })(window);

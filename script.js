@@ -479,8 +479,8 @@ function openOrderModal(type, data = {}) {
             `<div class="rt"><i></i><small>المسافة</small><b>${escHtml(calcState.dist)} كم</b></div>` +
             `<div class="rt-price">${escHtml(calcState.total)} JOD</div>`;
     } else {
-        summary.style.display = 'none';
-        summary.innerHTML = '';
+        summary.style.display = 'flex';
+        summary.innerHTML = `<div class="rt end"><i></i><small>إلى</small><b>وجهة غير محددة</b></div><div class="rt-price">الأجرة لاحقًا</div>`;
     }
 
     document.getElementById('orderModal').classList.add('show');
@@ -504,7 +504,7 @@ function submitOrder() {
         to: isArea ? d.area : isCalc ? 'حسب المسافة (' + calcState.dist + ' كم)' : '',
         price: isArea ? d.price : isCalc ? calcState.total : '',
         distance: isCalc ? calcState.dist : '',
-        orderValue: val, notes: notes
+        orderValue: val, notes: notes, unpriced: !(isArea || isCalc)   /* بلا وجهة: الإدارة تحدد الأجرة لاحقًا */
     });
     closeOrderModal();
     resetAndGo('screen-home');
@@ -579,10 +579,10 @@ function myOrders() {
     return allOrders.filter(o => o.storeId === currentUser.id);
 }
 const ST_MSG = {
-    accepted: (o) => 'الكابتن ' + ((o.captain && o.captain.name) || '') + ' في الطريق لاستلام طلبك ' + o.code,
-    picked: (o) => 'تم استلام طلبك ' + o.code + ' وهو في الطريق للتسليم',
-    delivered: (o) => 'تم تسليم الطلب ' + o.code + ' ✓',
-    cancelled: (o) => 'تم إلغاء الطلب ' + o.code
+    accepted: (o) => 'الكابتن ' + ((o.captain && o.captain.name) || '') + ' في الطريق لاستلام طلبك ' + HWOrders.shortNo(o),
+    picked: (o) => 'تم استلام طلبك ' + HWOrders.shortNo(o) + ' وهو في الطريق للتسليم',
+    delivered: (o) => 'تم تسليم الطلب ' + HWOrders.shortNo(o) + ' ✓',
+    cancelled: (o) => 'تم إلغاء الطلب ' + HWOrders.shortNo(o)
 };
 
 function onOrders(list) {
@@ -612,7 +612,7 @@ function statDetail(k) {
         rows: [['مسلّمة', done.length], ['قيد التنفيذ', today.filter(HWOrders.isActive).length], ['ملغاة', canc.length], ['متوسط القيمة', today.length ? m2(sum(today, o => Number(o.itemsTotal || o.orderValue || 0)) / today.length) + ' د.أ' : '—']],
         listTitle: 'طلبات اليوم', list: today.slice().sort((a, b) => b.createdAt - a.createdAt).map(o => HWStats.orderItem(o, HWOrders.fmtTime(o.createdAt))) };
     if (k === 'active') return { title: 'قيد التنفيذ', value: act.length, sub: 'تتحدث مباشرة',
-        rows: [['بانتظار قبولك', act.filter(o => o.storeState === 'pending').length], ['قيد التحضير', act.filter(o => o.storeState === 'preparing').length], ['جاهزة', act.filter(o => o.storeState === 'ready').length], ['مع الكابتن', act.filter(o => o.captain).length]],
+        rows: [['بانتظار قبولك', act.filter(o => o.storeState === 'pending').length], ['قيد التحضير', act.filter(o => o.storeState === 'preparing').length], ['جاهزة', act.filter(o => o.storeState === 'ready').length], ['تم تعيين كابتن', act.filter(o => o.captain).length]],
         listTitle: 'الطلبات الحالية', list: act.map(o => HWStats.orderItem(o, HWOrders.ago(o.createdAt))), empty: 'لا توجد طلبات حالية الآن' };
     if (k === 'delivered') return { title: 'تم تسليمها اليوم', value: done.length, sub: today.length ? Math.round(done.length / today.length * 100) + '٪ من طلبات اليوم' : '',
         rows: [['قيمة الطلبات', m2(sum(done, o => Number(o.itemsTotal || o.orderValue || 0))) + ' د.أ'], ['أجور التوصيل', m2(sum(done, fee)) + ' د.أ']],
@@ -693,7 +693,7 @@ function renderSheet(id) {
     if (o.rating) rows.push(['تقييم العميل', HWBiz.stars(o.rating.store) + (o.rating.comment ? ' · ' + o.rating.comment : '')]);
     const ph = o.captain && o.captain.phone ? String(o.captain.phone).replace(/[^\d+]/g, '') : '';
     body.innerHTML =
-        '<div class="sh-head"><div><small>تفاصيل الطلب</small><h3>' + HWOrders.esc(o.code) + '</h3></div><span class="oc-chip" style="' + '' + '">' + HWOrders.SHORT[o.status] + '</span></div>' +
+        '<div class="sh-head"><div><small dir="ltr">' + HWOrders.esc(o.code) + '</small><h3>طلب ' + HWOrders.esc(HWOrders.shortNo(o)) + '</h3></div><span class="oc-chip" style="' + '' + '">' + HWOrders.SHORT[o.status] + '</span></div>' +
         '<div class="s-' + o.status + '">' + HWOrders.routeRows(o).replace('oc-route', 'oc-route') + '</div>' +
         HWOrders.timeline(o) + HWOrders.captainRow(o, true) +
         '<div class="sh-rows">' + rows.map(r => '<div><span>' + r[0] + '</span><b>' + HWOrders.esc(r[1]) + '</b></div>').join('') + '</div>' +

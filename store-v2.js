@@ -85,7 +85,7 @@ function openAccept(id) {
     const o = HWOrders.get(id); if (!o) return;
     if (openSheetId) closeOrderSheet();   /* من نافذة التفاصيل: تُغلق وتظهر بطاقة وقت التحضير فورًا */
     const sug = o.prepMin || myState().prepMin || 20;
-    openMenuSheet(sheetHead(EH(o.code), 'كم يحتاج التحضير؟') +
+    openMenuSheet(sheetHead(EH(HWOrders.shortNo(o)), 'كم يحتاج التحضير؟') +
         (o.scheduledFor ? '<div class="sched-note">طلب مجدول للتوصيل ' + EH(HWOrders.fmtTime(o.scheduledFor)) + ' · سيُرسل الكابتن قبل الموعد تلقائيًا</div>' : '') +
         noShowWarn(o) + '<div class="sh-rows">' + itemLines(o) + '</div><div class="prep-grid">' +
         [10, 15, 20, 30, 45].map(m => '<button type="button" class="chip' + (m === sug ? ' on' : '') + '" onclick="acceptOrder(\'' + id + '\',' + m + ')">' + m + ' دقيقة</button>').join('') + '</div>');
@@ -99,7 +99,7 @@ function printTicket(id) {
     const o = HWOrders.get(id); if (!o) return;
     const row = (a, b) => '<div class="row"><span>' + a + '</span><b>' + b + '</b></div>';
     HWBiz.printHtml('تذكرة ' + o.code, '<div class="tk"><div class="hd"><b>HIGHWAY</b><small>' + EH(o.storeName || currentUser.label || '') + '</small></div>' +
-        '<div class="big">' + EH(o.code) + '</div>' + row('الوقت', HWOrders.fmtTime(o.createdAt)) +
+        '<div class="big">' + EH(HWOrders.shortNo(o)) + '</div><div style="text-align:center;font-size:11px">' + EH(o.code) + '</div>' + row('الوقت', HWOrders.fmtTime(o.createdAt)) +
         (o.scheduledFor ? row('موعد التوصيل', HWOrders.fmtTime(o.scheduledFor)) : '') + (o.customer ? row('العميل', EH(o.customer.name)) : '') + '<hr>' +
         o.items.map(l => row(l.qty + '× ' + EH(l.name), MNY(l.price * l.qty)) + (l.opts && l.opts.length ? '<div class="op">' + EH(HWBiz.optsText(l.opts)) + '</div>' : '') + (l.notes ? '<div class="op">ملاحظة: ' + EH(l.notes) + '</div>' : '')).join('') + '<hr>' +
         row('المجموع الفرعي', MNY(o.itemsGross || o.itemsTotal)) + (o.discount ? row('خصم العرض', '−' + MNY(o.discount)) : '') +
@@ -247,15 +247,14 @@ setInterval(() => { if (!document.hidden && isStore() && currentScreen_() === 's
 /* =========================================================
    5) استدعاء كابتن: اختيار نوع الطلب
    ========================================================= */
+/* "اطلب الآن": قائمة مناطق المتجر مباشرة (مع بحث)، أو "وجهة غير محددة"، ثم قيمة الطلب وإرسال */
 function openCallChoice() {
-    const pin = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
-    const bolt = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>';
-    openMenuSheet(sheetHead('استدعاء كابتن', 'ما نوع الطلب؟') +
-        '<button type="button" class="call-opt" onclick="callWithDest()"><span class="co-ic">' + pin + '</span><span class="co-t"><b>طلب بوجهة محددة</b><small>اختر منطقة التوصيل من قائمة الأسعار</small></span></button>' +
-        '<button type="button" class="call-opt y" onclick="callNoDest()"><span class="co-ic">' + bolt + '</span><span class="co-t"><b>طلب بدون وجهة</b><small>كابتن يصلك فورًا وتحدد الوجهة معه</small></span></button>');
+    buzz();
+    HWDest.open({ sid: currentUser ? currentUser.id : '', sub: 'استدعاء كابتن', title: 'إلى أين؟', onPick: (a) => {
+        const me = (currentUser && currentUser.label) || '';
+        if (a) openOrderModal('area', { area: a.n, price: a.p, startPoint: me }); else openOrderModal('direct');
+    } });
 }
-function callWithDest() { closeMenuSheet(); buzz(); tabGo('screen-prices'); }
-function callNoDest() { closeMenuSheet(); buzz(); openOrderModal('direct'); }
 
 /* الإشعارات الحقيقية: طلبات جديدة حتى والتطبيق مغلق */
 HWPush.init('store', () => (isStore() ? currentUser.id : ''), { open: (id) => { if (HWOrders.get(id)) openOrderSheet(id); } });
