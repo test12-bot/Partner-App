@@ -39,6 +39,20 @@
     var sc = act ? 'scr-' + act.id : ''; if (b.dataset.scr !== sc) { if (b.dataset.scr) b.classList.remove(b.dataset.scr); if (sc) b.classList.add(sc); b.dataset.scr = sc; }
     b.classList.toggle('modal-on', !!document.querySelector('.modal.show'));
     if (b.dataset.scr2 !== sc) { b.dataset.scr2 = sc; b.classList.remove('hdr-hide'); }
+    pgBack(b);
+  }
+  /* زر الرجوع داخل الصفحة (بدل الهيدر): يظهر فقط في الصفحات الفرعية، لا في صفحات الشريط السفلي */
+  var BK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
+  function pgBack(b) {
+    var hb = document.getElementById('headerBack'), act = document.querySelector('.screen.active'); if (!hb || !act) return;
+    var roots = [].map.call(document.querySelectorAll('.tabbar .tab[onclick]'), function (t) { var m = /'(screen-[a-z-]+)'/.exec(t.getAttribute('onclick')); return m && m[1]; });
+    var need = hb.classList.contains('show') && roots.indexOf(act.id) < 0 && !act.hasAttribute('data-no-back');
+    b.classList.toggle('has-back', need);
+    if (!need || act.querySelector(':scope > .pg-back, :scope .container > .pg-back')) return;
+    var host = act.querySelector(':scope > .container') || act, btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'pg-back'; btn.innerHTML = BK + '<span>رجوع</span>';
+    btn.addEventListener('click', function () { if (typeof window.goBack === 'function') window.goBack(); else history.back(); });
+    host.insertBefore(btn, host.firstChild);
   }
   function watchState() {
     pageState();
@@ -50,6 +64,10 @@
   document.addEventListener('DOMContentLoaded', function () { hdrH(); strip(); }); window.addEventListener('load', hdrH); setTimeout(hdrH, 1500);
   if (document.readyState !== 'loading') strip();
   window.HWUiHeader = hdrH;
+  /* لوحة المفاتيح: نعرف أنها مفتوحة عند التركيز على حقل كتابة */
+  var KB = /^(INPUT|TEXTAREA|SELECT)$/;
+  document.addEventListener('focusin', function (e) { var t = e.target; if (t && KB.test(t.tagName) && !/^(checkbox|radio|range|button|submit|file)$/.test(t.type || '')) document.body.classList.add('kb-open'); });
+  document.addEventListener('focusout', function () { setTimeout(function () { var a = document.activeElement; if (!a || !KB.test(a.tagName)) document.body.classList.remove('kb-open'); }, 80); });
 
   /* ---------- المظهر ---------- */
   var root = document.documentElement, mq = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;

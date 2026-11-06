@@ -491,6 +491,8 @@ function closeOrderModal() {
 }
 
 /* الطلب يذهب للنظام مباشرة (بلا واتساب): يظهر فورًا عند المنسق والكباتن القريبين */
+function prepPickV() { const b = document.querySelector('#prepPick .on'); return b ? +b.dataset.rd : 10; }
+document.addEventListener('click', e => { const b = e.target.closest('#prepPick [data-rd]'); if (!b) return; document.querySelectorAll('#prepPick button').forEach(x => x.classList.toggle('on', x === b)); buzz(6); });
 function submitOrder() {
     const val = document.getElementById('modalOrderValue').value.trim();
     const notes = document.getElementById('modalOrderNotes').value.trim();
@@ -504,7 +506,8 @@ function submitOrder() {
         to: isArea ? d.area : isCalc ? 'حسب المسافة (' + calcState.dist + ' كم)' : '',
         price: isArea ? d.price : isCalc ? calcState.total : '',
         distance: isCalc ? calcState.dist : '',
-        orderValue: val, notes: notes, unpriced: !(isArea || isCalc)   /* بلا وجهة: الإدارة تحدد الأجرة لاحقًا */
+        orderValue: val, notes: notes, unpriced: !(isArea || isCalc),   /* بلا وجهة: الإدارة تحدد الأجرة لاحقًا */
+        readyIn: prepPickV(), readyAt: Date.now() + prepPickV() * 60000   /* وقت التحضير: لحساب وقت الوصول المتوقع */
     });
     closeOrderModal();
     resetAndGo('screen-home');
@@ -635,11 +638,7 @@ function renderOrdersUI() {
     const badge = document.getElementById('tabBadge');
     if (badge) { badge.textContent = act.length; badge.classList.toggle('on', act.length > 0); }
 
-    const os = document.getElementById('ordStats');
-    if (os) os.innerHTML = '<div class="stat" data-stat="today"><b>' + st.today + '</b><small>طلبات اليوم</small></div>' +
-        '<div class="stat hot" data-stat="active"><b>' + st.active + '</b><small>قيد التنفيذ</small></div>' +
-        '<div class="stat" data-stat="delivered"><b>' + st.delivered + '</b><small>تم تسليمها اليوم</small></div>' +
-        '<div class="stat" data-stat="fees"><b>' + st.fees.toFixed(2) + '</b><small>أجور اليوم (تقديرية)</small></div>';
+    const os = document.getElementById('ordStats'); if (os) { os.innerHTML = ''; os.hidden = true; }   /* أرقام اليوم في الرئيسية فقط، بلا تكرار هنا */
     const doneCount = mine.filter(o => !HWOrders.isActive(o)).length;
     document.querySelectorAll('#ordSeg button').forEach(b => {
         const f = b.dataset.f, n = f === 'active' ? act.length : f === 'done' ? doneCount : mine.length;

@@ -431,6 +431,10 @@ function sha256(str) {
     var t = Date.now(), hist = (o.history || []).slice();
     if (patch.status && patch.status !== o.status) hist.push({ s: patch.status, t: t });
     if (ev) hist.push({ s: ev, t: t });
+    /* لحظة قبول الكابتن: نثبّت الوقت الموعود للوصول، ومنه نعرف التأخير لاحقًا */
+    if (patch.status === 'accepted' && !o.etaAt && !patch.etaAt) {
+      try { var cd = patch.captain && g.HWDB ? HWDB.col('captains').get(patch.captain.id) : null, e0 = eta(Object.assign({}, o, patch, { history: hist }), cd && cd.lat != null ? [cd.lat, cd.lng] : null); if (e0) patch.etaAt = e0.at; } catch (e) {}
+    }
     patch = keyed(Object.assign({}, patch), Object.assign({}, o, patch, { createdAt: o.createdAt }));
     var p = Object.assign({}, patch, { history: hist });
     /* على الخادم: كل خطوة تُضاف بمفتاح مستقل (history/h…) بدل إعادة كتابة السجل كاملًا،
@@ -488,6 +492,7 @@ function sha256(str) {
     if (o.status !== 'new' || o.captain) return false;
     if (isMarket(o) && o.storeState !== 'preparing' && o.storeState !== 'ready') return false;
     if (o.scheduledFor && Date.now() < dispatchAt(o)) return false;   // طلب مجدول: يُعرض قبل موعده بوقت التحضير والطريق
+    if (o.readyAt && !o.urgent && Date.now() < o.readyAt - (CFG.holdMin || 10) * 60000) return false;   // المتجر قال «جاهز بعد 20 د»: نرسل الكابتن قبل الجهوزية بعشر دقائق تقريبًا
     return true;
   }
   function dispatchAt(o) { return o.scheduledFor ? o.scheduledFor - ((o.routeMin || 15) + 10) * 60000 : 0; }
@@ -538,7 +543,9 @@ function sha256(str) {
   function progress(o) {
     var n = steps(o).length, h = '<div class="oc-prog' + (o.status === 'cancelled' ? ' cancelled' : '') + '">';
     if (o.status === 'cancelled') { for (var k = 0; k < n; k++) h += '<i></i>'; return h + '</div>'; }
-    var idx = stage(o);
+    var idx = stage(o), pc = o.status === 'delivered' ? 100 : Math.round(Math.min(idx + .5, n - 1) / Math.max(1, n - 1) * 100);
+    /* شريط المراحل على شكل طريق HIGHWAY: إسفلت بخط أصفر متقطع، والمقطوع منه فيروزي، والسيارة عند المرحلة الحالية */
+    h = h.replace('class="oc-prog', 'style="--p:' + pc + '%" class="oc-prog hw-road') + '<b class="rd-f"></b><em class="rd-c"></em>';
     for (var i = 0; i < n; i++) h += '<i class="' + (i < idx ? 'done' : i === idx ? 'act' : '') + '"></i>';
     return h + '</div>';
   }
@@ -561,8 +568,17 @@ function sha256(str) {
     return '<article class="oc s-' + o.status + '" data-id="' + esc(o.id) + '" tabindex="0" role="button">' +
       '<div class="oc-top"><span class="oc-code" dir="ltr" title="' + esc(o.code) + '">' + esc(g.HW_SHORT ? shortNo(o) : codeOf(o)) + '</span>' + (showStore ? '<span class="oc-store">' + esc(o.storeName || '') + '</span>' : '') +
       '<span class="oc-time">' + ago(o.createdAt) + '</span><span class="oc-chip">' + label(o) + '</span></div>' +
-      routeRows(o) + '<div class="oc-meta">' + meta + '</div>' + captainRow(o, true) + progress(o) +
+      routeRows(o) + '<div class="oc-meta">' + meta + '</div>' + captainRow(o, true) + etaLine(o) + progress(o) +
       (actionsHtml ? '<div class="oc-actions">' + actionsHtml + '</div>' : '') + '</article>';
+  }
+  /* سطر وقت الوصول على بطاقة الطلب (لكل التطبيقات) */
+  function etaLine(o) {
+    if (!o.captain || !isActive(o)) return '';
+    var e = eta(o); if (!e) return '';
+    var txt = o.status === 'accepted' && !o.arrivedStore && e.toStore != null ? 'الكابتن يصل للمتجر خلال <b>' + e.toStore + ' د</b>'
+      : o.status === 'accepted' ? 'الكابتن عند المتجر · يصل للعميل حوالي <b dir="ltr">' + clock(e.at) + '</b>'
+      : 'يصل للعميل حوالي <b dir="ltr">' + clock(e.at) + '</b> · خلال ' + e.toDest + ' د';
+    return '<div class="oc-eta' + (e.late ? ' late' : '') + '"><i></i><span>' + (e.late ? 'متأخر ' + e.late + ' د عن الموعد · ' : '') + txt + '</span></div>';
   }
   function timeline(o) {
     var h = '<ol class="tl">';
@@ -586,6 +602,51 @@ function sha256(str) {
     t.textContent = msg; t.classList.add('show');
     clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('show'); }, 3800);
   }
+  /* =========================================================
+     وقت الوصول المتوقع (موحّد لكل التطبيقات)
+     - من الكابتن للمتجر: المسافة على الخريطة × معامل الشوارع ÷ سرعة الكابتن
+     - انتظار التحضير: ما تبقى من وقت التحضير الذي حدده المتجر
+     - من المتجر للوجهة: من الخريطة إن عُرف موقع العميل، وإلا من معدّل الطلبات السابقة لنفس المسار
+       (يتعلم مع الوقت)، وإلا من مسافة تقريبية افتراضية
+     ========================================================= */
+  function hav(a, b) { var R = 6371, r = Math.PI / 180, dLa = (b[0] - a[0]) * r, dLo = (b[1] - a[1]) * r, x = Math.sin(dLa / 2) * Math.sin(dLa / 2) + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLo / 2) * Math.sin(dLo / 2); return 2 * R * Math.asin(Math.sqrt(x)); }
+  function drive(a, b) { if (!a || !b) return null; var km = hav(a, b) * 1.35; return Math.max(1, Math.round(km / ((CFG.capKmh || 27) / 60)) + 1); }
+  var learnC = { at: 0, m: {} };
+  function learned() {
+    if (Date.now() - learnC.at < 60000) return learnC.m; var m = {};
+    Orders.list().forEach(function (o) {
+      if (o.status !== 'delivered' || !o.history) return; var pk = 0, dl = 0;
+      o.history.forEach(function (h) { if (h.s === 'picked') pk = h.t; if (h.s === 'delivered') dl = h.t; });
+      if (!pk || !dl || dl <= pk) return; var min = (dl - pk) / 60000; if (min > 90) return;
+      [o.storeId + '>' + (o.to || ''), '*>' + (o.to || '')].forEach(function (k) { if (!o.to && k.indexOf('*') === 0) return; (m[k] = m[k] || []).push(min); });
+    });
+    Object.keys(m).forEach(function (k) { var xs = m[k].slice(-20); m[k] = { min: xs.reduce(function (a, b) { return a + b; }, 0) / xs.length, n: xs.length }; });
+    learnC = { at: Date.now(), m: m }; return m;
+  }
+  function legDest(o, from) {
+    var ad = o.address && o.address.lat != null ? [o.address.lat, o.address.lng] : null;
+    if (ad && from) return drive(from, ad);
+    var L = learned(), k1 = L[(o.storeId || '') + '>' + (o.to || '')], k2 = o.to ? L['*>' + o.to] : null;
+    if (k1 && k1.n >= 2) return Math.round(k1.min); if (k2 && k2.n >= 2) return Math.round(k2.min);
+    if (o.routeMin) return o.routeMin;
+    return CFG.travelMin || 12;
+  }
+  function eta(o, capPos) {
+    if (!o || !isActive(o)) return null;
+    var now = Date.now(), cp = capPos || (o.capLoc && now - (o.capLoc.at || 0) < 10 * 60000 ? [o.capLoc.lat, o.capLoc.lng] : null);
+    var sl = o.storeLoc ? [o.storeLoc.lat, o.storeLoc.lng] : null, toS = 0, wait = 0, toD;
+    if (o.status === 'picked') { toD = cp ? legDest(o, cp) : Math.max(2, legDest(o, sl) - Math.round((now - stepAt(o, 'picked')) / 60000)); }
+    else {
+      toS = o.arrivedStore ? 0 : cp && sl ? drive(cp, sl) : (o.status === 'new' ? 6 : null);
+      var ready = o.readyAt || (o.prepMin && stepAt(o, 'store_accepted') ? stepAt(o, 'store_accepted') + o.prepMin * 60000 : 0);
+      wait = ready ? Math.max(0, Math.round((ready - now) / 60000) - (toS || 0)) : 0;
+      toD = legDest(o, sl);
+    }
+    var total = (toS || 0) + wait + toD;
+    return { toStore: o.status === 'picked' ? 0 : toS, wait: wait, toDest: toD, total: total, at: now + total * 60000, late: o.etaAt && now > o.etaAt + 60000 ? Math.round((now - o.etaAt) / 60000) : 0 };
+  }
+  function stepAt(o, s) { var h = (o.history || []).filter(function (x) { return x.s === s; })[0]; return h ? h.t : 0; }
+  function clock(t) { var d = new Date(t), h = d.getHours(), m = d.getMinutes(); return (h % 12 || 12) + ':' + (m < 10 ? '0' : '') + m; }
   /* الصوت: يُدار من hw-notify.js (فك قفل الصوت في iOS، نغمات مختلفة، رنين متكرر) */
   function beep() { if (g.HWNotify) g.HWNotify.play('order'); }
   function openNav(q) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q); }
@@ -593,5 +654,5 @@ function sha256(str) {
   g.HWDB = { mode: remote ? 'remote' : 'local', col: Col, uid: uid, esc: esc, num: num, money: money, cfg: CFG };
   g.HWOrders = { mode: remote ? 'remote' : 'local', STEPS: STEPS, SHORT: SHORT, create: createOrder, update: updateOrder, patchLite: function (id, p) { return Orders.patch(id, p); }, keyRange: keyRange, pending: function (id) { return id ? outbox.has('orders', id) : outbox.count(); }, subscribe: Orders.subscribe, scope: Orders.scope, scoped: Orders.scoped, get: Orders.get, list: Orders.list, _raw: Orders._raw,
     stats: stats, isActive: isActive, isToday: isToday, isMarket: isMarket, stage: stage, steps: steps, label: label, offerable: offerable, dispatchAt: dispatchAt, claim: claim, settle: settle, counter: counter, capNo: capNo, codeOf: codeOf, shortNo: shortNo, prioritySort: prioritySort, rankCaptains: rankCaptains, dayKey: dayKey, feeFrom: feeFrom,
-    fmtTime: fmtTime, ago: ago, card: card, timeline: timeline, routeRows: routeRows, progress_: progress, captainRow: captainRow, esc: esc, num: num, money: money, toast: toast, beep: beep, openNav: openNav };
+    fmtTime: fmtTime, ago: ago, eta: eta, drive: drive, clock: clock, card: card, timeline: timeline, routeRows: routeRows, progress_: progress, captainRow: captainRow, esc: esc, num: num, money: money, toast: toast, beep: beep, openNav: openNav };
 })(window);
