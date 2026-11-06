@@ -713,3 +713,8 @@ html[dir="ltr"] .hw-row[data-stat]::after{transform:rotate(-135deg) !important}
 body.bar-mini .tabbar{transform:scale(.86) translateY(2px) !important}
 .tabbar{transform-origin:50% 100%;transition:transform .32s cubic-bezier(.22,1,.36,1) !important}
 body.kb-open .tabbar{transform:translateY(160%) !important}
+/* الرقم المميز داخل بطاقة الكابتن: نفس أسلوب الرقم البارز في كل التطبيقات (كحلي + أصفر) */
+.cm-stats .hi{background:var(--hw-ink) !important;color:var(--hw-cream) !important}
+.cm-stats .hi b{color:var(--hw-y) !important}.cm-stats .hi small{color:rgba(243,240,231,.72) !important}
+.cm-stats>div{border-radius:16px 16px 16px 6px !important}
+html[data-theme="dark"] .cm-stats .hi{background:#08292A !important}
