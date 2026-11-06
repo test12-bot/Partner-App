@@ -66,8 +66,21 @@
   window.HWUiHeader = hdrH;
   /* لوحة المفاتيح: نعرف أنها مفتوحة عند التركيز على حقل كتابة */
   var KB = /^(INPUT|TEXTAREA|SELECT)$/;
-  document.addEventListener('focusin', function (e) { var t = e.target; if (t && KB.test(t.tagName) && !/^(checkbox|radio|range|button|submit|file)$/.test(t.type || '')) document.body.classList.add('kb-open'); });
-  document.addEventListener('focusout', function () { setTimeout(function () { var a = document.activeElement; if (!a || !KB.test(a.tagName)) document.body.classList.remove('kb-open'); }, 80); });
+  /* الأجهزة الضعيفة (أندرويد بذاكرة قليلة): بلا تأثير الزجاج حتى يبقى كل شيء سلسًا */
+  try { if (/Android/i.test(navigator.userAgent) && ((navigator.deviceMemory && navigator.deviceMemory <= 3) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4))) document.documentElement.classList.add('lowfx'); } catch (e) {}
+  /* الشريط السفلي ثابت دائمًا، ولا يختفي إلا والكيبورد ظاهر فعلًا على الشاشة (نقيس ارتفاع الشاشة المرئي)،
+     فلو أُغلق الكيبورد والحقل ما زال محددًا (مثل صفحة البحث) يرجع الشريط فورًا */
+  var vv = window.visualViewport, maxH = 0;
+  function typing() { var t = document.activeElement; return !!(t && KB.test(t.tagName) && !/^(checkbox|radio|range|button|submit|file)$/.test(t.type || '')); }
+  function kbCheck() {
+    var h = vv ? vv.height : innerHeight; if (h > maxH || Math.abs(innerWidth - (kbCheck.w || 0)) > 40) { maxH = Math.max(h, innerHeight); kbCheck.w = innerWidth; }
+    var open = typing() && h < maxH * 0.78;
+    document.body && document.body.classList.toggle('kb-open', open);
+  }
+  maxH = vv ? Math.max(vv.height, innerHeight) : innerHeight; kbCheck.w = innerWidth;
+  if (vv) vv.addEventListener('resize', kbCheck); window.addEventListener('resize', kbCheck);
+  document.addEventListener('focusin', function () { setTimeout(kbCheck, 350); });
+  document.addEventListener('focusout', function () { setTimeout(kbCheck, 80); });
 
   /* ---------- المظهر ---------- */
   var root = document.documentElement, mq = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
@@ -219,4 +232,78 @@
 (function () {
   if (!('serviceWorker' in navigator) || !/^https:|^http:\/\/localhost/.test(location.href) || navigator.webdriver) return;
   window.addEventListener('load', function () { try { navigator.serviceWorker.register('sw.js'); } catch (e) {} });
+})();
+
+/* =========================================================
+   شريط التنقل الحي (مثل آيفون الجديد):
+   - الكبسولة الصفراء قطعة وحدة تنزلق من خيار لخيار وتتمطّ بالطريق مثل نقطة مَي
+   - تسحب إصبعك على الشريط والكبسولة تلحقه، وتفتح الصفحة لما تشيله (مع اهتزاز خفيف على أندرويد)
+   - بالراحة زجاجي، ولما تلمسه يتعبّى كحلي صلب، ويرجع زجاجي بعد ثانية
+   ========================================================= */
+(function () {
+  var bar, pill, cur = null, drag = null, relT = 0;
+  function tabs() { return bar ? [].slice.call(bar.querySelectorAll('.tab')).filter(function (t) { return t.offsetParent !== null || getComputedStyle(t).display !== 'none'; }) : []; }
+  /* مكان كل خيار بعد انتهاء التمدد (نحسبه حسابًا حتى تنطلق الكبسولة لمكانها النهائي فورًا) */
+  function geo(onIdx) {
+    var ts = tabs(), n = ts.length; if (!n) return [];
+    var cs = getComputedStyle(bar), pl = parseFloat(cs.paddingLeft) || 0, pr = parseFloat(cs.paddingRight) || 0, gap = parseFloat(cs.columnGap) || 0;
+    var g = 2.2, inner = bar.clientWidth - pl - pr - gap * (n - 1), unit = inner / (n - 1 + g), rtl = cs.direction === 'rtl', off = 0;
+    return ts.map(function (t, i) { var w = i === onIdx ? unit * g : unit, x = rtl ? bar.clientWidth - pr - off - w : pl + off; off += w + gap; return { l: x, w: w }; });
+  }
+  function place(r, anim) {
+    if (!r) return; var t0 = tabs()[0]; if (!t0) return;
+    pill.style.top = t0.offsetTop + 'px'; pill.style.height = t0.offsetHeight + 'px';
+    if (anim && cur && pill.animate && Math.abs(cur.l - r.l) > 2) {
+      var a = Math.min(cur.l, r.l), b = Math.max(cur.l + cur.w, r.l + r.w);
+      pill.animate([{ left: cur.l + 'px', width: cur.w + 'px', transform: 'scaleY(1)' },
+        { left: (a + (b - a) * .08) + 'px', width: ((b - a) * .84) + 'px', transform: 'scaleY(.84)', offset: .45 },
+        { left: r.l + 'px', width: r.w + 'px', transform: 'scaleY(1)' }], { duration: 420, easing: 'cubic-bezier(.3,.9,.3,1.12)' });
+    }
+    pill.style.left = r.l + 'px'; pill.style.width = r.w + 'px'; cur = r;
+  }
+  function sync(anim) {
+    if (!bar || drag) return; var ts = tabs(), i = ts.findIndex(function (t) { return t.classList.contains('on'); });
+    if (i < 0 || !bar.clientWidth) { pill.style.opacity = '0'; cur = null; return; }
+    pill.style.opacity = '1'; place(geo(i)[i], anim);
+    clearTimeout(sync._t); sync._t = setTimeout(function () {       // تصحيح دقيق بعد انتهاء التمدد
+      if (drag) return; var t = tabs()[i]; if (!t) return; place({ l: t.offsetLeft, w: t.offsetWidth }, false);
+    }, 380);
+  }
+  function idxAt(x) { var ts = tabs(), best = -1, d = 1e9; ts.forEach(function (t, i) { var r = t.getBoundingClientRect(), c = r.left + r.width / 2, dd = Math.abs(x - c); if (x >= r.left && x <= r.right) dd = 0; if (dd < d) { d = dd; best = i; } }); return best; }
+  function touchOn() { clearTimeout(relT); bar.classList.add('tb-touch'); }
+  function touchOff() { clearTimeout(relT); relT = setTimeout(function () { bar.classList.remove('tb-touch'); }, 1000); }
+  function down(e) {
+    if (e.button && e.button !== 0) return; touchOn();
+    drag = { x0: e.clientX, moved: false, i: idxAt(e.clientX), id: e.pointerId };
+  }
+  function move(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (!drag.moved && Math.abs(e.clientX - drag.x0) < 10) return;
+    if (!drag.moved) { drag.moved = true; bar.classList.add('tb-drag'); try { bar.setPointerCapture(e.pointerId); } catch (x) {} }
+    var br = bar.getBoundingClientRect(), u = tabs()[0] ? bar.clientWidth / (tabs().length + 1.2) : 70, w = Math.max(64, u * 1.25), l = Math.max(4, Math.min(bar.clientWidth - w - 4, e.clientX - br.left - w / 2));
+    pill.style.left = l + 'px'; pill.style.width = w + 'px'; cur = { l: l, w: w };
+    var i = idxAt(e.clientX); if (i !== drag.i) { drag.i = i; tabs().forEach(function (t, k) { t.classList.toggle('hov', k === i); }); try { navigator.vibrate && navigator.vibrate(8); } catch (x) {} }
+    e.preventDefault();
+  }
+  function up(e) {
+    if (!drag) return; var d = drag; drag = null; touchOff(); bar.classList.remove('tb-drag');
+    tabs().forEach(function (t) { t.classList.remove('hov'); });
+    if (!d.moved) return;                                            // ضغطة عادية: الزر نفسه يكمل عمله
+    var t = tabs()[d.i]; window.__hwTbSkip = Date.now();
+    if (t && !t.classList.contains('on')) { t.click(); } sync(true);
+  }
+  function boot() {
+    bar = document.querySelector('.tabbar'); if (!bar || bar.querySelector('.tb-pill')) return;
+    pill = document.createElement('span'); pill.className = 'tb-pill'; pill.setAttribute('aria-hidden', 'true'); bar.insertBefore(pill, bar.firstChild);
+    document.documentElement.classList.add('tb-live');
+    new MutationObserver(function () { sync(true); }).observe(bar, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    bar.addEventListener('pointerdown', down); bar.addEventListener('pointermove', move, { passive: false });
+    bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up); bar.addEventListener('lostpointercapture', function () { if (drag) up({}); });
+    bar.addEventListener('click', function (e) { if (window.__hwTbSkip && Date.now() - window.__hwTbSkip < 400 && e.isTrusted) { e.stopPropagation(); e.preventDefault(); } }, true);
+    window.addEventListener('resize', function () { sync(false); });
+    new MutationObserver(function () { sync(false); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    setTimeout(function () { sync(false); }, 60); setTimeout(function () { sync(false); }, 800);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+  window.HWTabPill = { sync: sync };
 })();

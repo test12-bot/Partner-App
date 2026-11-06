@@ -12,7 +12,7 @@ self.addEventListener('activate', function (e) {
 /* حفظ ملفات التطبيق على الجهاز: يفتح فورًا من المرة الثانية حتى مع إنترنت ضعيف.
    الملفات مرقّمة بالإصدار (?v=) فتُستبدل تلقائيًا عند كل تحديث، والصفحة نفسها تُطلب من الشبكة أولًا.
    بيانات الطلبات (Firebase) لا تمر من هنا أبدًا. */
-var SHELL = 'hw-shell-v2';
+var SHELL = 'hw-shell-v3';
 self.addEventListener('fetch', function (e) {
   var r = e.request; if (r.method !== 'GET') return;
   var u = new URL(r.url); if (u.origin !== self.location.origin) return;

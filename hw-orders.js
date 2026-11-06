@@ -563,7 +563,7 @@ function sha256(str) {
   }
   function card(o, actionsHtml, showStore) {
     var meta = '<span class="oc-price">' + (o.price ? esc(o.price) + ' <small>دينار</small>' : '<small>تُحدد لاحقًا</small>') + '</span>';
-    if (o.orderValue) meta += '<span class="oc-val">' + 'قيمة الطلب ' + esc(o.orderValue) + ' د.أ</span>';
+    if (o.orderValue) meta += '<span class="oc-val">' + 'قيمة الطلب ' + esc(valTxt(o.orderValue)) + '</span>';
     if (isMarket(o) && showStore) meta += '<span class="oc-tag">طلب تطبيق</span>';   // المطعم لا يحتاجه: كل طلباته من التطبيق
     return '<article class="oc s-' + o.status + '" data-id="' + esc(o.id) + '" tabindex="0" role="button">' +
       '<div class="oc-top"><span class="oc-code" dir="ltr" title="' + esc(o.code) + '">' + esc(g.HW_SHORT ? shortNo(o) : codeOf(o)) + '</span>' + (showStore ? '<span class="oc-store">' + esc(o.storeName || '') + '</span>' : '') +
@@ -572,6 +572,9 @@ function sha256(str) {
       (actionsHtml ? '<div class="oc-actions">' + actionsHtml + '</div>' : '') + '</article>';
   }
   /* سطر وقت الوصول على بطاقة الطلب (لكل التطبيقات) */
+  /* قيمة الطلب نص حر يكتبه المنسق أو المتجر (أرقام أو كلام أو رموز)؛ نضيف «د.أ» فقط إن كانت رقمًا */
+  function valTxt(v) { v = String(v == null ? '' : v).trim(); return /^[\d٠-٩.,٫\s]+$/.test(v) ? v + ' د.أ' : v; }
+  function valNum(v) { var n = parseFloat(String(v || '').replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); }).replace(/[٫,]/g, '.').replace(/[^\d.]/g, ' ').trim().split(/\s+/)[0]); return isNaN(n) ? 0 : n; }
   function etaLine(o) {
     if (!o.captain || !isActive(o)) return '';
     var e = eta(o); if (!e) return '';
@@ -580,8 +583,13 @@ function sha256(str) {
       : 'يصل للعميل حوالي <b dir="ltr">' + clock(e.at) + '</b> · خلال ' + e.toDest + ' د';
     return '<div class="oc-eta' + (e.late ? ' late' : '') + '"><i></i><span>' + (e.late ? 'متأخر ' + e.late + ' د عن الموعد · ' : '') + txt + '</span></div>';
   }
-  function timeline(o) {
-    var h = '<ol class="tl">';
+  /* مراحل الطلب على شكل طريق عمودي (نفس هوية شريط الطريق)، والكابتن المرسوم واقف عند المرحلة الحالية.
+     photos: أي صور يراها هذا التطبيق عند الضغط على المرحلة — 'pickpic' (الاستلام) و/أو 'dlvpic' (التسليم) */
+  var PH = { picked: ['pickpic', 'pickPicAt', 'صورة الاستلام من المتجر'], delivered: ['dlvpic', 'dlvPicAt', 'صورة تسليم الطلب للعميل'] };
+  var PH_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.5" r="3.5"/></svg>';
+  function timeline(o, photos) {
+    photos = photos || [];
+    var h = '<ol class="tl hw-tl">';
     if (o.status === 'cancelled') {
       o.history.forEach(function (e) {
         var txt = e.s === 'cancelled' ? 'تم إلغاء الطلب' : (steps(o).filter(function (s) { return s[0] === e.s; })[0] || [])[1];
@@ -589,13 +597,34 @@ function sha256(str) {
       });
       return h + '</ol>';
     }
-    var idx = stage(o);
+    var idx = stage(o), n = steps(o).length, rider = o.captain ? (o.status === 'delivered' ? n - 1 : idx) : -1;
     steps(o).forEach(function (s, i) {
-      var ev = o.history.filter(function (e) { return e.s === s[0]; })[0];
-      h += '<li class="' + (i < idx ? 'done' : i === idx ? 'act' : '') + '"><i></i><b>' + s[1] + '</b><small>' + (ev ? fmtTime(ev.t) : 'بانتظار الخطوة') + '</small></li>';
+      var ev = o.history.filter(function (e) { return e.s === s[0]; })[0], ph = PH[s[0]], has = ph && photos.indexOf(ph[0]) >= 0 && o[ph[1]];
+      var cls = (i < idx ? 'done' : i === idx ? 'act' : '') + (i === rider ? ' rider' + (o.status === 'delivered' ? ' still' : '') : '') + (has ? ' ph' : '');
+      var inner = '<i></i>' + (i === rider ? '<img class="tl-rider" src="art/ride' + (o.status === 'delivered' ? '-still' : '') + '.svg" alt="" aria-hidden="true">' : '') +
+        '<b>' + s[1] + '</b><small>' + (ev ? fmtTime(ev.t) : 'بانتظار الخطوة') + '</small>' + (has ? '<span class="tl-cam">' + PH_IC + 'الصورة</span>' : '');
+      h += has ? '<li class="' + cls + '"><button type="button" class="tl-btn" data-tlph="' + ph[0] + '" data-id="' + esc(o.id) + '">' + inner + '</button></li>'
+        : '<li class="' + cls + '">' + inner + '</li>';
     });
     return h + '</ol>';
   }
+  /* عارض صورة الاستلام/التسليم (موحّد لكل التطبيقات) */
+  function showPhoto(kind, id) {
+    var o = Orders.get(id) || {}, t = kind === 'dlvpic' ? PH.delivered[2] : PH.picked[2];
+    var v = document.getElementById('hwPhoto'); if (!v) { v = document.createElement('div'); v.id = 'hwPhoto'; v.className = 'hw-photo'; v.setAttribute('role', 'dialog'); document.body.appendChild(v); }
+    v.innerHTML = '<div class="hp-card"><div class="hp-head"><div><small dir="ltr">' + esc(o.code || '') + '</small><b>' + t + '</b></div><button type="button" class="hp-x" data-hpx aria-label="إغلاق">✕</button></div><div class="hp-img"><span>جاري التحميل…</span></div><small class="hp-sub"></small></div>';
+    v.classList.add('show');
+    var box = v.querySelector('.hp-img'), sub = v.querySelector('.hp-sub');
+    (g.HWBiz ? g.HWBiz.getDoc(kind, id) : Promise.resolve(null)).then(function (d) {
+      if (d && d.data) { box.innerHTML = '<img src="' + esc(d.data) + '" alt="' + t + '">'; sub.textContent = 'التقطها ' + ((o.captain || {}).name || 'الكابتن') + ' · ' + fmtTime(d.at); }
+      else box.innerHTML = '<span>لم تُرفع الصورة بعد</span>';
+    }).catch(function () { box.innerHTML = '<span>تعذّر تحميل الصورة</span>'; });
+  }
+  function hidePhoto() { var v = document.getElementById('hwPhoto'); if (v) v.classList.remove('show'); }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-tlph]'); if (b) { e.stopPropagation(); showPhoto(b.dataset.tlph, b.dataset.id); return; }
+    if (e.target.closest && (e.target.closest('[data-hpx]') || e.target.id === 'hwPhoto')) hidePhoto();
+  }, true);
   function toast(msg) {
     var t = document.getElementById('hwToast');
     if (!t) { t = document.createElement('div'); t.id = 'hwToast'; t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
@@ -654,5 +683,5 @@ function sha256(str) {
   g.HWDB = { mode: remote ? 'remote' : 'local', col: Col, uid: uid, esc: esc, num: num, money: money, cfg: CFG };
   g.HWOrders = { mode: remote ? 'remote' : 'local', STEPS: STEPS, SHORT: SHORT, create: createOrder, update: updateOrder, patchLite: function (id, p) { return Orders.patch(id, p); }, keyRange: keyRange, pending: function (id) { return id ? outbox.has('orders', id) : outbox.count(); }, subscribe: Orders.subscribe, scope: Orders.scope, scoped: Orders.scoped, get: Orders.get, list: Orders.list, _raw: Orders._raw,
     stats: stats, isActive: isActive, isToday: isToday, isMarket: isMarket, stage: stage, steps: steps, label: label, offerable: offerable, dispatchAt: dispatchAt, claim: claim, settle: settle, counter: counter, capNo: capNo, codeOf: codeOf, shortNo: shortNo, prioritySort: prioritySort, rankCaptains: rankCaptains, dayKey: dayKey, feeFrom: feeFrom,
-    fmtTime: fmtTime, ago: ago, eta: eta, drive: drive, clock: clock, card: card, timeline: timeline, routeRows: routeRows, progress_: progress, captainRow: captainRow, esc: esc, num: num, money: money, toast: toast, beep: beep, openNav: openNav };
+    fmtTime: fmtTime, ago: ago, eta: eta, drive: drive, clock: clock, card: card, timeline: timeline, showPhoto: showPhoto, valTxt: valTxt, valNum: valNum, routeRows: routeRows, progress_: progress, captainRow: captainRow, esc: esc, num: num, money: money, toast: toast, beep: beep, openNav: openNav };
 })(window);

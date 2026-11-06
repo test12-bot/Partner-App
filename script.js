@@ -400,18 +400,14 @@ function renderList(list) {
     }
 
     list.forEach(item => {
-        const el = document.createElement('button');
-        el.type = 'button';
-        el.className = 'price-row';
+        const el = document.createElement('div');   // للاطلاع فقط: طلب الكابتن يكون من بطاقة الرئيسية
+        el.className = 'price-row view';
         el.innerHTML = `
             <span class="nm">
                 <span class="item-name">${item.n}</span>
             </span>
             <span class="item-price">${item.p}</span>
         `;
-        el.addEventListener('click', () => {
-            openOrderModal('area', { area: item.n, price: item.p, startPoint: currentStartName });
-        });
         container.appendChild(el);
     });
 }
@@ -612,13 +608,13 @@ function statDetail(k) {
     const peak = Object.keys(byH).sort((a, b) => byH[b] - byH[a])[0];
     const hr = h => ((h % 12) || 12) + (h < 12 ? ' ص' : ' م');
     if (k === 'today') return { title: 'طلبات اليوم', value: today.length, sub: peak != null ? 'الذروة الساعة ' + hr(+peak) : '',
-        rows: [['مسلّمة', done.length], ['قيد التنفيذ', today.filter(HWOrders.isActive).length], ['ملغاة', canc.length], ['متوسط القيمة', today.length ? m2(sum(today, o => Number(o.itemsTotal || o.orderValue || 0)) / today.length) + ' د.أ' : '—']],
+        rows: [['مسلّمة', done.length], ['قيد التنفيذ', today.filter(HWOrders.isActive).length], ['ملغاة', canc.length], ['متوسط القيمة', today.length ? m2(sum(today, o => (Number(o.itemsTotal) || HWOrders.valNum(o.orderValue))) / today.length) + ' د.أ' : '—']],
         listTitle: 'طلبات اليوم', list: today.slice().sort((a, b) => b.createdAt - a.createdAt).map(o => HWStats.orderItem(o, HWOrders.fmtTime(o.createdAt))) };
     if (k === 'active') return { title: 'قيد التنفيذ', value: act.length, sub: 'تتحدث مباشرة',
         rows: [['بانتظار قبولك', act.filter(o => o.storeState === 'pending').length], ['قيد التحضير', act.filter(o => o.storeState === 'preparing').length], ['جاهزة', act.filter(o => o.storeState === 'ready').length], ['تم تعيين كابتن', act.filter(o => o.captain).length]],
         listTitle: 'الطلبات الحالية', list: act.map(o => HWStats.orderItem(o, HWOrders.ago(o.createdAt))), empty: 'لا توجد طلبات حالية الآن' };
     if (k === 'delivered') return { title: 'تم تسليمها اليوم', value: done.length, sub: today.length ? Math.round(done.length / today.length * 100) + '٪ من طلبات اليوم' : '',
-        rows: [['قيمة الطلبات', m2(sum(done, o => Number(o.itemsTotal || o.orderValue || 0))) + ' د.أ'], ['أجور التوصيل', m2(sum(done, fee)) + ' د.أ']],
+        rows: [['قيمة الطلبات', m2(sum(done, o => (Number(o.itemsTotal) || HWOrders.valNum(o.orderValue)))) + ' د.أ'], ['أجور التوصيل', m2(sum(done, fee)) + ' د.أ']],
         listTitle: 'الطلبات المسلّمة', list: done.map(o => HWStats.orderItem(o, (o.captain ? o.captain.name.split(' ')[0] : ''))) };
     if (k === 'fees') return { title: 'أجور اليوم (تقديرية)', value: m2(sum(today.filter(o => o.status !== 'cancelled'), fee)), unit: 'د.أ', sub: 'حسب قائمة الأسعار',
         rows: [['عدد الطلبات', today.filter(o => o.status !== 'cancelled').length], ['متوسط الأجرة', today.length ? m2(sum(today, fee) / Math.max(1, today.length)) + ' د.أ' : '—']],
@@ -683,7 +679,7 @@ function renderSheet(id) {
     const o = HWOrders.get(id), body = document.getElementById('orderSheetBody');
     if (!o) { closeOrderSheet(); return; }
     const rows = [['وقت الطلب', HWOrders.fmtTime(o.createdAt)]];
-    if (o.orderValue) rows.push(['قيمة الطلب', o.orderValue + ' د.أ']);
+    if (o.orderValue) rows.push(['قيمة الطلب', HWOrders.valTxt(o.orderValue)]);
     if (o.price) rows.push(['رسوم التوصيل', o.price + ' دينار']);
     if (o.notes) rows.push(['ملاحظات', o.notes]);
     if (o.discount) rows.push(['خصم العرض', '−' + HWOrders.money(o.discount) + ' د.أ' + (o.offerTitle ? ' (' + o.offerTitle + ')' : '')]);
@@ -692,9 +688,9 @@ function renderSheet(id) {
     if (o.rating) rows.push(['تقييم العميل', HWBiz.stars(o.rating.store) + (o.rating.comment ? ' · ' + o.rating.comment : '')]);
     const ph = o.captain && o.captain.phone ? String(o.captain.phone).replace(/[^\d+]/g, '') : '';
     body.innerHTML =
-        '<div class="sh-head"><div><small>تفاصيل الطلب</small><h3>' + HWOrders.esc(o.code) + '</h3></div><span class="oc-chip" style="' + '' + '">' + HWOrders.SHORT[o.status] + '</span></div>' +
-        '<div class="s-' + o.status + '">' + HWOrders.routeRows(o).replace('oc-route', 'oc-route') + '</div>' +
-        HWOrders.timeline(o) + HWOrders.captainRow(o, true) +
+        '<div class="sh-head"><div><small dir="ltr">' + HWOrders.esc(o.code) + '</small><h3>تفاصيل الطلب</h3></div><span class="oc-chip">' + HWOrders.SHORT[o.status] + '</span></div>' +
+        '<div class="s-' + o.status + '">' + HWOrders.routeRows(o) + '</div>' +
+        HWOrders.timeline(o, ['pickpic']) + HWOrders.captainRow(o, true) +
         '<div class="sh-rows">' + rows.map(r => '<div><span>' + r[0] + '</span><b>' + HWOrders.esc(r[1]) + '</b></div>').join('') + '</div>' +
         (HWOrders.isMarket(o) ? '<div class="sh-rows">' + itemLines(o) + (o.customer ? '<div><span>العميل</span><b>' + HWOrders.esc(o.customer.name) + '</b></div>' : '') + '</div>' + (storeActions(o) ? '<div class="oc-actions" style="margin-top:10px">' + storeActions(o) + '</div>' : '') : '') +
         '<div class="sh-actions">' + (HWOrders.isMarket(o) ? '<button type="button" class="ghost-btn" onclick="printTicket(\'' + o.id + '\')">طباعة التذكرة</button>' : '') + (o.status === 'new' && !HWOrders.isMarket(o) ? '<button type="button" class="ghost-btn dng" onclick="cancelOrder(\'' + o.id + '\')">إلغاء الطلب</button>' : '') +

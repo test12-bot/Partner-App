@@ -730,3 +730,103 @@ html[data-theme="dark"] .cm-stats .hi{background:#08292A !important}
 .tab>span:last-child{font-size:14px !important;color:var(--hw-ink) !important;white-space:nowrap;animation:tabLbl .3s ease !important}
 .tab:not(.on)>span:last-child{position:absolute !important;width:1px !important;height:1px !important;overflow:hidden !important;clip:rect(0 0 0 0) !important}
 html[data-theme="dark"] .tab.on{background:var(--hw-y) !important}
+
+/* =========================================================
+   مراحل الطلب على شكل طريق عمودي + الكابتن المرسوم عند المرحلة الحالية
+   (نفس هوية شريط الطريق في البطاقات وصفحة التتبع) — لكل التطبيقات
+   ========================================================= */
+.tl.hw-tl{list-style:none !important;margin:16px 0 6px !important;padding:0 !important}
+.tl.hw-tl li{position:relative !important;display:block !important;min-height:60px;padding:0 !important;color:var(--hw-ink) !important}
+.tl.hw-tl li:last-child{min-height:34px}
+.tl.hw-tl li>b,.tl.hw-tl li>small,.tl.hw-tl .tl-btn{margin:0}
+.tl.hw-tl li>b,.tl.hw-tl .tl-btn>b{display:block;padding-inline-start:62px;padding-top:3px;font-size:14px !important;font-weight:800 !important;line-height:1.4}
+.tl.hw-tl li>small,.tl.hw-tl .tl-btn>small{display:block;position:static !important;padding-inline-start:62px;margin:2px 0 0 !important;font-size:12px !important;font-weight:700 !important;opacity:.62}
+.tl.hw-tl li.ph>.tl-btn>b,.tl.hw-tl li.ph>.tl-btn>small{padding-inline-end:104px}
+.tl.hw-tl li:not(.done):not(.act):not(.bad){color:rgba(14,58,59,.45) !important}
+/* قطعة الطريق من هذه المرحلة للتالية */
+.tl.hw-tl li::before{content:"" !important;position:absolute !important;inset-inline-start:21px !important;right:auto;top:14px !important;bottom:-14px !important;width:14px !important;background:var(--hw-road) !important;border-radius:0 !important;display:block !important;z-index:0}
+.tl.hw-tl li::after{content:"" !important;position:absolute !important;inset-inline-start:27px !important;right:auto;top:26px !important;bottom:-2px !important;width:2px !important;background:repeating-linear-gradient(180deg,var(--hw-y) 0 7px,transparent 7px 13px) !important;opacity:.9;display:block !important;z-index:0}
+html[dir="rtl"] .tl.hw-tl li::before{right:21px !important;left:auto !important}
+html[dir="rtl"] .tl.hw-tl li::after{right:27px !important;left:auto !important}
+html[dir="ltr"] .tl.hw-tl li::before{left:21px !important;right:auto !important}
+html[dir="ltr"] .tl.hw-tl li::after{left:27px !important;right:auto !important}
+.tl.hw-tl li:first-child::before{border-radius:7px 7px 0 0 !important}
+.tl.hw-tl li:last-child::before,.tl.hw-tl li:last-child::after{display:none !important}
+.tl.hw-tl li.done::before{background:var(--hw-teal) !important}.tl.hw-tl li.done::after{display:none !important}
+.tl.hw-tl li.act.rider:not(.still)::before{background:linear-gradient(180deg,var(--hw-teal) 0 45%,var(--hw-road) 45%) !important}
+/* نقاط المراحل */
+.tl.hw-tl li i{position:absolute !important;top:3px !important;inset-inline-start:17px !important;right:auto;width:22px !important;height:22px !important;border-radius:50% !important;background:#fff !important;border:3px solid var(--hw-ink) !important;z-index:1;box-shadow:0 2px 6px -2px rgba(14,58,59,.5);animation:none !important}
+html[dir="rtl"] .tl.hw-tl li i{right:17px !important;left:auto !important}
+html[dir="ltr"] .tl.hw-tl li i{left:17px !important;right:auto !important}
+.tl.hw-tl li.done i{background:var(--hw-teal) !important}
+.tl.hw-tl li.act i{background:var(--hw-y) !important}
+.tl.hw-tl li.bad i{background:#E5484D !important;border-color:#E5484D !important}.tl.hw-tl li.bad{color:#C4363B !important}
+/* الكابتن ماشي على الطريق عند المرحلة الحالية */
+.tl.hw-tl li.rider{min-height:68px}
+.tl.hw-tl li.rider i{opacity:0}
+.tl-rider{position:absolute;top:-18px;inset-inline-start:-4px;width:66px;height:auto;z-index:2;pointer-events:none;filter:drop-shadow(0 4px 6px rgba(14,58,59,.25))}
+html[dir="rtl"] .tl-rider{right:-4px;left:auto;transform:scaleX(-1)}
+html[dir="ltr"] .tl-rider{left:-4px;right:auto}
+/* المرحلة التي لها صورة: تنضغط */
+.tl.hw-tl .tl-btn{all:unset;display:block;width:100%;min-height:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:14px}
+.tl.hw-tl .tl-btn:active{background:rgba(37,206,209,.1)}
+.tl.hw-tl .tl-btn:focus-visible{outline:2px solid var(--hw-teal);outline-offset:2px}
+.tl-cam{position:absolute;top:4px;inset-inline-end:0;display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:999px;background:var(--hw-ink);color:var(--hw-y);font-size:12px;font-weight:800;white-space:nowrap}
+.tl-cam svg{width:15px;height:15px}
+html[data-theme="dark"] .tl.hw-tl li{color:#F3F0E7 !important}
+html[data-theme="dark"] .tl.hw-tl li:not(.done):not(.act):not(.bad){color:rgba(243,240,231,.45) !important}
+html[data-theme="dark"] .tl.hw-tl li i{border-color:#F3F0E7 !important;background:#0E3A3B !important}
+html[data-theme="dark"] .tl.hw-tl li.done i{background:var(--hw-teal) !important}html[data-theme="dark"] .tl.hw-tl li.act i{background:var(--hw-y) !important}
+html[data-theme="dark"] .tl.hw-tl li::before{background:#2A4A4B !important}html[data-theme="dark"] .tl.hw-tl li.done::before{background:var(--hw-teal) !important}
+html[data-theme="dark"] .tl-cam{background:var(--hw-y);color:var(--hw-ink)}
+
+/* عارض صورة الاستلام/التسليم */
+.hw-photo{position:fixed;inset:0;z-index:10050;display:none;place-items:center;padding:18px;background:rgba(8,30,31,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.hw-photo.show{display:grid;animation:popIn .22s cubic-bezier(.22,1,.36,1)}
+.hp-card{width:min(100%,440px);background:var(--hw-cream);color:var(--hw-ink);border-radius:22px 22px 22px 7px;padding:14px;box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
+.hp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.hp-head small{display:block;font-size:12px;font-weight:700;opacity:.6}.hp-head b{display:block;font-size:17px;font-weight:900}
+.hp-x{flex:none;width:42px;height:42px;border-radius:50%;border:0;background:var(--hw-ink);color:var(--hw-y);font-size:17px;font-weight:900;cursor:pointer}
+.hp-img{display:grid;place-items:center;min-height:180px;border-radius:16px 16px 16px 6px;background:#E2DCCD;overflow:hidden}
+.hp-img span{font-size:14px;font-weight:700;opacity:.6}
+.hp-img img{display:block;width:100%;max-height:62vh;object-fit:contain;background:#000}
+.hp-sub{display:block;margin-top:9px;font-size:12px;font-weight:700;opacity:.7}
+html[data-theme="dark"] .hp-card{background:#12302F;color:#F3F0E7}
+
+/* شريط التنقل زجاجي: كحلي شفاف مع ضباب، والخيار المختار كبسولة صفراء صلبة */
+.tabbar{background:rgba(14,58,59,.86) !important;-webkit-backdrop-filter:blur(22px) saturate(1.8) !important;backdrop-filter:blur(22px) saturate(1.8) !important;border:1px solid rgba(255,255,255,.16) !important;box-shadow:0 16px 34px -14px rgba(14,58,59,.6),inset 0 1px 0 rgba(255,255,255,.16) !important}
+html[data-theme="dark"] .tabbar{background:rgba(6,32,33,.74) !important;border-color:rgba(243,240,231,.1) !important}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabbar{background:var(--hw-ink) !important}html[data-theme="dark"] .tabbar{background:#08292A !important}}
+@media (prefers-reduced-transparency:reduce){.tabbar{background:var(--hw-ink) !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}}
+html.lowfx .tabbar{background:var(--hw-ink) !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+.tab:not(.on) .hwi{filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+
+/* قائمة الأسعار عند المتجر: للاطلاع فقط */
+.price-row.view{cursor:default;border-radius:var(--hw-r) var(--hw-r) var(--hw-r) var(--hw-tail) !important}
+.price-row.view:active,.price-row.view:hover{transform:none !important}
+
+/* صفحة الحساب: أيقونات HIGHWAY الخاصة داخل مربع بشكل البطاقة المميز (نفس الهوية في التطبيقات الأربعة) */
+.pf-ico.pf-hw{width:46px !important;height:46px !important;border-radius:15px 15px 15px 5px !important;background:#fff !important;color:var(--hw-ink) !important;box-shadow:0 4px 10px -6px rgba(14,58,59,.45)}
+.pf-ico.pf-hw .hwi{width:32px !important;height:32px !important}
+.pf-logout .hwi{width:24px;height:24px;flex:none}
+html[data-theme="dark"] .pf-ico.pf-hw{background:#0E3A3B !important;color:#F3F0E7 !important}
+
+/* شريط التنقل الحي: كبسولة صفراء واحدة تنزلق وتتمطّ، وزجاجي بالراحة / كحلي صلب عند اللمس */
+html.tb-live .tab.on,html.tb-live[data-theme="dark"] .tab.on{background:transparent !important}
+.tb-live .tab{position:relative;z-index:1;touch-action:none}
+.tb-pill{position:absolute;z-index:0;left:0;width:0;border-radius:999px;background:var(--hw-y);pointer-events:none;transform-origin:50% 50%;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 4px rgba(14,58,59,.12),0 4px 12px -4px rgba(232,239,68,.55);
+  transition:left .42s cubic-bezier(.3,.9,.3,1.12),width .42s cubic-bezier(.3,.9,.3,1.12),opacity .2s}
+.tabbar.tb-drag .tb-pill{transition:none;transform:scale(1.08,1.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 8px 20px -6px rgba(232,239,68,.7)}
+.tabbar.tb-drag .tab.on>span:last-child{opacity:.0}
+.tabbar.tb-drag .tab.hov .hwi{transform:scale(1.12);transition:transform .15s}
+/* زجاجي بالراحة (كحلي شفاف بخفة) ← كحلي صلب لما تلمسه */
+.tabbar{background:rgba(14,58,59,.8) !important;transition:transform .32s cubic-bezier(.22,1,.36,1),background .28s ease !important}
+.tabbar.tb-touch{background:rgba(14,58,59,1) !important}
+html[data-theme="dark"] .tabbar{background:rgba(6,32,33,.66) !important}html[data-theme="dark"] .tabbar.tb-touch{background:#08292A !important}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabbar{background:var(--hw-ink) !important}}
+html.lowfx .tabbar{background:var(--hw-ink) !important}
+
+.tabbar.tb-drag .tab.hov{color:var(--hw-ink) !important;--ic-b:#F5EDE3;--ic-a:#25CED1;--ic-c:#25CED1}
+.tabbar.tb-drag .tab.on:not(.hov){color:#CFE8E8 !important;--ic-b:rgba(255,255,255,.1);--ic-a:rgba(232,239,68,.55);--ic-c:rgba(37,206,209,.6)}
+.tb-pill{transition:left .42s cubic-bezier(.3,.9,.3,1.12),width .42s cubic-bezier(.3,.9,.3,1.12),opacity .2s,transform .2s}
