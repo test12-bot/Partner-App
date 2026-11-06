@@ -830,3 +830,19 @@ html.lowfx .tabbar{background:var(--hw-ink) !important}
 .tabbar.tb-drag .tab.hov{color:var(--hw-ink) !important;--ic-b:#F5EDE3;--ic-a:#25CED1;--ic-c:#25CED1}
 .tabbar.tb-drag .tab.on:not(.hov){color:#CFE8E8 !important;--ic-b:rgba(255,255,255,.1);--ic-a:rgba(232,239,68,.55);--ic-c:rgba(37,206,209,.6)}
 .tb-pill{transition:left .42s cubic-bezier(.3,.9,.3,1.12),width .42s cubic-bezier(.3,.9,.3,1.12),opacity .2s,transform .2s}
+
+/* توحيد أخير: كل بطاقة في التطبيقات الأربعة بنفس الزاوية المميزة (22 / 22 / 22 / 7) */
+.vc,.bn,.hero2,.v-hero,.v-head,.mi,.today-card,.result-box,.list-note,.setup,.lv-empty,.ops-q,.stc,.w-feat .fi,.sk-row,.iss-card,.day-card,.pk-thumb,.cart-sum,.co-sum,.track-card,.tk-card,.it-card,.addr-row,.ofr-card,.pod-box,.hp-card,.need-c,.lv-card{border-radius:var(--hw-r) var(--hw-r) var(--hw-r) var(--hw-tail) !important}
+.vc-img,.v-hero img{border-radius:0 !important}
+
+/* نظام الزوايا الموحّد للتطبيقات الأربعة (نفس شكل HIGHWAY بثلاث مقاسات):
+   بطاقة كبيرة 22/7 — صندوق داخلي وحقل كتابة 16/6 — زر 18/6 */
+.co,.need,.sp-inbox,.dl-map,.perf,.er-list,.dz-list,.rt-row,.lv-c,.cart-card,.late-card,.pin-card,.oc{border-radius:var(--hw-r) var(--hw-r) var(--hw-r) var(--hw-tail) !important}
+.sh-rows,.oc-cap,.sa-cap,.dz-s,.cov-prev,.sq,.modal-summary,.pickup-pill,.last-sent,.due,.v-offer,.wh,.dest-btn,.plain,.w-search,.w-sbox,.jt,.cm-total,.list-note,.search-wrap,.value-wrap,
+input:not([type=checkbox]):not([type=radio]):not([type=range]),textarea,select{border-radius:16px 16px 16px 6px !important}
+.cm-main,.cm-acc,.pf-logout,.act-btn,.submit-btn,.ghost-btn{border-radius:18px 18px 18px 6px !important}
+.value-wrap input,.search-wrap input,.w-sbox input,.dest-btn input{border-radius:inherit !important}
+.oc .act-btn,.oc .act-btn.go.sa-ready,.cm-btns>a,.cm-btns>button{border-radius:18px 18px 18px 6px !important}
+.sr{border-radius:var(--hw-r) var(--hw-r) var(--hw-r) var(--hw-tail) !important}
+.stl-k>div,.mg-quick>button{border-radius:16px 16px 16px 6px !important}
+.mg-quick>button{border-radius:18px 18px 18px 6px !important}
