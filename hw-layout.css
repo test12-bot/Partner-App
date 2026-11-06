@@ -718,3 +718,15 @@ body.kb-open .tabbar{transform:translateY(160%) !important}
 .cm-stats .hi b{color:var(--hw-y) !important}.cm-stats .hi small{color:rgba(243,240,231,.72) !important}
 .cm-stats>div{border-radius:16px 16px 16px 6px !important}
 html[data-theme="dark"] .cm-stats .hi{background:#08292A !important}
+/* شريط التنقل مثل القديم: أيقونات فقط، والخيار المختار وحده يتمدد ويظهر اسمه داخل كبسولة صفراء.
+   بلا خط الشارع الأصفر: كحلي نظيف */
+.tabbar::before{display:none !important}
+.tabbar{padding:7px !important;border-radius:999px !important}
+.tab{flex:1 1 0 !important;flex-direction:row !important;gap:7px !important;height:52px !important;border-radius:999px !important;padding:0 !important;justify-content:center;align-items:center;transition:flex-grow .32s cubic-bezier(.22,1,.36,1),background .25s !important}
+.tab.on{flex-grow:2.2 !important;background:var(--hw-y) !important}
+.tab .ti{width:auto !important;height:auto !important;background:none !important;transform:none !important;border-radius:0 !important}
+.tab.on .ti{background:none !important;transform:none !important}
+.tab .hwi{width:28px;height:28px}
+.tab>span:last-child{font-size:14px !important;color:var(--hw-ink) !important;white-space:nowrap;animation:tabLbl .3s ease !important}
+.tab:not(.on)>span:last-child{position:absolute !important;width:1px !important;height:1px !important;overflow:hidden !important;clip:rect(0 0 0 0) !important}
+html[data-theme="dark"] .tab.on{background:var(--hw-y) !important}
