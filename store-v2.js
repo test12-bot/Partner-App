@@ -41,7 +41,7 @@ function capEtaToStore(o) {
     return km < .15 ? 0 : Math.max(1, Math.round(km / ((HW_CONFIG.capKmh || 25) / 60)));
 }
 /* أيقونة الكابتن بهوية هاي وي: دراجة توصيل بصندوق ليموني (بدل الإيموجي) */
-const CAP_IC = '<svg viewBox="0 0 48 48" fill="none" stroke="#0E3A3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="13" rx="3" fill="#E8EF44"/><path d="M8 16.5h8" stroke-width="2"/><path d="M8 31c0-4.5 3-7 7.5-7H27l-2 7z" fill="#25CED1"/><path d="M27 24l3-10m-2.5 0h6" /><path d="M30 14l6 18"/><circle cx="12" cy="35" r="5" fill="#F5EDE3"/><circle cx="37" cy="35" r="5" fill="#F5EDE3"/><path d="M17 35h15"/></svg>';
+const CAP_IC = '<svg viewBox="0 0 48 48" fill="none" stroke="#0E3A3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="13" rx="3" fill="#E8EF44"/><path d="M8 16.5h8" stroke-width="2"/><path d="M8 31c0-4.5 3-7 7.5-7H27l-2 7z" fill="#26CED0"/><path d="M27 24l3-10m-2.5 0h6" /><path d="M30 14l6 18"/><circle cx="12" cy="35" r="5" fill="#F5EDE3"/><circle cx="37" cy="35" r="5" fill="#F5EDE3"/><path d="M17 35h15"/></svg>';
 /* مؤقت التحضير: حلقة صغيرة تمتلئ (فيروزي ← ليموني ← أحمر عند التأخر) مع الوقت المتبقي */
 function prepInfo(o) {
     if (o.storeState !== 'preparing' || o.status === 'picked') return null;
@@ -51,7 +51,7 @@ function prepInfo(o) {
 }
 function prepRing(o) {
     const p = prepInfo(o); if (!p) return '';
-    const col = p.k < .7 ? '#25CED1' : p.k < 1 ? '#E8EF44' : '#E5484D', C = 2 * Math.PI * 15;
+    const col = p.k < .7 ? '#26CED0' : p.k < 1 ? '#E8EF44' : '#E5484D', C = 2 * Math.PI * 15;
     return '<div class="sa-prep' + (p.k >= 1 ? ' late' : '') + '"><span class="prep-ring"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="rgba(14,58,59,.12)" stroke-width="4.5"/><circle cx="18" cy="18" r="15" fill="none" stroke="' + col + '" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="' + (C * p.k).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 18 18)"/></svg></span>' +
         '<div><small>التحضير</small><b>' + (p.left > 0 ? 'باقي ' + p.left + ' د' : p.left === 0 ? 'الآن' : 'متأخر ' + (-p.left) + ' د') + '</b></div></div>';
 }

@@ -36,7 +36,7 @@
     '@font-face{font-family:NotoKufi;src:url(f/NotoKufiArabic.woff) format("woff");font-weight:100 900}' +
     '@font-face{font-family:Quicksand;src:url(f/Quicksand.woff) format("woff");font-weight:300 700}' +
     '@font-face{font-family:NotoSans;src:url(f/NotoSans.woff) format("woff");font-weight:100 900}' +
-    ':root{--teal:#25ced1;--beige:#f3f0e7;--yellow:#e8ef44;--ink:#000}*{box-sizing:border-box}' +
+    ':root{--teal:#26CED0;--beige:#f3f0e7;--yellow:#e8ef44;--ink:#000}*{box-sizing:border-box}' +
     'html,body{margin:0;background:#cfd9d9;font-family:NotoKufi,sans-serif;direction:rtl}' +
     '#doc{padding:10px 0}.page{position:relative;width:595.5pt;height:842.25pt;overflow:hidden;background:#fff;margin:0 auto 14px;direction:rtl}' +
     '.abs{position:absolute}.full{position:absolute;left:0;top:0;width:595.5pt;height:842.25pt}' +

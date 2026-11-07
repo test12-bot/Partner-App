@@ -88,7 +88,7 @@
   function apply() {
     var p = pref(), dark = p === 'dark' || (p === 'auto' && mq && mq.matches);
     root.setAttribute('data-theme', dark ? 'dark' : 'light');
-    var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', dark ? '#0C1F20' : '#25CED1');
+    var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', dark ? '#0C1F20' : '#26CED0');
   }
   if (mq && mq.addEventListener) mq.addEventListener('change', apply);
   apply();

@@ -60,14 +60,14 @@
       '.hw-onb-slide.on h2,.hw-onb-slide.on p{transform:none;opacity:1}' +
       '.hw-onb-pts{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px;text-align:start;max-width:330px}' +
       '.hw-onb-pts li{display:flex;gap:10px;align-items:center;background:rgba(255,255,255,.7);border-radius:14px;padding:10px 12px;font-size:14px;font-weight:700}' +
-      '.hw-onb-pts li::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:#25CED1;box-shadow:0 0 0 3px #E8EF44}' +
+      '.hw-onb-pts li::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:#26CED0;box-shadow:0 0 0 3px #E8EF44}' +
       '.hw-onb-bot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 22px calc(22px + env(safe-area-inset-bottom))}' +
       '.hw-onb-dots{display:flex;gap:7px}' +
       '.hw-onb-dots i{width:8px;height:8px;border-radius:99px;background:rgba(14,58,59,.2);transition:width .35s ease,background .35s ease}' +
       '.hw-onb-dots i.on{width:26px;background:#E8EF44}' +
       '.hw-onb-next{border:0;cursor:pointer;font:inherit;font-weight:800;font-size:16px;color:#0E3A3B;background:#E8EF44;border-radius:999px;height:58px;min-width:58px;padding:0 20px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 10px 24px rgba(14,58,59,.16),inset 0 -3px 0 rgba(14,58,59,.12);transition:min-width .45s ease,background .3s ease,transform .15s ease}' +
       '.hw-onb-next:focus{outline:none}.hw-onb-next:focus-visible{outline:3px solid #0E3A3B;outline-offset:3px}.hw-onb-next:active{transform:scale(.96)}.hw-onb-next svg{width:22px;height:22px}' +
-      '.hw-onb-next.go{min-width:min(220px,58vw);background:#25CED1;color:#fff}' +
+      '.hw-onb-next.go{min-width:min(220px,58vw);background:#26CED0;color:#fff}' +
       '[dir=ltr] .hw-onb-next svg{transform:scaleX(-1)}' +
       '[data-theme=dark] .hw-onb{--onb-bg:#0C1F20 !important;color:#F5EDE3}[data-theme=dark] .hw-onb-slide p{color:rgba(245,237,227,.75)}' +
       '[data-theme=dark] .hw-onb-art::before{background:rgba(255,255,255,.92)}[data-theme=dark] .hw-onb-skip{background:rgba(255,255,255,.1);color:#F5EDE3}' +

@@ -18,7 +18,7 @@
       '.hw-crop-top{display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 16px 8px}' +
       '.hw-crop-top b{font-size:16px}.hw-crop-top button{border:0;background:rgba(255,255,255,.12);color:#F5EDE3;font:inherit;font-weight:700;border-radius:99px;padding:8px 14px}' +
       '.hw-crop-stage{flex:1;display:grid;place-items:center;padding:12px;min-height:0}' +
-      '.hw-crop-box{position:relative;overflow:hidden;background:#0B2A2B;box-shadow:0 0 0 3px #25CED1,0 0 0 5px rgba(232,239,68,.8),0 20px 50px rgba(0,0,0,.5);cursor:grab;touch-action:none}' +
+      '.hw-crop-box{position:relative;overflow:hidden;background:#0B2A2B;box-shadow:0 0 0 3px #26CED0,0 0 0 5px rgba(232,239,68,.8),0 20px 50px rgba(0,0,0,.5);cursor:grab;touch-action:none}' +
       '.hw-crop-box.round{border-radius:50%}.hw-crop-box img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;pointer-events:none;will-change:transform}' +
       '.hw-crop-grid{position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)) 33.33% 0/1px 100% no-repeat,linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)) 66.66% 0/1px 100% no-repeat,linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)) 0 33.33%/100% 1px no-repeat,linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)) 0 66.66%/100% 1px no-repeat;opacity:0;transition:opacity .2s}' +
       '.hw-crop-box.drag .hw-crop-grid{opacity:1}' +

@@ -76,7 +76,7 @@
     return m;
   }
   function line(m, pts) {
-    return L.layerGroup([L.polyline(pts, { color: '#ffffff', weight: 9, opacity: .95, lineCap: 'round', lineJoin: 'round' }), L.polyline(pts, { color: '#25CED1', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round' })]).addTo(m);
+    return L.layerGroup([L.polyline(pts, { color: '#ffffff', weight: 9, opacity: .95, lineCap: 'round', lineJoin: 'round' }), L.polyline(pts, { color: '#26CED0', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round' })]).addTo(m);
   }
   function fit(m, pts, pad) { if (!pts.length) return; var o = !pad || Array.isArray(pad) ? { padding: pad || [40, 40] } : pad; m.fitBounds(L.latLngBounds(pts), Object.assign({ maxZoom: 16, animate: false }, o)); }
   /* هوامش خرائط الصفحات (الخريطة الثابتة أعلى الصفحة): الهيدر فوقها والبطاقة تغطي أسفلها */

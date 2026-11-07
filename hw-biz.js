@@ -238,7 +238,7 @@
 
   /* ---------- الطباعة: تذكرة الطلب (80 مم) والتقارير (A4) بهوية HIGHWAY ---------- */
   var PRINT_CSS = '*{box-sizing:border-box}body{margin:0;font-family:"Tajawal","Segoe UI",Tahoma,sans-serif;color:#0E3A3B;direction:rtl}' +
-    '.hd{background:#25CED1;color:#0E3A3B;padding:18px 22px;border-radius:0 0 18px 18px;display:flex;justify-content:space-between;align-items:center}' +
+    '.hd{background:#26CED0;color:#0E3A3B;padding:18px 22px;border-radius:0 0 18px 18px;display:flex;justify-content:space-between;align-items:center}' +
     '.hd b{font-size:22px;letter-spacing:.5px}.hd small{display:block;font-size:12px;opacity:.8}.hd .tag{background:#E8EF44;border-radius:10px;padding:6px 12px;font-weight:800;font-size:13px}' +
     '.wrap{padding:18px 22px}h2{font-size:16px;margin:18px 0 8px}' +
     '.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kp div{background:#F3F0E7;border-radius:12px;padding:10px}.kp small{display:block;font-size:11px;opacity:.7}.kp b{font-size:18px}' +
