@@ -41,7 +41,7 @@ function capEtaToStore(o) {
     return km < .15 ? 0 : Math.max(1, Math.round(km / ((HW_CONFIG.capKmh || 25) / 60)));
 }
 /* أيقونة الكابتن بهوية هاي وي: دراجة توصيل بصندوق ليموني (بدل الإيموجي) */
-const CAP_IC = '<svg viewBox="0 0 48 48" fill="none" stroke="#0E3A3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="13" rx="3" fill="#E8EF44"/><path d="M8 16.5h8" stroke-width="2"/><path d="M8 31c0-4.5 3-7 7.5-7H27l-2 7z" fill="#26CED0"/><path d="M27 24l3-10m-2.5 0h6" /><path d="M30 14l6 18"/><circle cx="12" cy="35" r="5" fill="#F5EDE3"/><circle cx="37" cy="35" r="5" fill="#F5EDE3"/><path d="M17 35h15"/></svg>';
+const CAP_IC = '<svg viewBox="0 0 48 48" fill="none" stroke="#0E3A3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="13" rx="3" fill="#E8EF44"/><path d="M8 16.5h8" stroke-width="2"/><path d="M8 31c0-4.5 3-7 7.5-7H27l-2 7z" fill="#26CED0"/><path d="M27 24l3-10m-2.5 0h6" /><path d="M30 14l6 18"/><circle cx="12" cy="35" r="5" fill="#F3F0E7"/><circle cx="37" cy="35" r="5" fill="#F3F0E7"/><path d="M17 35h15"/></svg>';
 /* مؤقت التحضير: حلقة صغيرة تمتلئ (فيروزي ← ليموني ← أحمر عند التأخر) مع الوقت المتبقي */
 function prepInfo(o) {
     if (o.storeState !== 'preparing' || o.status === 'picked') return null;

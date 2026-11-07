@@ -22,7 +22,7 @@
   function day(t) { var d = new Date(t), n = new Date(); if (d.toDateString() === n.toDateString()) return 'اليوم'; n.setDate(n.getDate() - 1); if (d.toDateString() === n.toDateString()) return 'أمس'; return d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear(); }
   function msgs(th) { var m = th && th.msgs || {}; return Object.keys(m).map(function (k) { return Object.assign({ id: k }, m[k]); }).sort(function (a, b) { return (a.at || 0) - (b.at || 0); }); }
   /* صورة صاحب المحادثة عند الإدارة: تُحسب من بياناته الحالية (شعار المتجر، صورة الكابتن) */
-  function avOf(th) { return (opt.avatar && opt.avatar(th)) || (th && th.img) || 'art/av-hw.jpg'; }
+  function avOf(th) { return (opt.avatar && opt.avatar(th)) || (th && th.img) || 'art/av-hw.jpg?v=2'; }
   function isAdmin() { return opt && opt.role === 'a'; }
   function myId() { var u = opt.me(); return u ? opt.role + '-' + String(u.uid).replace(/[.#$\[\]\/]/g, '_') : ''; }
   function hours() { var s = g.HWBiz && HWBiz.setting ? HWBiz.setting('support') : {}, c = (g.HW_CONFIG || {}).supportHours || [9, 24]; return [s.from != null ? +s.from : c[0], s.to != null ? +s.to : c[1]]; }
@@ -114,7 +114,7 @@
     if (isAdmin()) h = (opt.profile && th && opt.profile(th)) || '<div class="ip"><div class="ip-h"><img src="' + esc(avOf(th)) + '" alt=""><div><b>' + esc(th ? th.name : '') + '</b><span><em class="ip-st idle">' + (th ? ROLE[th.role] : '') + '</em></span></div></div>' + (th && th.phone ? '<div class="ip-l"><span>الهاتف</span><b dir="ltr">' + esc(th.phone) + '</b></div>' : '') + '</div>';
     else {
       var on2 = inHours(), r = hours(), ph = ((g.HW_CONFIG || {}).opsPhone || '').replace(/[^\d+]/g, '');
-      h = '<div class="ip"><div class="ip-h"><img src="art/av-hw.jpg" alt=""><div><b>دعم HIGHWAY</b><span><em class="ip-st ' + (on2 ? 'on' : 'idle') + '">' + (on2 ? 'متاح الآن' : 'خارج الدوام') + '</em></span></div></div>' +
+      h = '<div class="ip"><div class="ip-h"><img src="art/av-hw.jpg?v=2" alt=""><div><b>دعم HIGHWAY</b><span><em class="ip-st ' + (on2 ? 'on' : 'idle') + '">' + (on2 ? 'متاح الآن' : 'خارج الدوام') + '</em></span></div></div>' +
         '<div class="ip-l"><span>ساعات الدعم</span><b>من ' + hLabel(r[0]) + ' حتى ' + hLabel(r[1]) + '</b></div><div class="ip-l"><span>وقت الرد المعتاد</span><b>خلال دقائق</b></div>' +
         '<div class="ip-l"><span>للطوارئ أثناء الطلب</span><b>اتصال مباشر</b></div>' +
         '<div class="ip-a">' + (ph ? '<a class="ip-b go" href="tel:' + esc(ph) + '">' + S('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/>', 16) + 'اتصال بالإدارة</a>' : '') + '<button type="button" class="ip-b" data-sp="unprof">رجوع للمحادثة</button></div></div>';
@@ -150,7 +150,7 @@
         (th && th.status !== 'closed' ? '<button type="button" class="sp-ab solve" data-sp="solve">' + IC.ok + 'تم الحل</button>' : '');
     } else {
       var on = inHours(), r = hours();
-      m.querySelector('.sp-av').src = 'art/av-hw.jpg';
+      m.querySelector('.sp-av').src = 'art/av-hw.jpg?v=2';
       top.querySelector('b').textContent = 'دعم HIGHWAY';
       top.querySelector('small').innerHTML = on ? '<i class="sp-on"></i>متاح الآن · نرد عادة خلال دقائق' : 'خارج الدوام · نرد من ' + hLabel(r[0]);
       act.innerHTML = '';

@@ -66,7 +66,7 @@ function initIntroVideo() {
         'void main(){ uv = vec2(p.x*0.5+0.5, 0.5-p.y*0.5); gl_Position = vec4(p,0.0,1.0); }');
     const fs = compile(gl.FRAGMENT_SHADER,
         'precision mediump float; uniform sampler2D tex; varying vec2 uv;' +
-        'const vec3 BG = vec3(33.0,204.0,208.0)/255.0;' +            // لون خلفية الفيديو
+        'const vec3 BG = vec3(37.0,205.0,208.0)/255.0;' +            // لون خلفية الفيديو
         'void main(){' +
         '  vec3 c = texture2D(tex, uv).rgb;' +
         '  float a = clamp((distance(c, BG) - 0.035) / 0.80, 0.0, 1.0);' +
@@ -207,10 +207,10 @@ function userRole() { return 'متجر شريك'; }
 
 function fillUserUI(u) {
     const img = document.getElementById('pfImg');
-    img.onerror = () => { img.onerror = null; img.src = 'logo-icon.png'; };
+    img.onerror = () => { img.onerror = null; img.src = 'logo-icon.png?v=2'; };
     img.src = HWBiz.logo(u.id);   // شعار المتجر ترفعه الإدارة
     const lg = HWBiz.logo(u.id);   /* بلا شعار مرفوع: صورة HIGHWAY الدائرية */
-    HWHead.user({ img: /logo-icon/.test(lg) ? 'art/av-hw.jpg' : lg, name: userName(u), role: userRole(u) });
+    HWHead.user({ img: /logo-icon/.test(lg) ? 'art/av-hw.jpg?v=2' : lg, name: userName(u), role: userRole(u) });
     HWSupport.rescope();
     document.getElementById('pfName').textContent = userName(u);
     document.getElementById('pfHandle').textContent = '@' + u.names[0];

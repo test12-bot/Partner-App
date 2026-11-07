@@ -52,8 +52,8 @@
     return pts[pts.length - 1];
   }
   var HOME = '<svg viewBox="0 0 48 58" width="40" height="48"><path d="M24 56C24 56 4 36 4 22a20 20 0 0 1 40 0c0 14-20 34-20 34Z" fill="#0E4B4D"/><path d="M15 24.5 24 16l9 8.5V33a1.5 1.5 0 0 1-1.5 1.5h-4.5V28h-6v6.5h-4.5A1.5 1.5 0 0 1 15 33v-8.5Z" fill="#E8EF44"/></svg>';
-  function storePin(id, st) { return '<div class="mk-store' + (st ? ' st-' + st : '') + '"><img src="' + (g.HWBiz ? g.HWBiz.logo(id) : 'logo-icon.png') + '" onerror="this.src=\'logo-icon.png\'" alt=""><i></i></div>'; }
-  function capPin() { return '<div class="mk-cap"><span class="pulse"></span><div><img src="logo-icon.png" alt=""></div></div>'; }
+  function storePin(id, st) { return '<div class="mk-store' + (st ? ' st-' + st : '') + '"><img src="' + (g.HWBiz ? g.HWBiz.logo(id) : 'logo-icon.png?v=2') + '" onerror="this.src=\'logo-icon.png?v=2\'" alt=""><i></i></div>'; }
+  function capPin() { return '<div class="mk-cap"><span class="pulse"></span><div><img src="logo-icon.png?v=2" alt=""></div></div>'; }
   function mePin() { return '<div class="mk-me"><span class="pulse"></span><i></i></div>'; }
   function icon(html, w, h, ax, ay) { return L.divIcon({ html: html, className: 'mk', iconSize: [w, h], iconAnchor: [ax, ay] }); }
   var ICON = {
@@ -89,5 +89,22 @@
       return [a.road, a.neighbourhood || a.suburb || a.quarter, a.city || a.town || a.village].filter(Boolean).slice(0, 2).join('، ') || '';
     }).catch(function () { clearTimeout(to); return ''; });
   }
-  g.HWMap = { km: km, est: est, fee: fee, route: route, along: along, create: create, line: line, fit: fit, mpPad: mpPad, reverse: reverse, ICON: ICON, center: function () { return CFG.center || [32.0392, 35.7272]; } };
+  /* موقع تقريبي لمنطقة من قائمة الأسعار (مثل "البقعان") حول المتجر، حتى يظهر للكابتن بعد الوجهة بالكيلو ووقت الطريق
+     مثل طلب العميل. النتيجة تُحفظ على الجهاز فلا نسأل عن نفس المنطقة مرتين، ونقبل فقط ما يقع قريبًا من المتجر */
+  function geoArea(name, near) {
+    name = String(name || '').trim(); if (!name || !near) return Promise.resolve(null);
+    var k = 'hw-geo|' + name, c = null;
+    try { c = JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) {}
+    if (c && (c.p || Date.now() - c.at < 864e5)) return Promise.resolve(c.p && km(near, c.p) < 45 ? c.p : null);
+    var d = 0.45, vb = [near[1] - d, near[0] + d, near[1] + d, near[0] - d].join(',');
+    var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 6000);
+    return fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=jo&accept-language=ar&bounded=1&viewbox=' + vb + '&q=' + encodeURIComponent(name), ctl ? { signal: ctl.signal } : {})
+      .then(function (r) { return r.json(); }).then(function (a) {
+        clearTimeout(to);
+        var hit = (a || []).map(function (x) { return [+x.lat, +x.lon]; }).filter(function (p) { return isFinite(p[0]) && isFinite(p[1]) && km(near, p) < 40; })[0] || null;
+        try { localStorage.setItem(k, JSON.stringify({ p: hit, at: Date.now() })); } catch (e) {}
+        return hit;
+      }).catch(function () { clearTimeout(to); return null; });
+  }
+  g.HWMap = { km: km, est: est, fee: fee, route: route, along: along, create: create, line: line, fit: fit, mpPad: mpPad, reverse: reverse, geoArea: geoArea, ICON: ICON, center: function () { return CFG.center || [32.0392, 35.7272]; } };
 })(window);

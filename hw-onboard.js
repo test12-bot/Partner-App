@@ -69,9 +69,9 @@
       '.hw-onb-next:focus{outline:none}.hw-onb-next:focus-visible{outline:3px solid #0E3A3B;outline-offset:3px}.hw-onb-next:active{transform:scale(.96)}.hw-onb-next svg{width:22px;height:22px}' +
       '.hw-onb-next.go{min-width:min(220px,58vw);background:#26CED0;color:#fff}' +
       '[dir=ltr] .hw-onb-next svg{transform:scaleX(-1)}' +
-      '[data-theme=dark] .hw-onb{--onb-bg:#0C1F20 !important;color:#F5EDE3}[data-theme=dark] .hw-onb-slide p{color:rgba(245,237,227,.75)}' +
-      '[data-theme=dark] .hw-onb-art::before{background:rgba(255,255,255,.92)}[data-theme=dark] .hw-onb-skip{background:rgba(255,255,255,.1);color:#F5EDE3}' +
-      '[data-theme=dark] .hw-onb-dots i{background:rgba(245,237,227,.25)}[data-theme=dark] .hw-onb-dots i.on{background:#E8EF44}[data-theme=dark] .hw-onb-pts li{background:rgba(255,255,255,.08)}' +
+      '[data-theme=dark] .hw-onb{--onb-bg:#0C1F20 !important;color:#F3F0E7}[data-theme=dark] .hw-onb-slide p{color:rgba(243,240,231,.75)}' +
+      '[data-theme=dark] .hw-onb-art::before{background:rgba(255,255,255,.92)}[data-theme=dark] .hw-onb-skip{background:rgba(255,255,255,.1);color:#F3F0E7}' +
+      '[data-theme=dark] .hw-onb-dots i{background:rgba(243,240,231,.25)}[data-theme=dark] .hw-onb-dots i.on{background:#E8EF44}[data-theme=dark] .hw-onb-pts li{background:rgba(255,255,255,.08)}' +
       '@media (prefers-reduced-motion:reduce){.hw-onb,.hw-onb-track,.hw-onb-art img,.hw-onb-slide h2,.hw-onb-slide p,.hw-onb-next{transition:none!important}.hw-onb-art img,.hw-onb-slide h2,.hw-onb-slide p{transform:none!important;opacity:1!important}}';
     document.head.appendChild(st);
   }
@@ -82,7 +82,7 @@
     css();
     var i = 0, n = SLIDES.length, root = document.createElement('div');
     root.className = 'hw-onb'; root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', tr('تعرّف على هاي وي'));
-    root.innerHTML = '<div class="hw-onb-top"><img class="hw-onb-logo" src="logo-icon.png" alt="HIGHWAY">' + (n > 1 ? '<button type="button" class="hw-onb-skip">' + tr('تخطي') + '</button>' : '<span></span>') + '</div>' +
+    root.innerHTML = '<div class="hw-onb-top"><img class="hw-onb-logo" src="logo-icon.png?v=2" alt="HIGHWAY">' + (n > 1 ? '<button type="button" class="hw-onb-skip">' + tr('تخطي') + '</button>' : '<span></span>') + '</div>' +
       '<div class="hw-onb-view"><div class="hw-onb-track">' + SLIDES.map(function (s, k) {
         return '<section class="hw-onb-slide" aria-hidden="' + (k ? 'true' : 'false') + '"><div class="hw-onb-art"><img src="art/' + s.art + '.svg" alt="" decoding="async"></div>' +
           '<h2>' + tr(s.t) + '</h2><p>' + tr(s.s) + '</p>' + (s.points ? '<ul class="hw-onb-pts">' + s.points.map(function (x) { return '<li>' + tr(x) + '</li>'; }).join('') + '</ul>' : '') + '</section>';
@@ -144,7 +144,7 @@
       '.hw-gonb-track{display:flex;transition:transform .55s cubic-bezier(.22,.8,.24,1)}' +
       '.hw-gonb-slide{flex:0 0 100%;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;padding:0 4px}' +
       '.hw-gonb-art{position:relative;width:100%;height:clamp(160px,30vh,250px);margin-top:4px;display:grid;place-items:center}' +
-      '.hw-gonb-art::before{content:"";position:absolute;height:calc(100% - 40px);aspect-ratio:1;border-radius:50%;background:rgba(245,237,227,.96);box-shadow:0 0 0 8px rgba(255,255,255,.18),0 18px 40px rgba(10,53,54,.25)}' +
+      '.hw-gonb-art::before{content:"";position:absolute;height:calc(100% - 40px);aspect-ratio:1;border-radius:50%;background:rgba(243,240,231,.96);box-shadow:0 0 0 8px rgba(255,255,255,.18),0 18px 40px rgba(10,53,54,.25)}' +
       '.hw-gonb-art::after{content:"";position:absolute;height:calc(100% - 6px);box-sizing:border-box;aspect-ratio:1;border-radius:50%;border:2.5px dashed rgba(232,239,68,.9);animation:hwOnbSpin 28s linear infinite;z-index:0}' +
       '.hw-gonb-art img{position:relative;z-index:1;height:100%;width:auto;max-width:100%;object-fit:contain;transform:translateY(14px) scale(.9);opacity:0;transition:transform .7s cubic-bezier(.22,.8,.24,1) .1s,opacity .5s ease .1s}' +
       '.hw-gonb-slide.on .hw-gonb-art img{transform:none;opacity:1}' +

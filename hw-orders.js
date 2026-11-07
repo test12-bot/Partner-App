@@ -386,7 +386,28 @@ function sha256(str) {
     /* الوضع التجريبي (بلا قاعدة): الرقم يُحسب فورًا من عدّاد المتصفح، بلا كتابة إضافية */
     if (!remote && !o.code) { var d = ymd(t), ln = function (k) { var n = 0; try { n = (+localStorage.getItem('hw-ctr-' + k) || 0) + 1; localStorage.setItem('hw-ctr-' + k, n); } catch (e) { n = 1; } return n; };
       var mn = ln('ord/' + d.slice(0, 4)), dn = ln('ord/' + d); o.code = 'ORD#' + d + '-' + String(mn).padStart(4, '0') + '-' + String(dn).padStart(3, '0'); }
-    var res = origCreate(keyed(o, o)); if (remote) assignNo(id); return res;
+    var res = origCreate(keyed(o, o)); if (remote) assignNo(id); locate(o); return res;
+  }
+  /* نقطة التسليم: عنوان العميل الدقيق، أو الموقع التقريبي لمنطقة قائمة الأسعار (طلبات المطاعم والإدارة) */
+  function destLL(o) {
+    if (o && o.address && o.address.lat != null) return [o.address.lat, o.address.lng];
+    if (o && o.toLoc && o.toLoc.lat != null) return [o.toLoc.lat, o.toLoc.lng];
+    return null;
+  }
+  /* طلب المطعم/الإدارة يحمل اسم منطقة فقط: نحدد موقعها التقريبي ومسافة الطريق من المتجر مرة واحدة عند الإنشاء
+     (أو عند تغيير الوجهة)، فيصل العرض للكابتن بنفس صيغة طلب العميل: الكيلو والدقائق وخط الطريق على الخريطة */
+  var locating = {};
+  function locate(o) {
+    if (!o || isMarket(o) || !o.to || destLL(o) || !o.storeLoc || o.storeLoc.lat == null || !g.HWMap || !HWMap.geoArea) return;
+    var key = o.id + '|' + o.to; if (locating[key]) return; locating[key] = 1;
+    var sl = [o.storeLoc.lat, o.storeLoc.lng];
+    HWMap.geoArea(o.to, sl).then(function (p) {
+      if (!p) return;
+      return HWMap.route(sl, p).then(function (r) {
+        var cur = Orders.get(o.id); if (!cur || cur.to !== o.to || destLL(cur) || !isActive(cur)) return;
+        updateOrder(o.id, { toLoc: { lat: p[0], lng: p[1], approx: true }, distKm: Math.round(r.km * 10) / 10, routeMin: r.min });
+      });
+    }).catch(function () {});
   }
   /* رقم الكابتن: سنة وشهر الانضمام + ترتيبه بين من انضموا في ذلك الشهر، مثل 261101 */
   function capNo(t) { var m = ymd(t || Date.now()).slice(0, 4); return counter('cap/' + m).then(function (n) { return m + String(n).padStart(2, '0'); }); }
@@ -435,13 +456,18 @@ function sha256(str) {
     if (patch.status === 'accepted' && !o.etaAt && !patch.etaAt) {
       try { var cd = patch.captain && g.HWDB ? HWDB.col('captains').get(patch.captain.id) : null, e0 = eta(Object.assign({}, o, patch, { history: hist }), cd && cd.lat != null ? [cd.lat, cd.lng] : null); if (e0) patch.etaAt = e0.at; } catch (e) {}
     }
+    /* تغيّرت الوجهة: الموقع التقريبي القديم لم يعد صحيحًا، ونحسبه للمنطقة الجديدة */
+    var reloc = patch.to !== undefined && patch.to !== o.to && !isMarket(o) && patch.toLoc === undefined;
+    if (reloc) { patch.toLoc = null; if (patch.distKm === undefined) patch.distKm = null; if (patch.routeMin === undefined) patch.routeMin = null; }
     patch = keyed(Object.assign({}, patch), Object.assign({}, o, patch, { createdAt: o.createdAt }));
     var p = Object.assign({}, patch, { history: hist });
     /* على الخادم: كل خطوة تُضاف بمفتاح مستقل (history/h…) بدل إعادة كتابة السجل كاملًا،
        فلا يمحو تحديثان متزامنان (المتجر والكابتن مثلًا) خطوة بعضهما */
     var w = Object.assign({}, patch);
     hist.slice((o.history || []).length).forEach(function (h, i) { w['history/h' + t.toString(36) + i + Math.random().toString(36).slice(2, 5)] = h; });
-    return Orders.patch(id, p, false, w);
+    var out = Orders.patch(id, p, false, w);
+    if (reloc) locate(Object.assign({}, o, patch));
+    return out;
   }
 
   /* ---------- الحسابات المالية ---------- */
@@ -545,10 +571,14 @@ function sha256(str) {
     if (o.status === 'cancelled') { for (var k = 0; k < n; k++) h += '<i></i>'; return h + '</div>'; }
     var idx = stage(o), pc = o.status === 'delivered' ? 100 : Math.round(Math.min(idx + .5, n - 1) / Math.max(1, n - 1) * 100);
     /* شريط المراحل على شكل طريق HIGHWAY: إسفلت بخط أصفر متقطع، والمقطوع منه فيروزي، والسيارة عند المرحلة الحالية */
-    h = h.replace('class="oc-prog', 'style="--p:' + pc + '%" class="oc-prog hw-road') + '<b class="rd-f"></b><em class="rd-c"></em>';
+    /* مع كابتن: نفس رسمة الكابتن على الدراجة الماشية في صفحة تفاصيل الطلب، تتقدم على الطريق مع كل مرحلة (وتقف عند التسليم) */
+    var rid = !!(o.captain && o.captain.name);
+    h = h.replace('class="oc-prog', 'style="--p:' + pc + '%" class="oc-prog hw-road' + (rid ? ' has-r' : '')) + '<b class="rd-f"></b>' +
+      (rid ? riderImg(o) : '<em class="rd-c"></em>');
     for (var i = 0; i < n; i++) h += '<i class="' + (i < idx ? 'done' : i === idx ? 'act' : '') + '"></i>';
     return h + '</div>';
   }
+  function riderImg(o) { return '<img class="rd-r" src="art/ride' + (o.status === 'delivered' ? '-still' : '') + '.svg" alt="" aria-hidden="true" decoding="async">'; }
   function routeRows(o) {
     var h = '<div class="oc-route"><div class="ocr"><i class="a"></i><small>' + (o.to ? 'من' : 'استلام من') + '</small><b>' + esc(o.from || o.storeName || '') + '</b></div>';
     if (o.to) h += '<div class="ocr"><i class="b"></i><small>إلى</small><b>' + esc(o.to) + '</b></div>';
@@ -653,10 +683,10 @@ function sha256(str) {
     learnC = { at: Date.now(), m: m }; return m;
   }
   function legDest(o, from) {
-    var ad = o.address && o.address.lat != null ? [o.address.lat, o.address.lng] : null;
+    var ad = destLL(o);
     if (ad && from) return drive(from, ad);
     var L = learned(), k1 = L[(o.storeId || '') + '>' + (o.to || '')], k2 = o.to ? L['*>' + o.to] : null;
-    if (k1 && k1.n >= 2) return Math.round(k1.min); if (k2 && k2.n >= 2) return Math.round(k2.min);
+    if (k1 && k1.n >= 2) return Math.max(2, Math.round(k1.min)); if (k2 && k2.n >= 2) return Math.max(2, Math.round(k2.min));
     if (o.routeMin) return o.routeMin;
     return CFG.travelMin || 12;
   }
@@ -683,5 +713,5 @@ function sha256(str) {
   g.HWDB = { mode: remote ? 'remote' : 'local', col: Col, uid: uid, esc: esc, num: num, money: money, cfg: CFG };
   g.HWOrders = { mode: remote ? 'remote' : 'local', STEPS: STEPS, SHORT: SHORT, create: createOrder, update: updateOrder, patchLite: function (id, p) { return Orders.patch(id, p); }, keyRange: keyRange, pending: function (id) { return id ? outbox.has('orders', id) : outbox.count(); }, subscribe: Orders.subscribe, scope: Orders.scope, scoped: Orders.scoped, get: Orders.get, list: Orders.list, _raw: Orders._raw,
     stats: stats, isActive: isActive, isToday: isToday, isMarket: isMarket, stage: stage, steps: steps, label: label, offerable: offerable, dispatchAt: dispatchAt, claim: claim, settle: settle, counter: counter, capNo: capNo, codeOf: codeOf, shortNo: shortNo, prioritySort: prioritySort, rankCaptains: rankCaptains, dayKey: dayKey, feeFrom: feeFrom,
-    fmtTime: fmtTime, ago: ago, eta: eta, drive: drive, clock: clock, card: card, timeline: timeline, showPhoto: showPhoto, valTxt: valTxt, valNum: valNum, routeRows: routeRows, progress_: progress, captainRow: captainRow, esc: esc, num: num, money: money, toast: toast, beep: beep, openNav: openNav };
+    fmtTime: fmtTime, ago: ago, eta: eta, drive: drive, clock: clock, card: card, timeline: timeline, showPhoto: showPhoto, valTxt: valTxt, valNum: valNum, destLL: destLL, locate: locate, routeRows: routeRows, progress_: progress, riderImg: riderImg, captainRow: captainRow, esc: esc, num: num, money: money, toast: toast, beep: beep, openNav: openNav };
 })(window);

@@ -4,7 +4,7 @@
    تُركّب تلقائيًا على شريط التنقل وزر الإشعارات وقائمة الصورة الشخصية في التطبيقات الأربعة.
    ========================================================= */
 (function (g) {
-  var O = 'stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"', B = 'fill="var(--ic-b,#F5EDE3)"', A = 'fill="var(--ic-a,#E8EF44)"', A2 = 'fill="var(--ic-c,#26CED0)"';
+  var O = 'stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"', B = 'fill="var(--ic-b,#F3F0E7)"', A = 'fill="var(--ic-a,#E8EF44)"', A2 = 'fill="var(--ic-c,#26CED0)"';
   var P = {
     home: '<path d="M14 31 32 16l18 15v18a3 3 0 0 1-3 3H17a3 3 0 0 1-3-3Z" ' + B + ' ' + O + '/><path d="M27 52V41h10v11" ' + A2 + ' ' + O + '/><path d="M9 33 32 13l23 20" fill="none" ' + O + '/>',
     search: '<circle cx="28" cy="28" r="15" ' + B + ' ' + O + '/><path d="M21 25a8 8 0 0 1 8-6" fill="none" stroke="var(--ic-a,#E8EF44)" stroke-width="3.4" stroke-linecap="round"/><path d="M39 39l12 12" fill="none" ' + O + ' stroke-width="5"/>',
@@ -25,7 +25,7 @@
     star: '<path d="M32 8l7 15 16 2-12 11 3 16-14-8-14 8 3-16L9 25l16-2Z" ' + A + ' ' + O + '/><path d="M27 24l2-4" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".85"/>',
     phone: '<rect x="18" y="8" width="28" height="48" rx="7" ' + B + ' ' + O + '/><rect x="23" y="15" width="18" height="26" rx="3" ' + A2 + ' stroke="currentColor" stroke-width="2.4"/><circle cx="32" cy="48" r="2.6" fill="currentColor"/><path d="M27 21h6" fill="none" stroke="var(--ic-a,#E8EF44)" stroke-width="3" stroke-linecap="round"/>',
     map: '<path d="M8 16l15-6 18 6 15-6v38l-15 6-18-6-15 6Z" ' + B + ' ' + O + '/><path d="M23 10v38M41 16v38" fill="none" ' + O + '/><path d="M41 16l15-6v38l-15 6Z" ' + A2 + ' ' + O + '/><circle cx="31" cy="30" r="4" ' + A + ' stroke="currentColor" stroke-width="2.4"/>',
-    shield: '<path d="M32 8l20 7v14c0 13-9 22-20 27-11-5-20-14-20-27V15Z" ' + A2 + ' ' + O + '/><path d="M23 31l6 6 12-12" fill="none" ' + O + ' stroke="var(--ic-b,#F5EDE3)" stroke-width="4"/>',
+    shield: '<path d="M32 8l20 7v14c0 13-9 22-20 27-11-5-20-14-20-27V15Z" ' + A2 + ' ' + O + '/><path d="M23 31l6 6 12-12" fill="none" ' + O + ' stroke="var(--ic-b,#F3F0E7)" stroke-width="4"/>',
     card: '<rect x="8" y="14" width="48" height="36" rx="7" ' + B + ' ' + O + '/><circle cx="23" cy="30" r="6" ' + A2 + ' stroke="currentColor" stroke-width="2.4"/><path d="M15 43c1-4 4-6 8-6s7 2 8 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M37 26h12M37 33h12M37 40h7" fill="none" ' + O + '/><path d="M8 21h48" fill="none" stroke="var(--ic-a,#E8EF44)" stroke-width="3"/>',
     radar: '<circle cx="32" cy="32" r="22" ' + B + ' ' + O + '/><circle cx="32" cy="32" r="12" fill="none" stroke="var(--ic-c,#26CED0)" stroke-width="3"/><path d="M32 32 47 17" fill="none" ' + O + '/><circle cx="32" cy="32" r="5" ' + A + ' ' + O + '/>'
   };

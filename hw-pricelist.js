@@ -69,9 +69,9 @@
     function newPage() { var p = el('section', 'page'); doc.appendChild(p); return p; }
     function img(p, src, x, y, w, h) { p.appendChild(el('img', 'abs', 'left:' + x + 'pt;top:' + y + 'pt;width:' + w + 'pt;height:' + h + 'pt')).src = src; }
     function full(p, src) { var b = el('img', 'full'); b.src = src; p.appendChild(b); }
-    function head(p) { img(p, 'a/header-bg.jpg', 0, 0, 595.5, 118); img(p, 'a/h_3_0.jpg', 358.9, 14.03, 207.15, 80.6); }
+    function head(p) { img(p, 'a/header-bg.jpg?v=2', 0, 0, 595.5, 118); img(p, 'a/h_3_0.jpg?v=2', 358.9, 14.03, 207.15, 80.6); }
     function table(list, rows) {
-      var p = newPage(), L = D.store; head(p); img(p, 'a/h_3_1.jpg', 532.38, 72.38, 33.67, 21.47);
+      var p = newPage(), L = D.store; head(p); img(p, 'a/h_3_1.jpg?v=2', 532.38, 72.38, 33.67, 21.47);
       p.appendChild(el('div', 'lbl abs', 'left:57pt;top:108pt;font-size:14pt', 'LIST #'));
       p.appendChild(el('div', 'val abs', 'left:153pt;top:108pt;font-size:14pt', esc(list.no)));
       p.appendChild(el('div', 'lbl abs', 'left:330pt;top:109pt;font-size:14pt', 'LISTED TO'));
@@ -102,9 +102,9 @@
       p.appendChild(el('div', 'issued', 'top:' + (km + 40) + 'pt', 'صادرة إلكترونيًا من HIGHWAY · <span style="font-family:NotoSans;direction:ltr;unicode-bidi:embed">' + esc(D.issued) + '</span>'));
       p.appendChild(el('div', 'thanks', '', 'THANK YOU'));
     }
-    full(newPage(), 'a/bg-cover.jpg');
+    full(newPage(), 'a/bg-cover.jpg?v=2');
     D.areas.forEach(function (area) {
-      var ap = newPage(); full(ap, 'a/bg-area.jpg'); ap.appendChild(el('div', 'area-sub', '', 'التوصيل لمناطق')); ap.appendChild(el('div', 'area-title', '', esc(area.title)));
+      var ap = newPage(); full(ap, 'a/bg-area.jpg?v=2'); ap.appendChild(el('div', 'area-sub', '', 'التوصيل لمناطق')); ap.appendChild(el('div', 'area-title', '', esc(area.title)));
       area.lists.forEach(function (list, li) {
         var p = table(list, list.rows);
         if (li === area.lists.length - 1) {
@@ -113,7 +113,7 @@
         }
       });
     });
-    full(newPage(), 'a/bg-social.jpg');
+    full(newPage(), 'a/bg-social.jpg?v=2');
   }
 
   function html(D) {

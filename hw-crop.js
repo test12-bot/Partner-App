@@ -13,10 +13,10 @@
     if (document.getElementById('hwCropCss')) return;
     var st = document.createElement('style'); st.id = 'hwCropCss';
     st.textContent =
-      '.hw-crop{position:fixed;inset:0;z-index:6000;background:rgba(7,29,30,.92);display:flex;flex-direction:column;color:#F5EDE3;opacity:0;transition:opacity .25s;touch-action:none;-webkit-user-select:none;user-select:none}' +
+      '.hw-crop{position:fixed;inset:0;z-index:6000;background:rgba(7,29,30,.92);display:flex;flex-direction:column;color:#F3F0E7;opacity:0;transition:opacity .25s;touch-action:none;-webkit-user-select:none;user-select:none}' +
       '.hw-crop.show{opacity:1}' +
       '.hw-crop-top{display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 16px 8px}' +
-      '.hw-crop-top b{font-size:16px}.hw-crop-top button{border:0;background:rgba(255,255,255,.12);color:#F5EDE3;font:inherit;font-weight:700;border-radius:99px;padding:8px 14px}' +
+      '.hw-crop-top b{font-size:16px}.hw-crop-top button{border:0;background:rgba(255,255,255,.12);color:#F3F0E7;font:inherit;font-weight:700;border-radius:99px;padding:8px 14px}' +
       '.hw-crop-stage{flex:1;display:grid;place-items:center;padding:12px;min-height:0}' +
       '.hw-crop-box{position:relative;overflow:hidden;background:#0B2A2B;box-shadow:0 0 0 3px #26CED0,0 0 0 5px rgba(232,239,68,.8),0 20px 50px rgba(0,0,0,.5);cursor:grab;touch-action:none}' +
       '.hw-crop-box.round{border-radius:50%}.hw-crop-box img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;pointer-events:none;will-change:transform}' +
@@ -27,7 +27,7 @@
       '.hw-crop-zoom{display:flex;align-items:center;gap:12px;direction:ltr}.hw-crop-zoom span{font-size:20px;opacity:.8;width:20px;text-align:center}' +
       '.hw-crop-zoom input{flex:1;accent-color:#E8EF44;height:28px}' +
       '.hw-crop-acts{display:flex;gap:10px}.hw-crop-acts button{flex:1;height:52px;border-radius:99px;border:0;font:inherit;font-weight:800;font-size:15.5px}' +
-      '.hw-crop-ok{background:#E8EF44;color:#0E3A3B}.hw-crop-reset{background:rgba(255,255,255,.12);color:#F5EDE3}';
+      '.hw-crop-ok{background:#E8EF44;color:#0E3A3B}.hw-crop-reset{background:rgba(255,255,255,.12);color:#F3F0E7}';
     document.head.appendChild(st);
   }
   function load(src) {

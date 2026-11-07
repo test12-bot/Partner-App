@@ -166,7 +166,7 @@
     var st = document.createElement('style');
     st.textContent = '.hw-net{position:fixed;inset-inline:12px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:3000;display:flex;align-items:center;gap:12px;background:#fff;color:#0E3A3B;border-radius:20px;padding:10px 14px 10px 10px;box-shadow:0 10px 30px rgba(14,58,59,.18);transform:translateY(140%);opacity:0;transition:transform .4s ease,opacity .4s ease;max-width:520px;margin:0 auto}' +
       '.hw-net.show{transform:none;opacity:1}.hw-net-art{display:block;height:clamp(58px,10vh,80px);width:auto;flex:none}.hw-net b{display:block;font-size:15px}.hw-net small{display:block;font-size:12.5px;opacity:.75;margin-top:2px}' +
-      '[data-theme=dark] .hw-net{background:#16302F;color:#F5EDE3}@media (prefers-reduced-motion:reduce){.hw-net{transition:opacity .2s}}';
+      '[data-theme=dark] .hw-net{background:#16302F;color:#F3F0E7}@media (prefers-reduced-motion:reduce){.hw-net{transition:opacity .2s}}';
     document.head.appendChild(st); document.body.appendChild(box); return box;
   }
   function show(off) {

@@ -172,7 +172,7 @@
       storesCol.patch(id, { mediaV: v }); mediaSubs.forEach(function (f) { f(id); });
     });
   }
-  function logo(id) { var m = readMedia(id); return (m && m.logo) || 'logo-icon.png'; }
+  function logo(id) { var m = readMedia(id); return (m && m.logo) || 'logo-icon.png?v=2'; }
   /* صورة الغلاف التي ترفعها الإدارة (المتجر بلا غلاف تظهر له رسمة قسمه) */
   function cover(sid) { var m = readMedia(sid); return (m && m.cover) || ''; }
   function onMedia(f) { mediaSubs.push(f); }
